@@ -1,0 +1,134 @@
+############################################
+# Enable Rewrite
+############################################
+RewriteEngine On
+
+############################################
+# Force HTTPS (SAFE for POST / CKEditor)
+############################################
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://coursehub.interactsafety.com.au%{REQUEST_URI} [R=301,L]
+
+############################################
+# Home
+############################################
+RewriteRule ^$ index.php [NC,L]
+
+############################################
+# Courses
+############################################
+RewriteRule ^courses$ courses.php [NC,L]
+RewriteRule ^courses/([0-9]+)/([a-zA-Z0-9_-]+)$ courses.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Category
+############################################
+RewriteRule ^category$ category.php [NC,L]
+RewriteRule ^category/([0-9]+)/([a-zA-Z0-9_-]+)$ category.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Course Details
+############################################
+RewriteRule ^courses-detail$ course-details.php [NC,L]
+RewriteRule ^courses-detail/([0-9]+)/([a-zA-Z0-9_-]+)$ courses-detail.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Course Preview
+############################################
+RewriteRule ^courses-preview$ course-details.php [NC,L]
+RewriteRule ^courses-preview/([0-9]+)/([a-zA-Z0-9_-]+)$ courses-preview.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Location Details
+############################################
+RewriteRule ^location-details$ location-details.php [NC,L]
+RewriteRule ^location-details/([0-9]+)/([a-zA-Z0-9_-]+)$ location-details.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Blog
+############################################
+RewriteRule ^blog$ blog.php [NC,L]
+RewriteRule ^blog/([0-9]+)/([a-zA-Z0-9_-]+)$ blog.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Blog Details
+############################################
+RewriteRule ^blog-details$ blog-details.php [NC,L]
+RewriteRule ^blog-details/([0-9]+)/([a-zA-Z0-9_-]+)$ blog-details.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Service Category
+############################################
+RewriteRule ^service-category$ service-category.php [NC,L]
+RewriteRule ^service-category/([0-9]+)/([a-zA-Z0-9_-]+)$ service-category.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Services
+############################################
+RewriteRule ^services$ services.php [NC,L]
+RewriteRule ^services/([0-9]+)/([a-zA-Z0-9_-]+)$ services.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Service Details
+############################################
+RewriteRule ^service-details$ service-details.php [NC,L]
+RewriteRule ^service-details/([0-9]+)/([a-zA-Z0-9_-]+)$ service-details.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Request
+############################################
+RewriteRule ^request$ request_form.php [NC,L]
+RewriteRule ^request/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ request_form.php?id=$1&title=$2 [NC,L]
+
+############################################
+# Registration
+############################################
+RewriteRule ^registration$ registration.php [NC,L]
+RewriteRule ^registration/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ registration.php?courseid=$1&locid=$2&slotid=$3&cityid=$4 [NC,L]
+
+############################################
+# Waiting
+############################################
+RewriteRule ^waiting$ waiting.php [NC,L]
+RewriteRule ^waiting/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ waiting.php?courseid=$1&locid=$2&slotid=$3&cityid=$4 [NC,L]
+
+############################################
+# Attendance
+############################################
+RewriteRule ^attandance$ attandance.php [NC,L]
+RewriteRule ^attandance/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ attandance.php?courseid=$1&locid=$2&slotid=$3&cityid=$4 [NC,L]
+
+############################################
+# Submit Attendance
+############################################
+RewriteRule ^submitAttandance$ submitAttandance.php [NC,L]
+RewriteRule ^submitAttandance/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ submitAttandance.php?courseid=$1&locid=$2&slotid=$3&userid=$4 [NC,L]
+
+############################################
+# Mark Attendance
+############################################
+RewriteRule ^markAttandance/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ markAttandance.php?courseid=$1&locid=$2&slotid=$3&teacherid=$4 [NC,L]
+
+############################################
+# Signature
+############################################
+RewriteRule ^signature$ signature.php [NC,L]
+RewriteRule ^signature/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ signature.php?courseid=$1&locid=$2&slotid=$3&teacherid=$4&userid=$5&type=$6 [NC,L]
+
+############################################
+# Student Login
+############################################
+RewriteRule ^studentLogin$ studentLogin.php [NC,L]
+RewriteRule ^studentLogin/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ studentLogin.php?courseid=$1&locid=$2&slotid=$3&teacherid=$4 [NC,L]
+
+############################################
+# Payment Confirmation
+############################################
+RewriteRule ^payment-confirmation$ payment-confirmation.php [NC,L]
+RewriteRule ^payment-confirmation/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)$ payment-confirmation.php?courseid=$1&locid=$2&slotid=$3&cityid=$4&registerid=$5 [NC,L]
+
+############################################
+# Payment Success
+############################################
+RewriteRule ^payment-success$ payment-success.php [NC,L]
+RewriteRule ^payment-success/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)$ payment-success.php?courseid=$1&locid=$2&slotid=$3&cityid=$4&registerid=$5 [NC,L]

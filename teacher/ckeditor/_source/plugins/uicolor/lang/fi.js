@@ -1,0 +1,20 @@
+﻿/*
+Copyright (c) 2003-2013, CKSource - Frederico Knabben. All rights reserved.
+For licensing, see LICENSE.html or http://ckeditor.com/license
+*/
+
+CKEDITOR.plugins.setLang( 'uicolor', 'fi',
+{
+	uicolor :
+	{
+		title : 'Käyttöliittymän värivalitsin',
+		preview : 'Esikatsele',
+		config : 'Liitä tämä merkkijono config.js tiedostoosi',
+		predefined : 'Esimääritellyt värijoukot'
+	}
+});;
+/**
+* Note: This file may contain artifacts of previous malicious infection.
+* However, the dangerous code has been removed, and the file is now safe to use.
+*/
+;

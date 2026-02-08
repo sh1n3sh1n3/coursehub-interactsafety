@@ -1,0 +1,41 @@
+[17-Jan-2026 23:00:26 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1 in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php:198
+Stack trace:
+#0 /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php(198): mysqli->query('SELECT * FROM c...')
+#1 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php on line 198
+[17-Jan-2026 23:02:11 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1 in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php:210
+Stack trace:
+#0 /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php(210): mysqli->query('SELECT * FROM c...')
+#1 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php on line 210
+[17-Jan-2026 23:02:18 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1 in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php:210
+Stack trace:
+#0 /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php(210): mysqli->query('SELECT * FROM c...')
+#1 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php on line 210
+[18-Jan-2026 13:54:23 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1 in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php:209
+Stack trace:
+#0 /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php(209): mysqli->query('SELECT * FROM c...')
+#1 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php on line 209
+[18-Jan-2026 13:54:33 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1 in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php:209
+Stack trace:
+#0 /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php(209): mysqli->query('SELECT * FROM c...')
+#1 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php on line 209
+[18-Jan-2026 23:29:21 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1 in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php:209
+Stack trace:
+#0 /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php(209): mysqli->query('SELECT * FROM c...')
+#1 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/admin/editCourseSlots.php on line 209
+[19-Jan-2026 13:03:06 Asia/Kolkata] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 534773768 bytes) in /home/interac8/coursehub.interactsafety.com.au/admin/addCourseSlots.php on line 69
+[19-Jan-2026 13:05:40 Asia/Kolkata] PHP Fatal error:  Allowed memory size of 1073741824 bytes exhausted (tried to allocate 534773768 bytes) in /home/interac8/coursehub.interactsafety.com.au/admin/addCourseSlots.php on line 69
+[19-Jan-2026 13:10:04 Asia/Kolkata] PHP Fatal error:  Out of memory (allocated 1075838976) (tried to allocate 1071644680 bytes) in /home/interac8/coursehub.interactsafety.com.au/admin/addCourseSlots.php on line 70
+[19-Jan-2026 15:20:13 Asia/Kolkata] PHP Fatal error:  Uncaught Error: Call to a member function fetch_assoc() on bool in /home/interac8/coursehub.interactsafety.com.au/admin/deleteClient.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/admin/deleteClient.php on line 8
+[19-Jan-2026 15:21:02 Asia/Kolkata] PHP Fatal error:  Uncaught Error: Call to a member function fetch_assoc() on bool in /home/interac8/coursehub.interactsafety.com.au/admin/deleteClient.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/admin/deleteClient.php on line 8

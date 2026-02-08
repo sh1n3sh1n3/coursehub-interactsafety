@@ -1,0 +1,85 @@
+RewriteEngine On
+RewriteCond %{SERVER_PORT} 80
+RewriteRule ^(.*)$ https://student.experiasoft.com/$1 [R,L]
+
+RewriteRule ^$ index.php [NC,L]
+
+#For courses
+RewriteRule ^courses$ courses.php [NC,L]
+RewriteRule ^courses/([0-9]+)/([a-zA-Z0-9_-]+)$ courses.php?id=$1&title=$2
+
+#For category
+RewriteRule ^category$ category.php [NC,L]
+RewriteRule ^category/([0-9]+)/([a-zA-Z0-9_-]+)$ category.php
+
+#For courses-detail
+RewriteRule ^courses-detail$ course-details.php [NC,L]
+RewriteRule ^courses-detail/([0-9]+)/([a-zA-Z0-9_-]+)$ courses-detail.php?id=$1&title=$2
+
+#For courses-preview
+RewriteRule ^courses-preview$ course-details.php [NC,L]
+RewriteRule ^courses-preview/([0-9]+)/([a-zA-Z0-9_-]+)$ courses-preview.php?id=$1&title=$2
+
+#For location-detail
+RewriteRule ^location-details$ location-details.php [NC,L]
+RewriteRule ^location-details/([0-9]+)/([a-zA-Z0-9_-]+)$ location-details.php?id=$1&title=$2
+
+#For blog
+RewriteRule ^blog blog.php [NC,L]
+RewriteRule ^blog/([0-9]+)/([a-zA-Z0-9_-]+)$ blog.php
+
+#For blog-detail
+RewriteRule ^blog-details$ blog-details.php [NC,L]
+RewriteRule ^blog-details/([0-9]+)/([a-zA-Z0-9_-]+)$ blog-details.php?id=$1&title=$2
+
+#For service-category
+RewriteRule ^service-category$ service-category.php [NC,L]
+RewriteRule ^service-category/([0-9]+)/([a-zA-Z0-9_-]+)$ service-category.php
+
+#For courses
+RewriteRule ^services$ services.php [NC,L]
+RewriteRule ^services/([0-9]+)/([a-zA-Z0-9_-]+)$ services.php?id=$1&title=$2
+
+#For services-detail
+RewriteRule ^service-details$ service-details.php [NC,L]
+RewriteRule ^service-details/([0-9]+)/([a-zA-Z0-9_-]+)$ service-details.php?id=$1&title=$2
+
+#For request
+RewriteRule ^request$ request_form.php [NC,L]
+RewriteRule ^request/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ request_form.php?id=$1&title=$2
+
+#For registration
+RewriteRule ^registration$ registration.php [NC,L]
+RewriteRule ^registration/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ registration.php?courseid=$1&locid=$2&slotid=$3&cityid=$4
+
+#For waiting
+RewriteRule ^waiting$ waiting.php [NC,L]
+RewriteRule ^waiting/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ waiting.php?courseid=$1&locid=$2&slotid=$3&cityid=$4
+
+#For attandance
+RewriteRule ^attandance$ attandance.php [NC,L]
+RewriteRule ^attandance/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ attandance.php?courseid=$1&locid=$2&slotid=$3&cityid=$4
+
+#For submitAttandance
+RewriteRule ^submitAttandance$ submitAttandance.php [NC,L]
+RewriteRule ^submitAttandance/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ submitAttandance.php?courseid=$1&locid=$2&slotid=$3&userid=$4
+
+#For markAttandance
+RewriteRule ^markAttandance$ markAttandance.php [NC,L]
+RewriteRule ^markAttandance/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ markAttandance.php?courseid=$1&locid=$2&slotid=$3&teacherid=$4
+
+#For signature
+RewriteRule ^signature$ signature.php [NC,L]
+RewriteRule ^signature/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ signature.php?courseid=$1&locid=$2&slotid=$3&teacherid=$4&userid=$5&type=$6
+
+#For studentLogin
+RewriteRule ^studentLogin$ studentLogin.php [NC,L]
+RewriteRule ^studentLogin/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ studentLogin.php?courseid=$1&locid=$2&slotid=$3&teacherid=$4
+
+#For payment-confirmation
+RewriteRule ^payment-confirmation$ payment-confirmation.php [NC,L]
+RewriteRule ^payment-confirmation/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)$ payment-confirmation.php?courseid=$1&locid=$2&slotid=$3&cityid=$4&registerid=$5
+
+#For payment-success
+RewriteRule ^payment-success$ payment-success.php [NC,L]
+RewriteRule ^payment-success/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)$ payment-success.php?courseid=$1&locid=$2&slotid=$3&cityid=$4&registerid=$5

@@ -1,0 +1,10 @@
+[03-Feb-2026 08:19:35 Asia/Kolkata] PHP Fatal error:  Uncaught TypeError: date(): Argument #2 ($timestamp) must be of type ?int, string given in /home/interac8/coursehub.interactsafety.com.au/courses-preview.php:100
+Stack trace:
+#0 /home/interac8/coursehub.interactsafety.com.au/courses-preview.php(100): date('Y-m-d H:i:s', '1770057000 1770...')
+#1 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/courses-preview.php on line 100
+[03-Feb-2026 08:20:58 Asia/Kolkata] PHP Fatal error:  Uncaught TypeError: date(): Argument #2 ($timestamp) must be of type ?int, string given in /home/interac8/coursehub.interactsafety.com.au/courses-preview.php:100
+Stack trace:
+#0 /home/interac8/coursehub.interactsafety.com.au/courses-preview.php(100): date('Y-m-d H:i:s', '1770057000 1770...')
+#1 {main}
+  thrown in /home/interac8/coursehub.interactsafety.com.au/courses-preview.php on line 100
