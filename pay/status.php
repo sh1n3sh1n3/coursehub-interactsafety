@@ -85,19 +85,19 @@ if(!empty($_GET['tid'])){
         	$coursestitle='';
         	$invoiceno = 'CN/'.$minyear.'-'.$maxyear.'/'.$vrno;
         	$orderno = 'ORD'.$minyear.'-'.$maxyear.$vrno;
-        	$seeltdata = $conn->query("SELECT * FROM sale WHERE courseid='".$courseid."' AND slotid='".$slotid."' AND user='".$register_details['id']."'");
-        	if($seeltdata->num_rows > 0) { } else {
+        	$seeltdata = $conn->query("SELECT * FROM sale WHERE courseid=".$courseid." AND slotid=".$slotid." AND user=".$register_details['id']."");
+            if($seeltdata->num_rows ==  0) { 
         	    $sql="INSERT INTO sale (date, invoiceno, vrno, orderno, courseid, slotid, user, fname, lname, email, address1,assign_to,assigned,industry_type,paymenttag,paymentmethod,paymentid,amount,netamount,hsrornot,position,company,postal_address,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, instruction) SELECT now(), '".$invoiceno."','".$vrno."','".$orderno."','".$courseid."','".$slotid."',id, fname,lname,email,postal_address,'".$course_slots['teacherid']."',1,'".$register_details['industry_type']."',1,'Online','".$transaction_id."','".$course_details['price']."','".$course_details['price']."','".$register_details['hsr_or_not']."', '".$register_details['position']."','".$register_details['company']."','".$register_details['postal_address']."','".$register_details['workplace_contact']."','".$register_details['workplace_email']."','".$register_details['workplace_phone']."','".$register_details['emergency_contact']."','".$register_details['emergency_phone']."','".$register_details['special_requirements']."','".$register_details['food_requirements']."','".$register_details[' instruction']."' from registration where id='".$registerid."'";
         	    $insert = $conn->query($sql);
         	}
-        	if($insert){
+        	if($seeltdata->num_rows > 0 || $insert){
         	    $last_id = $conn->insert_id;
-        	    $conn->query("UPDATE private_course SET registration_id = '".$registerid."', sale_id='".$last_id."', status='sold' WHERE course_code = '".$_SESSION['client_course_code']."' AND course_id='".$courseid."' AND slot_id='".$slotid."'");
-        	    $remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid = '".$courseid."' AND slotid='".$slotid."'");
+        	    $conn->query("UPDATE private_course SET registration_id = ".$registerid.", sale_id=".$last_id.", status='sold' WHERE course_code = '".$_SESSION['client_course_code']."' AND course_id=".$courseid." AND slot_id=".$slotid."");
+        	    $remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid = ".$courseid." AND slotid=".$slotid."");
         	    if($remain_places->num_rows > 0) {
         	        $fetchremain_places = $remain_places->fetch_assoc();
         	        $pencount = $fetchremain_places['count'] + 1;
-        	        $conn->query("UPDATE remain_places SET count='".$pencount."' WHERE courseid = '".$courseid."' AND slotid='".$slotid."'");
+        	        $conn->query("UPDATE remain_places SET count=".$pencount." WHERE courseid = ".$courseid." AND slotid=".$slotid."");
         	    }
         	    if($emailaccount['status'] == '1') {
         		    $userdataname = $register_details['title'].' '.$register_details['fname'].' '.$register_details['lname'];
@@ -127,6 +127,7 @@ if(!empty($_GET['tid'])){
         			$txt1 .= "".$tips."<br>";
         			$txt1 .= "<br>Regards<br>Company";
         		    $mail = new PHPMailer(true);
+                    $email_failed = false;
                     try {
                         $mail->SMTPDebug  = 0; // debugging: 1 = errors and messages, 2 = messages only
                         $mail->SMTPAuth   = true; // authentication enabled
@@ -143,25 +144,36 @@ if(!empty($_GET['tid'])){
                         $mail->Body    = $txt1;
                         if($mail->Send()) {
                             $_SESSION['orderprice'] = '';
-                            $_SESSION['ordertitle'] = ''; ?>
-                            
-                            <h2 style="color: #327e00;">Success! Your payment has been received successfully.</h2>
-                            <h3>Payment Receipt:</h3>
-                            <p><strong>Full Name:</strong> <?php echo explode('_', $fullname)[0]; ?></p>
-                            <p><strong>Email:</strong> <?php echo $email; ?></p>
-                            <p><strong>Transaction ID:</strong> <?php echo $transaction_id; ?></p>
-                            <p><strong>Amount:</strong> <?php echo $amount.' '.$currency; ?></p>
-                            <p><strong>Item Description:</strong> <?php echo $item_description; ?></p>
-                            <?php
-                            $sendurl = "../payment-success/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$registerid;
-                            echo "<script>window.setTimeout(function() { window.location.href = '$sendurl'; }, 1000);</script>"; 
+                            $_SESSION['ordertitle'] = '';
+                            $email_failed = false;
+                        } else {
+                            $email_failed = true;
                         }
                     } catch (phpmailerException $e) {
-                      $err = $e->errorMessage(); 
+                        $email_failed = true;
                     } catch (Exception $e) {
-                      $err = $e->getMessage(); //Boring error messages from anything else!
+                        $email_failed = true;
                     }
-        	    }
+                    $_SESSION['orderprice'] = '';
+                    $_SESSION['ordertitle'] = ''; ?>
+                    <h2 style="color: #327e00;">Success! Your payment has been received successfully.</h2>
+                    <?php if (!empty($email_failed)) { ?>
+                    <div class="payment-email-notice" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 14px 18px; margin: 16px 0; color: #856404;">
+                        <p style="margin: 0 0 8px 0; font-weight: bold;">We were not able to send your confirmation email.</p>
+                        <p style="margin: 0; font-size: 14px;">Your order and payment have been recorded. Please save your Transaction ID below and contact our support team if you need a copy of your confirmation or have any questions.</p>
+                    </div>
+                    <?php } ?>
+                    <h3>Payment Receipt:</h3>
+                    <p><strong>Full Name:</strong> <?php echo htmlspecialchars(explode('_', $fullname)[0]); ?></p>
+                    <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
+                    <p><strong>Transaction ID:</strong> <?php echo htmlspecialchars($transaction_id); ?></p>
+                    <p><strong>Amount:</strong> <?php echo htmlspecialchars($amount.' '.$currency); ?></p>
+                    <p><strong>Item Description:</strong> <?php echo htmlspecialchars($item_description); ?></p>
+                    <?php $sendurl = "../payment-success/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$registerid; ?>
+                    <p style="margin-top: 24px;">
+                        <a href="<?php echo htmlspecialchars($sendurl); ?>" style="display: inline-block; padding: 12px 24px; background: #327e00; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Continue</a>
+                    </p>    
+                <?php }
         	} else {
         // 		$err = $conn->error;
         	} ?>

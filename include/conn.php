@@ -1,1 +1,1 @@
-<?php include("admin/includes/conn.php"); ?>
+<?php include(__DIR__ . '/../admin/includes/conn.php'); ?>

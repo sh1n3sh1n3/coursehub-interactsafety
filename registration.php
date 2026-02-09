@@ -17,6 +17,131 @@ if(isset($_SESSION['client_emaill']) && $course_slots['type'] == 'private') {
     $sessionemail = $_SESSION['client_emaill'];
     $backbutn = '1';
 }
+
+function genRandomString() {
+    $length = 5;
+    $characters = '023456789abcdefghijkmnopqrstuvwxyz';
+    $string = '';
+    for ($p = 0; $p < $length; $p++) {
+        $string .= $characters[mt_rand(0, strlen($characters))];
+    }
+    return $string;
+}
+
+// Build base URL for redirects (same logic as head_script.php)
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'];
+$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+$basePath = ($scriptDir === '/coursehub' || strpos($scriptDir, '/coursehub/') === 0) ? '/coursehub' : '';
+$redirectBaseUrl = $protocol . '://' . $host . $basePath;
+
+$err = $msg = $errup = $msgup = '';
+$last_id = null;
+$loggedid = null;
+
+// Process POST before any output so redirect can work
+if (isset($_POST['submit'])) {
+    $fname = mysqli_real_escape_string($conn, $_POST['fname']);
+    $lname = mysqli_real_escape_string($conn, $_POST['lname']);
+    $title = mysqli_real_escape_string($conn, $_POST['title']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $position = mysqli_real_escape_string($conn, $_POST['position']);
+    $company = mysqli_real_escape_string($conn, $_POST['company']);
+    $postal_address = mysqli_real_escape_string($conn, $_POST['postal_address']);
+    $industry_type = mysqli_real_escape_string($conn, $_POST['industry_type']);
+    $hsr_or_not = mysqli_real_escape_string($conn, $_POST['hsr_or_not']);
+    $workplace_contact = mysqli_real_escape_string($conn, $_POST['workplace_contact']);
+    $workplace_email = mysqli_real_escape_string($conn, $_POST['workplace_email']);
+    $workplace_phone = mysqli_real_escape_string($conn, $_POST['workplace_phone']);
+    $emergency_contact = mysqli_real_escape_string($conn, $_POST['emergency_contact']);
+    $emergency_phone = mysqli_real_escape_string($conn, $_POST['emergency_phone']);
+    $special_requirements = mysqli_real_escape_string($conn, $_POST['special_requirements']);
+    $food_requirements = mysqli_real_escape_string($conn, $_POST['food_requirements']);
+    $instruction = mysqli_real_escape_string($conn, $_POST['instruction']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    $generated_code = genRandomString();
+    $check_random_string_row = $conn->query('SELECT generated_code FROM registration WHERE (generated_code="'.$generated_code.'")')->fetch_assoc();
+    if ($check_random_string_row && $generated_code == $check_random_string_row['generated_code']) {
+        $generated_code = genRandomString();
+    }
+    $courseid = $_GET['courseid'];
+    $locid = $_GET['locid'];
+    $slotid = $_GET['slotid'];
+    $cityid = $_GET['cityid'];
+    $sql = "INSERT INTO registration (title,fname,lname,email,position,company,postal_address,courseid,locid,slotid,cityid,industry_type,hsr_or_not,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, password, generated_code, instruction, verifyEmail) VALUES ('".$title."','".$fname."','".$lname."','".$email."','".$position."','".$company."','".$postal_address."','".$courseid."','".$locid."', '".$slotid."', '".$cityid."', '".$industry_type."', '".$hsr_or_not."', '".$workplace_contact."', '".$workplace_email."','".$workplace_phone."', '".$emergency_contact."', '".$emergency_phone."', '".$special_requirements."', '".$food_requirements."', '".$password."', '".$generated_code."', '".$instruction."', '1')";
+    $insert = $conn->query($sql);
+    $last_id = mysqli_insert_id($conn);
+    if ($insert) {
+        $_SESSION['pin_user'] = $last_id;
+        $msg = 'Data Added Successfully.';
+        if ($emailaccount['status'] == '1') {
+            $userdataname = $title.' '.$fname.' '.$lname;
+            $txt1 = "Hi ".$fname.",<br>";
+            $txt1 .= "Welcome to the Company.<br/>Your login details are below:<br>";
+            $txt1 .= "Username : ".$email."<br>";
+            $txt1 .= "Password : ".$password."<br><br>Regards<br>Company";
+            $mail = new PHPMailer(true);
+            try {
+                $mail->SMTPDebug = 0;
+                $mail->SMTPAuth = true;
+                $mail->SMTPSecure = 'ssl';
+                $mail->Host = $emailaccount['host'];
+                $mail->Port = $emailaccount['port'];
+                $mail->IsHTML(true);
+                $mail->Username = $emailaccount['email'];
+                $mail->Password = $emailaccount['password'];
+                $mail->addAddress($email, $userdataname);
+                $mail->setFrom($impactem, $impacttitle);
+                $mail->addReplyTo($impactem, $impacttitle);
+                $mail->Subject = "Welcome to Company!!";
+                $mail->Body = $txt1;
+                $mail->Send();
+            } catch (phpmailerException $e) {
+                $err = $e->errorMessage();
+            } catch (Exception $e) {
+                $err = $e->getMessage();
+            }
+        }
+        header("Location: ".$redirectBaseUrl."/payment-confirmation/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$last_id);
+        exit;
+    } else {
+        $err = $conn->error;
+    }
+}
+
+if (isset($_POST['update'])) {
+    $fname = mysqli_real_escape_string($conn, $_POST['fname']);
+    $lname = mysqli_real_escape_string($conn, $_POST['lname']);
+    $title = mysqli_real_escape_string($conn, $_POST['title']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $position = mysqli_real_escape_string($conn, $_POST['position']);
+    $company = mysqli_real_escape_string($conn, $_POST['company']);
+    $postal_address = mysqli_real_escape_string($conn, $_POST['postal_address']);
+    $industry_type = mysqli_real_escape_string($conn, $_POST['industry_type']);
+    $hsr_or_not = mysqli_real_escape_string($conn, $_POST['hsr_or_not']);
+    $workplace_contact = mysqli_real_escape_string($conn, $_POST['workplace_contact']);
+    $workplace_email = mysqli_real_escape_string($conn, $_POST['workplace_email']);
+    $workplace_phone = mysqli_real_escape_string($conn, $_POST['workplace_phone']);
+    $emergency_contact = mysqli_real_escape_string($conn, $_POST['emergency_contact']);
+    $emergency_phone = mysqli_real_escape_string($conn, $_POST['emergency_phone']);
+    $special_requirements = mysqli_real_escape_string($conn, $_POST['special_requirements']);
+    $food_requirements = mysqli_real_escape_string($conn, $_POST['food_requirements']);
+    $instruction = mysqli_real_escape_string($conn, $_POST['instruction']);
+    $loggedid = $_POST['loggedid'];
+    $courseid = $_GET['courseid'];
+    $locid = $_GET['locid'];
+    $slotid = $_GET['slotid'];
+    $cityid = $_GET['cityid'];
+    $sqlquery = "UPDATE registration SET title = '".$title."', fname = '".$fname."', lname = '".$lname."', email='".$email."', position = '".$position."', company = '".$company."', postal_address = '".$postal_address."', courseid = '".$courseid."', locid = '".$locid."', slotid = '".$slotid."', cityid = '".$cityid."', industry_type = '".$industry_type."', hsr_or_not = '".$hsr_or_not."', workplace_contact = '".$workplace_contact."', workplace_email = '".$workplace_email."', workplace_phone = '".$workplace_phone."', emergency_contact = '".$emergency_contact."', emergency_phone = '".$emergency_phone."', special_requirements = '".$special_requirements."', food_requirements = '".$food_requirements."', instruction='".$instruction."' WHERE id=".$loggedid;
+    $update = $conn->query($sqlquery);
+    if ($update) {
+        $msgup = 'Data Added Successfully.';
+        header("Location: ".$redirectBaseUrl."/payment-confirmation/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$loggedid);
+        exit;
+    } else {
+        $errup = $conn->error;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
@@ -76,96 +201,7 @@ if(isset($_SESSION['client_emaill']) && $course_slots['type'] == 'private') {
                             <a class="btn btn-primary" href="javascript:" onclick="window.history.go(-1); return false;" style="position:absolute;right:0;z-index: 9;cursor: pointer;">Back</a>
                         <?php } ?>
                             <h4 class="mt-0 mb-30 line-bottom-theme-colored-2">ENTER YOUR DETAILS BELOW:?</h4>
-                            <?php 
-                            function randomPassword() {
-                                $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-                                $pass = array(); //remember to declare $pass as an array
-                                $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
-                                for ($i = 0; $i < 8; $i++) {
-                                    $n = rand(0, $alphaLength);
-                                    $pass[] = $alphabet[$n];
-                                }
-                                return implode($pass); //turn the array into a string
-                            }
-                            function genRandomString() {
-                                $length = 5;
-                                $characters = '023456789abcdefghijkmnopqrstuvwxyz';
-                                $string = '';    
-                            
-                                for ($p = 0; $p < $length; $p++) {
-                                    $string .= $characters[mt_rand(0, strlen($characters))];
-                                }
-                                return $string;
-                            }
-							$err = $msg = '';
-							if(isset($_POST['submit'])) {
-							    $fname = mysqli_real_escape_string($conn, $_POST['fname']);
-								$lname = mysqli_real_escape_string($conn, $_POST['lname']);
-								$title = mysqli_real_escape_string($conn, $_POST['title']);
-								$email = mysqli_real_escape_string($conn, $_POST['email']);
-								$position = mysqli_real_escape_string($conn, $_POST['position']);
-								$company = mysqli_real_escape_string($conn, $_POST['company']);
-								$postal_address = mysqli_real_escape_string($conn, $_POST['postal_address']);
-								$industry_type = mysqli_real_escape_string($conn, $_POST['industry_type']);
-								$hsr_or_not = mysqli_real_escape_string($conn, $_POST['hsr_or_not']);
-								$workplace_contact = mysqli_real_escape_string($conn, $_POST['workplace_contact']);
-								$workplace_email= mysqli_real_escape_string($conn, $_POST['workplace_email']);
-								$workplace_phone = mysqli_real_escape_string($conn, $_POST['workplace_phone']);
-								$emergency_contact = mysqli_real_escape_string($conn, $_POST['emergency_contact']);
-								$emergency_phone = mysqli_real_escape_string($conn, $_POST['emergency_phone']);
-								$special_requirements = mysqli_real_escape_string($conn, $_POST['special_requirements']);
-								$food_requirements = mysqli_real_escape_string($conn, $_POST['food_requirements']);
-								$instruction = mysqli_real_escape_string($conn, $_POST['instruction']);
-								$password = mysqli_real_escape_string($conn, $_POST['password']);//randomPassword();
-								$generated_code = genRandomString();
-                    			$check_random_string_row = $conn->query('SELECT generated_code FROM registration WHERE (generated_code="'.$generated_code.'")')->fetch_assoc();
-                    			if($generated_code == $check_random_string_row['generated_code']){
-                    			    $generated_code = genRandomString();
-                    			}
-								$courseid = $_GET['courseid'];
-								$locid = $_GET['locid'];
-								$slotid = $_GET['slotid'];
-								$cityid = $_GET['cityid'];
-								$sql="INSERT INTO registration (title,fname,lname,email,position,company,postal_address,courseid,locid,slotid,cityid,industry_type,hsr_or_not,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, password, generated_code, instruction, verifyEmail) VALUES ('".$title."','".$fname."','".$lname."','".$email."','".$position."','".$company."','".$postal_address."','".$courseid."','".$locid."', '".$slotid."', '".$cityid."', '".$industry_type."', '".$hsr_or_not."', '".$workplace_contact."', '".$workplace_email."','".$workplace_phone."', '".$emergency_contact."', '".$emergency_phone."', '".$special_requirements."', '".$food_requirements."', '".$password."', '".$generated_code."', '".$instruction."', '1')";
-    							$insert = $conn->query($sql);
-    							$last_id = mysqli_insert_id($conn);
-    							if($insert){
-    							    $_SESSION['pin_user'] = $last_id;
-    								$msg = 'Data Added Successfully.';
-    								if($emailaccount['status'] == '1') {
-        							    $userdataname = $title.' '.$fname.' '.$lname;
-        							    $txt1 = "Hi ".$fname.",<br>";
-                        				$txt1 .= "Welcome to the Company.<br/>Your login details are below:<br>";
-                        				$txt1 .= "Username : ".$email."<br>";
-                        				$txt1 .= "Password : ".$password."<br><br>Regards<br>Company";
-        							    $mail = new PHPMailer(true);
-                                        try {
-                                            $mail->SMTPDebug  = 0; // debugging: 1 = errors and messages, 2 = messages only
-                                            $mail->SMTPAuth   = true; // authentication enabled
-                                            $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for Gmail
-                                            $mail->Host       = $emailaccount['host'];; // SMTP server
-                                            $mail->Port       = $emailaccount['port'];                    // set the SMTP port for the GMAIL server
-                                            $mail->IsHTML(true);
-                                            $mail->Username   = $emailaccount['email']; // SMTP account username
-                                            $mail->Password   = $emailaccount['password'];       // SMTP account password
-                                            $mail->addAddress($email, $userdataname);  //Add a recipient
-                                            $mail->setFrom($impactem, $impacttitle);
-                                            $mail->addReplyTo($impactem, $impacttitle);
-                                            $mail->Subject = "Welcome to Company!!";
-                                            $mail->Body    = $txt1;
-                                            if($mail->Send()) {
-                                                // $msg = 'Data Added Successfully.';
-                                            }
-                                        } catch (phpmailerException $e) {
-                                          $err = $e->errorMessage(); 
-                                        } catch (Exception $e) {
-                                          $err = $e->getMessage(); //Boring error messages from anything else!
-                                        }
-    							    }
-    							} else {
-    								$err = $conn->error;
-    							}
-    						}
+                            <?php
     						if(!empty($err)){
     						  echo "
     							<div class='alert alert-danger alert-dismissible'>
@@ -175,46 +211,6 @@ if(isset($_SESSION['client_emaill']) && $course_slots['type'] == 'private') {
     							</div>
     						  ";
     						}
-    						if(!empty($msg)){
-    						    $courseid=$_GET['courseid'];
-    						    $locid=$_GET['locid'];
-    						    $slotid=$_GET['slotid'];
-    						    $cityid=$_GET['cityid'];
-    						    $actual_link = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]";
-    						    header("Location: ".$actual_link."/payment-confirmation/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$last_id);
-    						}
-							$errup = $msgup = '';
-							if(isset($_POST['update'])) {
-							    $fname = mysqli_real_escape_string($conn, $_POST['fname']);
-								$lname = mysqli_real_escape_string($conn, $_POST['lname']);
-								$title = mysqli_real_escape_string($conn, $_POST['title']);
-								$email = mysqli_real_escape_string($conn, $_POST['email']);
-								$position = mysqli_real_escape_string($conn, $_POST['position']);
-								$company = mysqli_real_escape_string($conn, $_POST['company']);
-								$postal_address = mysqli_real_escape_string($conn, $_POST['postal_address']);
-								$industry_type = mysqli_real_escape_string($conn, $_POST['industry_type']);
-								$hsr_or_not = mysqli_real_escape_string($conn, $_POST['hsr_or_not']);
-								$workplace_contact = mysqli_real_escape_string($conn, $_POST['workplace_contact']);
-								$workplace_email= mysqli_real_escape_string($conn, $_POST['workplace_email']);
-								$workplace_phone = mysqli_real_escape_string($conn, $_POST['workplace_phone']);
-								$emergency_contact = mysqli_real_escape_string($conn, $_POST['emergency_contact']);
-								$emergency_phone = mysqli_real_escape_string($conn, $_POST['emergency_phone']);
-								$special_requirements = mysqli_real_escape_string($conn, $_POST['special_requirements']);
-								$food_requirements = mysqli_real_escape_string($conn, $_POST['food_requirements']);
-								$instruction = mysqli_real_escape_string($conn, $_POST['instruction']);
-								$loggedid = $_POST['loggedid'];
-								$courseid = $_GET['courseid'];
-								$locid = $_GET['locid'];
-								$slotid = $_GET['slotid'];
-								$cityid = $_GET['cityid'];
-								$sqlquery="UPDATE registration SET title = '".$title."', fname = '".$fname."', lname = '".$lname."', email='".$email."', position = '".$position."', company = '".$company."', postal_address = '".$postal_address."', courseid = '".$courseid."', locid = '".$locid."', slotid = '".$slotid."', cityid = '".$cityid."', industry_type = '".$industry_type."', hsr_or_not = '".$hsr_or_not."', workplace_contact = '".$workplace_contact."', workplace_email = '".$workplace_email."', workplace_phone = '".$workplace_phone."', emergency_contact = '".$emergency_contact."', emergency_phone = '".$emergency_phone."', special_requirements = '".$special_requirements."', food_requirements = '".$food_requirements."', instruction='".$instruction."' WHERE id=".$loggedid;
-    							$update = $conn->query($sqlquery);
-    							if($update){
-    								$msgup = 'Data Added Successfully.';
-    							} else {
-    								$errup = $conn->error;
-    							}
-    						}
     						if(!empty($errup)){
     						  echo "
     							<div class='alert alert-danger alert-dismissible'>
@@ -223,14 +219,6 @@ if(isset($_SESSION['client_emaill']) && $course_slots['type'] == 'private') {
     							  ".$errup."
     							</div>
     						  ";
-    						}
-    						if(!empty($msgup)){
-    						    $courseid=$_GET['courseid'];
-    						    $locid=$_GET['locid'];
-    						    $slotid=$_GET['slotid'];
-    						    $cityid=$_GET['cityid'];
-    						    $actual_link = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]";
-    						    header("Location: ".$actual_link."/payment-confirmation/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$loggedid);
     						}
     						if(isset($_SESSION['pin_user']) && !empty($_SESSION['pin_user']) && $_SESSION['pin_user'] != '') {
     						    $fetchRegis = $conn->query("SELECT * FROM registration WHERE id= '".$_SESSION['pin_user']."'")->fetch_assoc();
