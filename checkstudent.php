@@ -23,14 +23,16 @@ if($check > 0) {
         echo '2';
     }
 } else {
+    $err = '';
     $txt1 = "Dear Student,<br>";
     $txt1 .= "Your OTP is ".$otp.",<br>";
     $mail = new PHPMailer(true);
     try {
+        $mail->isSMTP();
         $mail->SMTPDebug  = 0; // debugging: 1 = errors and messages, 2 = messages only
         $mail->SMTPAuth   = true; // authentication enabled
-        $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for Gmail
-        $mail->Host       = $emailaccount['host'];; // SMTP server
+        $mail->SMTPSecure = 'tls'; // port 587 uses STARTTLS
+        $mail->Host       = $emailaccount['host']; // SMTP server
         $mail->Port       = $emailaccount['port'];                    // set the SMTP port for the GMAIL server
         $mail->IsHTML(true);
         $mail->Username   = $emailaccount['email']; // SMTP account username
@@ -43,12 +45,15 @@ if($check > 0) {
         if($mail->Send()) {
             $_SESSION['ver_OTP'] = $otp;
             echo '5';
+            exit;
         }
-    } catch (phpmailerException $e) {
-      $err = $e->errorMessage(); 
+    } catch (\PHPMailer\PHPMailer\Exception $e) {
+        $err = $e->getMessage();
     } catch (Exception $e) {
-      $err = $e->getMessage(); //Boring error messages from anything else!
+        $err = $e->getMessage(); //Boring error messages from anything else!
     }
-    echo $err;
+    if ($err !== '') {
+        echo $err;
+    }
 }
 ?>

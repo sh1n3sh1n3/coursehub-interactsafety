@@ -21,11 +21,12 @@ if($select->num_rows > 0) {
 			$txt1 .= "Regards<br>Company";
 		    $mail = new PHPMailer(true);
             try {
-                $mail->SMTPDebug  = 0; // debugging: 1 = errors and messages, 2 = messages only
-                $mail->SMTPAuth   = true; // authentication enabled
-                $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for Gmail
-                $mail->Host       = $emailaccount['host'];; // SMTP server
-                $mail->Port       = $emailaccount['port'];                    // set the SMTP port for the GMAIL server
+                $mail->isSMTP();
+                $mail->SMTPDebug  = 0;
+                $mail->Host       = $emailaccount['host'];
+                $mail->Port       = $emailaccount['port'];
+                $mail->SMTPSecure = 'tls'; // port 587 uses STARTTLS
+                $mail->SMTPAuth   = true;
                 $mail->IsHTML(true);
                 $mail->Username   = $emailaccount['email']; // SMTP account username
                 $mail->Password   = $emailaccount['password'];       // SMTP account password

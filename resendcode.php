@@ -12,31 +12,36 @@ $impactph = $emailaccount['phone'];
 $impactem = $emailaccount['email1'];
 $val = mysqli_real_escape_string($conn, $_POST['val']);
 $otp = rand(111111,999999);
-    $txt1 = "Dear Student,<br>";
-    $txt1 .= "Your OTP is ".$otp.",<br>";
-    $mail = new PHPMailer(true);
-    try {
-        $mail->SMTPDebug  = 0; // debugging: 1 = errors and messages, 2 = messages only
-        $mail->SMTPAuth   = true; // authentication enabled
-        $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for Gmail
-        $mail->Host       = $emailaccount['host'];; // SMTP server
-        $mail->Port       = $emailaccount['port'];                    // set the SMTP port for the GMAIL server
-        $mail->IsHTML(true);
-        $mail->Username   = $emailaccount['email']; // SMTP account username
-        $mail->Password   = $emailaccount['password'];       // SMTP account password
-        $mail->addAddress($val, $val);  //Add a recipient
-        $mail->setFrom($impactem, $impacttitle);
-        $mail->addReplyTo($impactem, $impacttitle);
-        $mail->Subject = "Welcome to Company!!";
-        $mail->Body    = $txt1;
-        if($mail->Send()) {
-            $_SESSION['ver_OTP'] = $otp;
-            echo '1';
-        }
-    } catch (phpmailerException $e) {
-      $err = $e->errorMessage(); 
-    } catch (Exception $e) {
-      $err = $e->getMessage(); //Boring error messages from anything else!
+$err = '';
+$txt1 = "Dear Student,<br>";
+$txt1 .= "Your OTP is ".$otp.",<br>";
+$mail = new PHPMailer(true);
+try {
+    $mail->isSMTP();
+    $mail->SMTPDebug  = 0; // debugging: 1 = errors and messages, 2 = messages only
+    $mail->SMTPAuth   = true; // authentication enabled
+    $mail->SMTPSecure = 'tls'; // port 587 uses STARTTLS
+    $mail->Host       = $emailaccount['host']; // SMTP server
+    $mail->Port       = $emailaccount['port'];                    // set the SMTP port for the GMAIL server
+    $mail->IsHTML(true);
+    $mail->Username   = $emailaccount['email']; // SMTP account username
+    $mail->Password   = $emailaccount['password'];       // SMTP account password
+    $mail->addAddress($val, $val);  //Add a recipient
+    $mail->setFrom($impactem, $impacttitle);
+    $mail->addReplyTo($impactem, $impacttitle);
+    $mail->Subject = "Welcome to Company!!";
+    $mail->Body    = $txt1;
+    if($mail->Send()) {
+        $_SESSION['ver_OTP'] = $otp;
+        echo '1';
+        exit;
     }
+} catch (\PHPMailer\PHPMailer\Exception $e) {
+    $err = $e->getMessage();
+} catch (Exception $e) {
+    $err = $e->getMessage(); //Boring error messages from anything else!
+}
+if ($err !== '') {
     echo $err;
+}
 ?>

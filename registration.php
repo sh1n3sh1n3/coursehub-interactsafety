@@ -82,11 +82,12 @@ if (isset($_POST['submit'])) {
             $txt1 .= "Password : ".$password."<br><br>Regards<br>Company";
             $mail = new PHPMailer(true);
             try {
+                $mail->isSMTP();
                 $mail->SMTPDebug = 0;
-                $mail->SMTPAuth = true;
-                $mail->SMTPSecure = 'ssl';
                 $mail->Host = $emailaccount['host'];
                 $mail->Port = $emailaccount['port'];
+                $mail->SMTPSecure = 'tls'; // port 587 uses STARTTLS
+                $mail->SMTPAuth = true;
                 $mail->IsHTML(true);
                 $mail->Username = $emailaccount['email'];
                 $mail->Password = $emailaccount['password'];

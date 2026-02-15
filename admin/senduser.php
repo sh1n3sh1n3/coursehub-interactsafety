@@ -12,10 +12,11 @@ $txt2 = ' <div style="margin:20px;box-sizing:border-box;font-family:Arial;color:
     $mail->IsSMTP(); // telling the class to use SMTP
     
     try {
-      $mail->Host       = $emailaccount['host'];; // SMTP server
-      $mail->SMTPDebug  = 0;                     // enables SMTP debug information (for testing)
-      $mail->SMTPAuth   = true;                  // enable SMTP authentication
-      $mail->Port       = $emailaccount['port'];                    // set the SMTP port for the GMAIL server
+      $mail->Host       = $emailaccount['host'];
+      $mail->Port       = $emailaccount['port'];
+      $mail->SMTPSecure = 'tls'; // port 587 uses STARTTLS
+      $mail->SMTPDebug  = 0;
+      $mail->SMTPAuth   = true;
       $mail->Username   = $emailaccount['email']; // SMTP account username
       $mail->Password   = $emailaccount['password'];       // SMTP account password
 	  $mail->AddAddress($userdataemail, $userdataname);     //Add a recipient
