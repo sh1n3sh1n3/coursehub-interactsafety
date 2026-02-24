@@ -14,12 +14,22 @@
     <meta name="description" content="Learnpro - Education University School Kindergarten Learning HTML Template" />
     <meta name="keywords" content="education,school,university,educational,learn,learning,teaching,workshop" />
     <meta name="author" content="ThemeMascot" />
+    <?php if (strpos($_SERVER['HTTP_HOST'], 'localhost') === false && strpos($_SERVER['HTTP_HOST'], '127.0.0.1') === false) { ?>
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-
+    <?php } ?>
     <title>Company Name</title>
-    <?php
-    include("include/head_script.php");
-    ?>
+    <?php include("include/head_script.php"); ?>
+    <style>
+    #home .row.multi-row-clearfix { display: flex; flex-wrap: wrap; }
+    #home .row.multi-row-clearfix > [class*="col-"] { display: flex; }
+    #home .event-list { flex: 1; display: flex; flex-direction: column; min-height: 100%; }
+    #home .event-list a { flex: 1; display: flex; flex-direction: column; }
+    #home .event-list-details { flex: 0 0 auto; min-height: 80px; height: 80px; display: flex; align-items: center; justify-content: center; padding: 15px; }
+    #home .event-list-details h5 { margin: 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    #home .event-list .thumb { flex: 0 0 200px; height: 200px; overflow: hidden; display: block; }
+    #home .event-list .thumb img { object-fit: cover; width: 100%; height: 100%; display: block; transform: scale(1.3); transition: transform 0.4s ease; }
+    #home .event-list:hover .thumb img { transform: scale(1.5); }
+    </style>
 </head>
 <body>
 <div id="wrapper" class="clearfix">
@@ -29,95 +39,51 @@
        
 
         <div class="main-content">
-            <section id="home" class="bg-gray-lighter pb-140 mb-20">
-                <div class="container pt-0 mt-10 bg-white pb-40">
+            <section id="about" class="pb-70">
+                <div class="container">
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-7">
+                                <?php $aboutus = $conn->query("SELECT * FROM aboutus WHERE id='1'")->fetch_assoc(); ?>
+                                <h2 class="text-uppercase text-theme-colored mt-0 mt-sm-30">About the business and myself</h2>
+                                <div class="double-line-bottom-theme-colored-2"></div>
+                                <?php $string = $aboutus['description'];
+                                    if (strlen($string) > 2500) {
+                                        $stringCut = substr($string, 0, 2500);
+                                        $endPoint = strrpos($stringCut, ' ');
+                                        $string = $endPoint ? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
+                                        $string .= '... <br><a href="about.php" class="btn btn-colored btn-theme-colored2 text-white btn-lg pl-40 pr-40 mt-15">Read More</a>';
+                                    }
+                                    echo $string;
+                                ?>
+                            </div>
+                            <div class="col-md-5">
+                                <img class="img-fullwidth maxwidth500" src="assets/images/about/<?php echo $aboutus['image']; ?>" alt="About the business">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="home" class="bg-gray-lighter pt-40 pb-40">
+                <div class="container pt-40 pb-40 bg-white">
                     <div class="section-content">
                         <div class="row multi-row-clearfix">
                             	<?php $count=0;
 					$courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE status='1' order by title ASC");
 					while($fetchcourses = $courses->fetch_assoc()) {$count++; $id = $fetchcourses['id'];  ?>
-                            <div class="col-sm-6 col-md-3">
-                                <div class="event-list bg-silver-light maxwidth500 mb-20">
+                            <div class="col-sm-6 col-md-4">
+                                <div class="event-list bg-silver-light maxwidth500">
                                     <a href="courses/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>">
                                     <div class="event-list-details border-1px bg-white clearfix text-center" style="overflow:hidden">
-                                        <h5 class="text-uppercase font-weight-600 font-16 mb-5"><?php echo $fetchcourses['title']; ?></h5>
+                                        <h5 class="text-uppercase font-weight-600 font-16"><?php echo $fetchcourses['title']; ?></h5>
                                     </div>
                                     <div class="thumb">
-                                        <img style="height:180px" src="assets/images/category/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
+                                        <img src="assets/images/category/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
                                     </div></a>
                                 </div>
                             </div>
                          	<?php } ?>
                          
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <section>
-                <div class="container pt-0 pb-0">
-                    <?php $webcounts = $conn->query("SELECT * FROM counts WHERE id='1'")->fetch_assoc(); ?>
-                   <div class="section-content">
-                      <div class="row equal-height-inner home-boxes" data-margin-top="-100px" style="margin-top: -100px;">
-                         <div class="col-sm-12 col-md-3 pl-0 pl-sm-15 pr-1 pr-sm-15 sm-height-auto mt-sm-0 wow fadeInLeft animation-delay3" style="min-height: 19.5em; visibility: visible;">
-                            <div class="img-rounded sm-height-auto" data-bg-color="#D8701A" style="background: #D8701A !important; min-height: 273px;">
-                               <div class="features-box-colored text-center p-15 pt-30 pb-20">
-                                   <br>
-                                  <h2 class="text-uppercase font-weight-600 mt-0"><a href="javascript:" class="text-white"><?php echo number_format($webcounts['students']); ?></a></h2>
-                                  <h4 class="text-uppercase font-weight-600 mt-0"><a href="javascript:" class="text-dark">Qualified Students</a></h4>
-                                  <br>
-                               </div>
-                            </div>
-                         </div>
-                         <div class="col-sm-12 col-md-3 pl-0 pl-sm-15 pr-1 pr-sm-15 sm-height-auto mt-sm-0 wow fadeInLeft animation-delay3" style="min-height: 19.5em; visibility: visible;">
-                            <div class="img-rounded sm-height-auto" data-bg-color="#D8701A" style="background: #D8701A !important; min-height: 273px;">
-                               <div class="features-box-colored text-center p-15 pt-30 pb-20">
-                                  <br><h2 class="text-uppercase font-weight-600 mt-0"><a href="javascript:" class="text-white"><?php echo number_format($webcounts['laststudents']); ?></a></h2>
-                                  <h4 class="text-uppercase font-weight-600 mt-0"><a href="javascript:" class="text-dark">Students Last Year</a></h4><br>
-                               </div>
-                            </div>
-                         </div>
-                         <div class="col-sm-12 col-md-3 pl-0 pl-sm-15 pr-1 pr-sm-15 sm-height-auto mt-sm-0 wow fadeInLeft animation-delay3" style="min-height: 19.5em; visibility: visible;">
-                            <div class="img-rounded sm-height-auto" data-bg-color="#D8701A" style="background: #D8701A !important; min-height: 273px;">
-                               <div class="features-box-colored text-center p-15 pt-30 pb-20">
-                                   <br><h2 class="text-uppercase font-weight-600 mt-0"><a href="javascript:" class="text-white"><?php echo $webcounts['rating']; ?></a></h2>
-                                  <h4 class="text-uppercase font-weight-600 mt-0"><a href="javascript:" class="text-dark">Student Satisfaction</a></h4><br>
-                               </div>
-                            </div>
-                         </div>
-                         <div class="col-sm-12 col-md-3 pl-0 pl-sm-15 pr-0 pr-sm-15 sm-height-auto mt-sm-0 wow fadeInLeft animation-delay3" style="min-height: 19.5em; visibility: visible;">
-                            <div class="img-rounded sm-height-auto" data-bg-color="#D8701A" style="background: #D8701A !important; min-height: 273px;">
-                               <div class="features-box-colored text-center p-15 pt-30 pb-20">
-                                   <br><h2 class="text-uppercase font-weight-600 mt-0"><a href="javascript:" class="text-white"><?php echo number_format($webcounts['courses']); ?></a></h2>
-                                  <h4 class="text-uppercase font-weight-600 mt-0"><a href="javascript:" class="text-dark">e-Learning Courses</a></h4><br>
-                               </div>
-                            </div>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-            </section>
-            <section>
-                <div class="container pb-70">
-                    <div class="section-content">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <?php $aboutus = $conn->query("SELECT * FROM aboutus WHERE id='1'")->fetch_assoc(); ?>
-                                <h2 class="text-uppercasetext-theme-colored mt-0 mt-sm-30">COMPANY SAFETY AND TRAINING </h2>
-                                <div class="double-line-bottom-theme-colored-2"></div>
-                                <?php $string = $aboutus['description'];//strip_tags($aboutus['description']);
-                                    if (strlen($string) > 2500) {
-                                        $stringCut = substr($string, 0, 2500);
-                                        $endPoint = strrpos($stringCut, ' ');
-                                        $string = $endPoint? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
-                                        $string .= '... <br><a href="about.php" class="btn btn-colored btn-theme-colored2 text-white btn-lg pl-40 pr-40 mt-15">Read More</a>';
-                                    }
-                                    echo $string;
-                                ?>
-                                
-                            </div>
-                            <div class="col-md-6">
-                                <img class="img-fullwidth maxwidth500" src="assets/images/about/<?php echo $aboutus['image']; ?>" alt>
-                            </div>
                         </div>
                     </div>
                 </div>

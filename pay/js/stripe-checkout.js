@@ -1,3 +1,6 @@
+// Base URL for pay endpoints (set by page when loaded from payment-confirmation rewrite)
+const payBase = (typeof PAY_BASE !== 'undefined' && PAY_BASE) ? PAY_BASE.replace(/\/$/, '') : '';
+
 // Get Your Stripe Publishable API Key
 let publishable_key = document.querySelector("#publishable_key").value;
 
@@ -50,7 +53,7 @@ paymentForm.addEventListener("submit", handlePaymentSubmit);
 // Fetch a payment intent and capture the client secret
 let payment_intent_id;
 async function initialize() {
-    const { paymentIntentId, clientSecret } = await fetch("create_payment_intent.php", {
+    const { paymentIntentId, clientSecret } = await fetch((payBase ? payBase + '/' : '') + "create_payment_intent.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ request_type:'create_payment_intent' }),
@@ -76,6 +79,11 @@ async function initialize() {
 // Function to handle payment form submit
 async function handlePaymentSubmit(e) {
     e.preventDefault();
+    var termsEl = document.getElementById("terms_agree");
+    if (termsEl && !termsEl.checked) {
+        showMessage("Please accept the Terms and Conditions to proceed with payment.");
+        return;
+    }
     setLoading(true);
     
     let name = document.getElementById("fullname").value;
@@ -87,7 +95,7 @@ async function handlePaymentSubmit(e) {
     let registerid = document.getElementById("registerid").value;
     let fullname = name+'_'+courseid+'_'+locid+'_'+slotid+'_'+cityid+'_'+registerid;
     
-    const { customer_id } = await fetch("create_customer.php", {
+    const { customer_id } = await fetch((payBase ? payBase + '/' : '') + "create_customer.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ payment_intent_id: payment_intent_id, fullname: fullname, email: email }),
@@ -130,14 +138,20 @@ async function checkStatus() {
         return;
     }
     
+    // Show loading while we check status (user just returned from 3DS etc.)
+    paymentForm.classList.add("hidden");
+    paymentProcessing.classList.remove("hidden");
+    if (submitButton) { submitButton.classList.add("hidden"); }
+    if (payReinitiate) { payReinitiate.classList.add("hidden"); }
+    
     const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
     
     if (paymentIntent) {
         switch (paymentIntent.status) { 
             case "succeeded":
                 // Post the transaction data to the server-side script
-                // and redirect to the payment status page
-                fetch("payment_insert.php", {
+                // and redirect to the payment status page (keep showing "processing..." until redirect)
+                fetch((payBase ? payBase + '/' : '') + "payment_insert.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ payment_intent: paymentIntent, customer_id: customer_id }),
@@ -145,28 +159,38 @@ async function checkStatus() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.transaction_id) {
-                        window.location.href = 'status.php?tid='+data.transaction_id;
+                        var statusUrl = (payBase ? payBase.replace(/\/+$/, '') + '/' : '') + 'status.php?tid='+data.transaction_id;
+                        window.location.href = statusUrl;
                     } else {
-                        showMessage(data.error);
+                        paymentProcessing.classList.add("hidden");
+                        showMessage(data.error || "Something went wrong.");
                         paymentReinitiate();
                     }
                 })
-                .catch(console.error);
+                .catch(function(err) {
+                    paymentProcessing.classList.add("hidden");
+                    showMessage("Something went wrong. Please try again.");
+                    paymentReinitiate();
+                });
                 break;
             case "processing":
-                showMessage("Your payment is processing.");
+                // Keep showing payment_processing message
+                showMessage("Your payment is still processing. We will confirm shortly.");
                 paymentReinitiate();
                 break;
             case "requires_payment_method":
+                paymentProcessing.classList.add("hidden");
                 showMessage("Your payment was not successful, please try again.");
                 paymentReinitiate();
                 break;
             default:
+                paymentProcessing.classList.add("hidden");
                 showMessage("Something went wrong.");
                 paymentReinitiate();
                 break;
         }
     } else {
+        paymentProcessing.classList.add("hidden");
         showMessage("Something went wrong.");
         paymentReinitiate();
     }
@@ -179,22 +203,20 @@ function showMessage(messageText) {
     
     setTimeout(function () {
         messageContainer.classList.add("hidden");
-        messageText.textContent = "";
+        messageContainer.textContent = "";
     }, 10000);
 }
 
 // Show a spinner on payment submission
 function setLoading(isLoading) {
     if (isLoading) {
-        // Disable the submit button and show a spinner
         submitButton.disabled = true;
         spinner.classList.remove("hidden");
-        submitText.classList.add("hidden");
+        submitText.textContent = "Processing...";
     } else {
-        // Enable the submit button and hide a spinner
         submitButton.disabled = false;
         spinner.classList.add("hidden");
-        submitText.classList.remove("hidden");
+        submitText.textContent = "Pay Now";
     }
 }
 

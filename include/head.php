@@ -47,8 +47,8 @@
 				    	<div class="col-xs-12 col-sm-3 col-md-3  pt-20">
                             <div class="widget no-border sm-text-center mt-10 mb-10 m-0">
                                 <i class="pe-7s-headphones text-theme-colored2 font-48 mt-0 mr-15 mr-sm-0 sm-display-block pull-left flip sm-pull-none"></i>
-                                <a href="#" class="font-12 text-gray text-uppercase">Call us</a>
-                                <h6 class="font-11 text-black m-0"> <?php echo $information['phone']; ?> </h6>
+                                <span class="font-12 text-gray text-uppercase d-block">Call us</span>
+                                <h6 class="font-12 text-black m-0"><?php echo htmlspecialchars($information['phone']); ?></h6>
                             </div>
                         </div>
                         <?php } ?>
@@ -56,8 +56,8 @@
                         <div class="col-xs-12 col-sm-3 col-md-3  pt-20">
                             <div class="widget no-border sm-text-center mt-10 mb-10 m-0">
                                 <i class="pe-7s-mail-open text-theme-colored2 font-48 mt-0 mr-15 mr-sm-0 sm-display-block pull-left flip sm-pull-none"></i>
-                                <a href="#" class="font-12 text-gray text-uppercase">Email us</a>
-                                <h6 class="font-11 text-black m-0"> <?php echo $information['email']; ?></h6>
+                                <span class="font-12 text-gray text-uppercase d-block">Email us</span>
+                                <h6 class="font-12 m-0"><a href="mailto:<?php echo htmlspecialchars($information['email']); ?>" class="text-theme-colored2 font-weight-600"><?php echo htmlspecialchars($information['email']); ?></a></h6>
                             </div>
                         </div>
                          <?php } ?>
@@ -84,61 +84,8 @@
             <div class="container">
                 <nav id="menuzord" class="menuzord default menuzord-responsive">
                     <ul class="menuzord-menu">
-                       <li><a href="index.php">HOME</a></li>
-                       <li class="<?= (($activePage == 'index') || ($activePage == '') || ($activePage == 'courses') || ($activePage == 'category')) ? 'active':''; ?>"><a href="#home">COURSES</a>
-                            <ul class="dropdown">
-                             <?php $count=0;
-                    			$courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE status='1' order by title ASC");
-                    			while($fetchcourses = $courses->fetch_assoc()) {$count++; $id = $fetchcourses['id'];  ?>
-                                    <li class="mb-1">
-                                        <a  href="courses/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>"> <?php echo $fetchcourses['title']; ?></a>
-                                    </li>	
-                          	 <?php } ?>
-                      	        <li><a href="category.php">All Courss</a></li>
-						    </ul>
-                        </li>
-                        <li class="<?= (($activePage == 'services') || ($activePage == 'services_category')) ? 'active':''; ?>">
-                        <a href="#services">CONSULTING  </a>
-                            <ul class="dropdown">
-                              <?php $count1=0;
-                    			$services = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM services_category WHERE status='1' order by title ASC");
-                    			while($fetchservices = $services->fetch_assoc()) {$count1++; $id = $fetchservices['id'];  ?>
-                                <li>
-									<a href="services/<?php echo $fetchservices['id']; ?>/<?php echo $fetchservices['slug']; ?>"><?php echo $fetchservices['title']; ?></a>
-								</li>
-							  <?php } ?>
-								<li class="divider dropdown-item"></li>
-								<li><a href="services_category.php">All Services</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="clients.php">CLIENTS</a>
-                        </li>
-                        <li>
-                            <a href="javascript:">STUDENT</a>
-                            <ul class="dropdown">
-                                <?php if(isset($_SESSION['pin_user']) && !empty($_SESSION['pin_user']) && $_SESSION['pin_user'] != '') { ?>
-                                <?php } else { ?>
-                                <li><a href="javascript:" data-toggle="modal" data-target="#LoginModal">Student Login</a></li>
-                                <?php } ?>
-								<!--<li><a href="#">Student Handbook</a></li>-->
-							</ul>
-                        </li>
-                        <!--<li><a href="blog.php">BLOG</a></li>-->
-                        <li class="<?= (($activePage == 'locations') || ($activePage == 'location-details')) ? 'active':''; ?>">
-                        <a href="javascript:">LOCATIONS</a>
-                            <ul class="dropdown">
-                                <?php $count=0;
-                    			$locations = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM locations WHERE status='1' order by title ASC");
-                    			while($fetchlocations = $locations->fetch_assoc()) {$count++; $id = $fetchcourses['id'];  ?>
-                                    <li>
-        								<a  href="location-details/<?php echo $fetchlocations['id']; ?>/<?php echo $fetchlocations['slug']; ?>"> <?php echo $fetchlocations['title']; ?></a>
-        							</li>
-    							<?php } ?>
-    						    <li class="divider dropdown-item"></li>
-							</ul>
-                        </li>
-						<li class="<?= (($activePage == 'contact')) ? 'active':''; ?>"><a href="contact.php">CONTACT</a></li>
+                       <li class="<?= ($activePage == 'index' || $activePage == '') ? 'active':''; ?>"><a href="index.php">HOME</a></li>
+						<li class="<?= ($activePage == 'contact') ? 'active':''; ?>"><a href="contact.php">CONTACT</a></li>
                     </ul>
                 </nav>
             </div>

@@ -21,6 +21,21 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title><?php echo $cate['title']; ?> | Company Name</title>
     <?php include("include/head_script.php");?>
+    <style>
+    .course-card { border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: box-shadow 0.2s; }
+    .course-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+    .course-card .thumb { overflow: hidden; }
+    .course-card .thumb img { height: 180px; width: 100%; object-fit: cover; display: block; }
+    .course-card .card-body { padding: 16px; background: #fff; }
+    .course-card .card-title { font-size: 14px; font-weight: 600; margin: 0 0 10px 0; line-height: 1.35; min-height: 2.7em; }
+    .course-card .card-title a { color: #333; }
+    .course-card .card-title a:hover { color: #D8701A; text-decoration: none; }
+    .course-card .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+    .course-card .card-price { color: #D8701A; font-weight: 700; }
+    .course-card .card-duration { color: #666; }
+    .course-card .card-desc { font-size: 13px; color: #555; line-height: 1.45; min-height: 2.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .course-card a { display: block; text-decoration: none; color: inherit; }
+    </style>
 </head>
 <body class>
 <div id="wrapper" class="clearfix">
@@ -30,7 +45,7 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
                 <div class="container pt-20 pb-20">
                     <div class="section-content">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <h2 class="text-theme-colored2 font-36"><?php echo $cate['title']; ?></h2>
                                 <ol class="breadcrumb text-left mt-10 white">
                                     <li><a href="index.php">Home</a></li>
@@ -74,28 +89,33 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
                             <div class="panel-body" style="padding-top: 0 "> 
                                 <div class="row multi-row-clearfix" id="filteredData">
                                 <div class="bg-silver-deep" style="padding:15px"><b>All Records</b></div>
-                            	<?php $catid=$_GET['id'];
+<?php $catid=$_GET['id'];
             					$courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM courses WHERE status='1' AND isPublished='1' and catid='".$catid."'  order by title ASC");
             					if($courses->num_rows > 0) {
-            					while($fetchcourses = $courses->fetch_assoc()) { $id = $fetchcourses['id'];  ?>
+            					while($fetchcourses = $courses->fetch_assoc()) {
+            					    $id = $fetchcourses['id'];
+            					    $price = isset($fetchcourses['price']) && $fetchcourses['price'] !== '' ? $fetchcourses['price'] : null;
+            					    $duration = '';
+            					    if (!empty($fetchcourses['duration'])) $duration = $fetchcourses['duration'] . ' ' . (isset($fetchcourses['duration_type']) ? $fetchcourses['duration_type'] : 'days');
+            					?>
                                     <div class="col-sm-6 col-md-3">
-                                        <div class="event-list bg-silver-light maxwidth500 mb-30">
+                                        <div class="course-card mb-30">
                                             <a href="courses-detail/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>">
                                                 <div class="thumb">
-                                                    <img style="height:180px" src="assets/images/course/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
+                                                    <img src="assets/images/course/<?php echo htmlspecialchars($fetchcourses['image']); ?>" alt="<?php echo htmlspecialchars($fetchcourses['title']); ?>">
                                                 </div>
-                                                <div class="event-list-details border-1px bg-white clearfix p-15 pt-15 pb-30">
-                                                    <div style="height:50px;overflow:hidden">
-                                                        <h5 class="text-uppercase font-weight-600 font-14 mb-5"><a href="courses-detail/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>"><?php echo $fetchcourses['title']; ?></a></h5>
+                                                <div class="card-body">
+                                                    <h5 class="card-title text-uppercase"><?php echo htmlspecialchars($fetchcourses['title']); ?></h5>
+                                                    <div class="card-meta">
+                                                        <?php if ($price !== null) { ?><span class="card-price"><?php echo htmlspecialchars($price); ?></span><?php } ?>
+                                                        <?php if ($duration !== '') { ?><span class="card-duration"><?php echo htmlspecialchars($duration); ?></span><?php } ?>
                                                     </div>
-                                                    <div style="height:50px;overflow:hidden">
-                                                        <?php echo $fetchcourses['shortdescription']; ?>
-                                                     </div>
-                                                 </div>
-                                             </a>
+                                                    <?php if (!empty($fetchcourses['shortdescription'])) { ?><div class="card-desc"><?php echo $fetchcourses['shortdescription']; ?></div><?php } ?>
+                                                </div>
+                                            </a>
                                         </div>
                                     </div>
-                            	<?php } } else { ?>
+            					<?php } } else { ?>
                             	<div class="col-sm-12 col-md-12"><h3><center>No record found!!</center></h3></div>
                             	<?php } ?>
                                 </div>

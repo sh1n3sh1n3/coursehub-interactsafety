@@ -26,9 +26,18 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
     include("include/head_script.php");
     ?>
     <style>
-    html {
-  scroll-behavior: smooth;
-}
+    html { scroll-behavior: smooth; }
+    /* Private Course Code: justify-between, 16px gap, input fills remaining width */
+    #importform .form-group.row { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 16px; }
+    #importform .form-group.row .col-form-label { margin-bottom: 0; padding: 0; white-space: nowrap; flex-shrink: 0; }
+    #importform .form-group.row .col-sm-6 { flex: 1 1 auto; min-width: 0; padding: 0; }
+    #importform .form-group.row .col-sm-3:last-child { flex-shrink: 0; padding: 0; }
+    #importform #course_code { height: 32px; line-height: 32px; padding: 0 12px; border-radius: 6px; box-sizing: border-box; width: 100%; }
+    #importform #submitbook { height: 32px; line-height: 32px; padding: 0 10px; border-radius: 6px; border: none; box-sizing: border-box; background: #D8701A !important; color: #fff !important; width: auto !important; min-width: 0; }
+    #importform #submitbook:hover { background: #c46214 !important; color: #fff !important; }
+    /* Scroll Up To Book – 40px height, 6px radius */
+    .main-content .btn-theme-colored2.btn-xl { height: 40px; line-height: 40px; padding: 0 24px; border-radius: 6px; }
+    .main-content #datatable .btn-primary.btn-sm { height: 32px; line-height: 32px; padding: 0 16px; border-radius: 6px; }
     </style>
 </head>
 <body class>

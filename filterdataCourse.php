@@ -6,22 +6,27 @@ if($val == 'all') { ?>
 <?php
 $courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM courses WHERE status='1' and catid='".$catid."'  order by title ASC");
 if($courses->num_rows > 0) {
-while($fetchcourses = $courses->fetch_assoc()) { $id = $fetchcourses['id'];  ?>
+while($fetchcourses = $courses->fetch_assoc()) {
+    $id = $fetchcourses['id'];
+    $price = isset($fetchcourses['price']) && $fetchcourses['price'] !== '' ? $fetchcourses['price'] : null;
+    $duration = '';
+    if (!empty($fetchcourses['duration'])) $duration = $fetchcourses['duration'] . ' ' . (isset($fetchcourses['duration_type']) ? $fetchcourses['duration_type'] : 'days');
+?>
     <div class="col-sm-6 col-md-3">
-        <div class="event-list bg-silver-light maxwidth500 mb-30">
+        <div class="course-card mb-30">
             <a href="courses-detail/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>">
                 <div class="thumb">
-                    <img style="height:180px" src="assets/images/course/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
+                    <img src="assets/images/course/<?php echo htmlspecialchars($fetchcourses['image']); ?>" alt="<?php echo htmlspecialchars($fetchcourses['title']); ?>">
                 </div>
-                <div class="event-list-details border-1px bg-white clearfix p-15 pt-15 pb-30">
-                    <div style="height:50px;overflow:hidden">
-                        <h5 class="text-uppercase font-weight-600 font-14 mb-5"><a href="courses-detail/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>"><?php echo $fetchcourses['title']; ?></a></h5>
+                <div class="card-body">
+                    <h5 class="card-title text-uppercase"><?php echo htmlspecialchars($fetchcourses['title']); ?></h5>
+                    <div class="card-meta">
+                        <?php if ($price !== null) { ?><span class="card-price"><?php echo htmlspecialchars($price); ?></span><?php } ?>
+                        <?php if ($duration !== '') { ?><span class="card-duration"><?php echo htmlspecialchars($duration); ?></span><?php } ?>
                     </div>
-                    <div style="height:50px;overflow:hidden">
-                        <?php echo $fetchcourses['shortdescription']; ?>
-                     </div>
-                 </div>
-             </a>
+                    <?php if (!empty($fetchcourses['shortdescription'])) { ?><div class="card-desc"><?php echo $fetchcourses['shortdescription']; ?></div><?php } ?>
+                </div>
+            </a>
         </div>
     </div>
 <?php } } else { ?>
@@ -35,22 +40,27 @@ while($fetchcourses = $courses->fetch_assoc()) { $id = $fetchcourses['id'];  ?>
     if($course_slots->num_rows > 0) {
     while($fetchcourse_slots = $course_slots->fetch_assoc()) {
     $courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM courses WHERE status='1' and catid='".$catid."' AND id='".$fetchcourse_slots['courseid']."'  order by title ASC");
-    while($fetchcourses = $courses->fetch_assoc()) { $id = $fetchcourses['id'];  ?>
+    while($fetchcourses = $courses->fetch_assoc()) {
+        $id = $fetchcourses['id'];
+        $price = isset($fetchcourses['price']) && $fetchcourses['price'] !== '' ? $fetchcourses['price'] : null;
+        $duration = '';
+        if (!empty($fetchcourses['duration'])) $duration = $fetchcourses['duration'] . ' ' . (isset($fetchcourses['duration_type']) ? $fetchcourses['duration_type'] : 'days');
+?>
         <div class="col-sm-6 col-md-3">
-            <div class="event-list bg-silver-light maxwidth500 mb-30">
+            <div class="course-card mb-30">
                 <a href="courses-detail/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>">
                     <div class="thumb">
-                        <img style="height:180px" src="assets/images/course/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
+                        <img src="assets/images/course/<?php echo htmlspecialchars($fetchcourses['image']); ?>" alt="<?php echo htmlspecialchars($fetchcourses['title']); ?>">
                     </div>
-                    <div class="event-list-details border-1px bg-white clearfix p-15 pt-15 pb-30">
-                        <div style="height:50px;overflow:hidden">
-                            <h5 class="text-uppercase font-weight-600 font-14 mb-5"><a href="courses-detail/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>"><?php echo $fetchcourses['title']; ?></a></h5>
+                    <div class="card-body">
+                        <h5 class="card-title text-uppercase"><?php echo htmlspecialchars($fetchcourses['title']); ?></h5>
+                        <div class="card-meta">
+                            <?php if ($price !== null) { ?><span class="card-price"><?php echo htmlspecialchars($price); ?></span><?php } ?>
+                            <?php if ($duration !== '') { ?><span class="card-duration"><?php echo htmlspecialchars($duration); ?></span><?php } ?>
                         </div>
-                        <div style="height:50px;overflow:hidden">
-                            <?php echo $fetchcourses['shortdescription']; ?>
-                         </div>
-                     </div>
-                 </a>
+                        <?php if (!empty($fetchcourses['shortdescription'])) { ?><div class="card-desc"><?php echo $fetchcourses['shortdescription']; ?></div><?php } ?>
+                    </div>
+                </a>
             </div>
         </div>
 <?php }}} else { ?>

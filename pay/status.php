@@ -43,18 +43,14 @@ if(!empty($_GET['tid'])){
 }else{ 
     header("Location: index.php"); 
     exit(); 
-} 
+}
+
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'];
+$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+$basePath = ($scriptDir === '/coursehub' || strpos($scriptDir, '/coursehub/') === 0) ? '/coursehub' : '';
+$baseUrl = $protocol . '://' . $host . $basePath;
 ?>
-<html>
-<head>
-<title>Demo Integrate Stripe Payment Gateway using PHP - AllPHPTricks.com</title>
-<link rel='stylesheet' href='css/style.css' type='text/css' media='all' />
-</head>
-<body>
-
-<div style="width:700px; margin:50 auto;">
-<h1>Demo Integrate Stripe Payment Gateway using PHP</h1>
-
 <?php if(!empty($row)){
             $print = explode('_', $fullname);
             $courseid = $print['1'];
@@ -87,12 +83,16 @@ if(!empty($_GET['tid'])){
         	$orderno = 'ORD'.$minyear.'-'.$maxyear.$vrno;
         	$seeltdata = $conn->query("SELECT * FROM sale WHERE courseid=".$courseid." AND slotid=".$slotid." AND user=".$register_details['id']."");
             if($seeltdata->num_rows ==  0) { 
-        	    $sql="INSERT INTO sale (date, invoiceno, vrno, orderno, courseid, slotid, user, fname, lname, email, address1,assign_to,assigned,industry_type,paymenttag,paymentmethod,paymentid,amount,netamount,hsrornot,position,company,postal_address,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, instruction) SELECT now(), '".$invoiceno."','".$vrno."','".$orderno."','".$courseid."','".$slotid."',id, fname,lname,email,postal_address,'".$course_slots['teacherid']."',1,'".$register_details['industry_type']."',1,'Online','".$transaction_id."','".$course_details['price']."','".$course_details['price']."','".$register_details['hsr_or_not']."', '".$register_details['position']."','".$register_details['company']."','".$register_details['postal_address']."','".$register_details['workplace_contact']."','".$register_details['workplace_email']."','".$register_details['workplace_phone']."','".$register_details['emergency_contact']."','".$register_details['emergency_phone']."','".$register_details['special_requirements']."','".$register_details['food_requirements']."','".$register_details[' instruction']."' from registration where id='".$registerid."'";
+        	    $sql="INSERT INTO sale (date, invoiceno, vrno, orderno, courseid, slotid, user, fname, lname, email, address1,assign_to,assigned,industry_type,paymenttag,paymentmethod,paymentid,amount,netamount,hsrornot,position,company,postal_address,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, instruction) SELECT now(), '".$invoiceno."','".$vrno."','".$orderno."','".$courseid."','".$slotid."',id, fname,lname,email,postal_address,'".$course_slots['teacherid']."',1,'".$register_details['industry_type']."',1,'Online','".$transaction_id."','".$course_details['price']."','".$course_details['price']."','".$register_details['hsr_or_not']."', '".$register_details['position']."','".$register_details['company']."','".$register_details['postal_address']."','".$register_details['workplace_contact']."','".$register_details['workplace_email']."','".$register_details['workplace_phone']."','".$register_details['emergency_contact']."','".$register_details['emergency_phone']."','".$register_details['special_requirements']."','".$register_details['food_requirements']."','".$register_details['instruction']."' from registration where id='".$registerid."'";
         	    $insert = $conn->query($sql);
         	}
         	if($seeltdata->num_rows > 0 || $insert){
         	    $last_id = $conn->insert_id;
-        	    $conn->query("UPDATE private_course SET registration_id = ".$registerid.", sale_id=".$last_id.", status='sold' WHERE course_code = '".$_SESSION['client_course_code']."' AND course_id=".$courseid." AND slot_id=".$slotid."");
+        	    // Payment success: mark registration as paid (seat confirmed, course register populated)
+        	    $conn->query("UPDATE registration SET payment_status = 'paid' WHERE id = '".mysqli_real_escape_string($conn, $registerid)."'");
+        	    if (!empty($_SESSION['client_course_code'])) {
+        	        $conn->query("UPDATE private_course SET registration_id = ".$registerid.", sale_id=".$last_id.", status='sold' WHERE course_code = '".mysqli_real_escape_string($conn, $_SESSION['client_course_code'])."' AND course_id=".$courseid." AND slot_id=".$slotid."");
+        	    }
         	    $remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid = ".$courseid." AND slotid=".$slotid."");
         	    if($remain_places->num_rows > 0) {
         	        $fetchremain_places = $remain_places->fetch_assoc();
@@ -100,32 +100,39 @@ if(!empty($_GET['tid'])){
         	        $conn->query("UPDATE remain_places SET count=".$pencount." WHERE courseid = ".$courseid." AND slotid=".$slotid."");
         	    }
         	    if($emailaccount['status'] == '1') {
-        		    $userdataname = $register_details['title'].' '.$register_details['fname'].' '.$register_details['lname'];
+        		    $userdataname = trim(($register_details['title'] ?? '').' '.$register_details['fname'].' '.$register_details['lname']);
         		    $email = $register_details['email'];
-        		    $tips = "<h4>Here are some tips for attending a course:</h4>
-                            <b>Prepare</b>
-                            <p>Consider what you want to gain from the course, and how you can apply what you learn. Review the course joining instructions, which may include details about the venue, timings, course length, and what to bring. </p>
-                            <b>Create a routine</b>
-                            <p>Set aside time each day for the course, and build your schedule around it. This will help you prioritize the course and reduce distractions. </p>
-                            <b>Make a study plan</b>
-                            <p>Create a comprehensive strategy that includes everything you need to cover, and how much time you have. Leave the last few days for revision. </p>
-                            <b>Take notes</b>
-                            <p>Taking notes helps you absorb information and gives you a written record to refer back to later. </p>
-                            <b>Ask questions</b>
-                            <p>Asking relevant questions shows that you are engaged and eager to learn. </p> ";
-        		    $txt1 = "Hi ".$register_details['fname'].",<br>";
-        			$txt1 .= "Order Success.<br/>Order details are below:<br>";
-        			$txt1 .= "Course Fees: ".$amount." ".$currency."<br>";
-        			$txt1 .= "Transaction ID : ".$transaction_id."<br>";
-        			$txt1 .= "Course : ".$course_details['title']."<br>";
-        			$txt1 .= "Course Link : <a target='_blank' href='".$urlcourse."courses-detail/".$fetchcourses['id']."/".$fetchcourses['slug']."'>Click Here</a><br>";
-        			$txt1 .= "Start Date & Slot : ".date('d-M-Y', strtotime($fetchdates['date'])).' '.date('h:i A', strtotime($fetchdates['starttime']))."<br>";
-        			$txt1 .= "End Date : ".date('d-M-Y', strtotime($fetchdateslast['date'])).' '.date('h:i A', strtotime($fetchdateslast['starttime']))."<br>";
-        			$txt1 .= "Location : ".$course_city['name'].' - '.$course_locations['location'].' ('.$course_locations['title'].')'."<br>";
-        			$txt1 .= "Location Map : <a target='_blank' href='".$course_locations['maplink']."'>Click Here</a><br>";
-        			$txt1 .= "Venue Notes : ".$course_slots['remarks']."<br>";
-        			$txt1 .= "".$tips."<br>";
-        			$txt1 .= "<br>Regards<br>Company";
+        		    $course_link = $baseUrl."/courses-detail/".$fetchcourses['id']."/".$fetchcourses['slug'];
+        		    $start_date = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])).' at '.date('g:i A', strtotime($fetchdates['starttime'])) : '—';
+        		    $end_date = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '—';
+        		    $location_text = ($course_city ? $course_city['name'].' — ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
+        		    $map_link = !empty($course_locations['maplink']) ? $course_locations['maplink'] : '';
+        		    $what_to_bring = !empty($course_slots['remarks']) ? trim($course_slots['remarks']) : 'Photo ID; notepad and pen; any materials advised in your course joining instructions.';
+        		    $txt1 = "<p>Hi ".htmlspecialchars($register_details['fname']).",</p>";
+        		    $txt1 .= "<p><strong>Your seat is confirmed.</strong> Thank you for your payment. Please find your booking and receipt details below.</p>";
+        		    $txt1 .= "<h3 style='margin-top:24px;'>Course details</h3>";
+        		    $txt1 .= "<ul style='line-height:1.6;'>";
+        		    $txt1 .= "<li><strong>Course:</strong> ".htmlspecialchars($course_details['title'])."</li>";
+        		    $txt1 .= "<li><strong>Start:</strong> ".$start_date."</li>";
+        		    $txt1 .= "<li><strong>End:</strong> ".$end_date."</li>";
+        		    $txt1 .= "<li><strong>Amount paid:</strong> ".htmlspecialchars($amount.' '.$currency)."</li>";
+        		    $txt1 .= "<li><strong>Transaction ID (receipt):</strong> ".htmlspecialchars($transaction_id)."</li>";
+        		    if ($course_link) $txt1 .= "<li><a href='".htmlspecialchars($course_link)."' target='_blank'>View course details</a></li>";
+        		    $txt1 .= "</ul>";
+        		    $txt1 .= "<h3 style='margin-top:24px;'>Location</h3>";
+        		    $txt1 .= "<p>".htmlspecialchars($location_text)."</p>";
+        		    if ($map_link) $txt1 .= "<p><a href='".htmlspecialchars($map_link)."' target='_blank'>View on map</a></p>";
+        		    if (!empty($course_slots['remarks'])) $txt1 .= "<p><strong>Venue notes:</strong> ".nl2br(htmlspecialchars($course_slots['remarks']))."</p>";
+        		    $txt1 .= "<h3 style='margin-top:24px;'>What to bring</h3>";
+        		    $txt1 .= "<p>".nl2br(htmlspecialchars($what_to_bring))."</p>";
+        		    $txt1 .= "<p><strong>Please keep this email for reference and bring the items listed above on the day.</strong></p>";
+        		    $txt1 .= "<h3 style='margin-top:24px;'>Contact details</h3>";
+        		    $txt1 .= "<p>If you have any questions or need to change your booking, please contact us:</p>";
+        		    $txt1 .= "<ul style='line-height:1.6;'>";
+        		    $txt1 .= "<li><strong>Email:</strong> <a href='mailto:".htmlspecialchars($impactem)."'>".htmlspecialchars($impactem)."</a></li>";
+        		    $txt1 .= "<li><strong>Phone:</strong> ".htmlspecialchars($impactph)."</li>";
+        		    $txt1 .= "</ul>";
+        		    $txt1 .= "<p style='margin-top:24px;'>Regards,<br>".htmlspecialchars($impacttitle)."</p>";
         		    $mail = new PHPMailer(true);
                     $email_failed = false;
                     try {
@@ -141,7 +148,7 @@ if(!empty($_GET['tid'])){
                         $mail->addAddress($email, $userdataname);  //Add a recipient
                         $mail->setFrom($impactem, $impacttitle);
                         $mail->addReplyTo($impactem, $impacttitle); 
-                        $mail->Subject = "Welcome to Company!!";
+                        $mail->Subject = "Seat confirmed – ".$course_details['title'];
                         $mail->Body    = $txt1;
                         if($mail->Send()) {
                             $_SESSION['orderprice'] = '';
@@ -150,38 +157,132 @@ if(!empty($_GET['tid'])){
                         } else {
                             $email_failed = true;
                         }
-                    } catch (phpmailerException $e) {
-                        $email_failed = true;
                     } catch (Exception $e) {
                         $email_failed = true;
                     }
                     $_SESSION['orderprice'] = '';
-                    $_SESSION['ordertitle'] = ''; ?>
-                    <h2 style="color: #327e00;">Success! Your payment has been received successfully.</h2>
-                    <?php if (!empty($email_failed)) { ?>
-                    <div class="payment-email-notice" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 14px 18px; margin: 16px 0; color: #856404;">
-                        <p style="margin: 0 0 8px 0; font-weight: bold;">We were not able to send your confirmation email.</p>
-                        <p style="margin: 0; font-size: 14px;">Your order and payment have been recorded. Please save your Transaction ID below and contact our support team if you need a copy of your confirmation or have any questions.</p>
+                    $_SESSION['ordertitle'] = '';
+                    $conf_start = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])).' at '.date('g:i A', strtotime($fetchdates['starttime'])) : '—';
+                    $conf_end = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '—';
+                    $conf_location = ($course_city ? $course_city['name'].' — ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
+                    ?>
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>Payment successful – Seat confirmed</title>
+    <?php include('../include/head_script.php'); ?>
+    <style>
+        .confirmation-hero { background: linear-gradient(135deg, #D8701A 0%, #c46214 100%); color: #fff; padding: 32px 24px; border-radius: 8px; text-align: center; margin-bottom: 28px; }
+        .confirmation-hero h1, .confirmation-hero p { color: #fff !important; }
+        .confirmation-hero h1 { margin: 0 0 8px 0; font-size: 28px; font-weight: 700; }
+        .confirmation-hero p { margin: 0; opacity: 0.95; font-size: 16px; }
+        .conf-summary { border: 1px solid #e8e8e8; border-radius: 8px; padding: 24px; margin-bottom: 24px; background: #fff; }
+        .conf-summary h3 { margin: 0 0 16px 0; font-size: 18px; color: #333; border-bottom: 2px solid #D8701A; padding-bottom: 8px; }
+        .conf-summary .row-item { margin-bottom: 10px; }
+        .conf-summary .row-item strong { display: inline-block; min-width: 140px; color: #555; }
+        .conf-notice { background: #fff5ee; border: 1px solid #D8701A; border-radius: 6px; padding: 16px 20px; margin-bottom: 24px; color: #333; }
+        .conf-notice.email-failed { background: #fff8e1; border: 1px solid #D8701A; color: #333; }
+        .btn-continue { display: inline-block; height: 32px; line-height: 32px; padding: 0 16px; background: #D8701A; color: #fff !important; text-decoration: none; border-radius: 6px; font-weight: 600; box-sizing: border-box; }
+        .btn-continue:hover { background: #c46214; color: #fff !important; }
+    </style>
+</head>
+<body class>
+    <div id="wrapper" class="clearfix">
+        <?php include('../include/head.php'); ?>
+        <div class="main-content">
+            <section class="inner-header divider layer-overlay overlay-theme-colored-7" data-bg-img="<?php echo $baseUrl; ?>/images/bg/bg1.jpg">
+                <div class="container pt-20 pb-20">
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h2 class="text-theme-colored2 font-36">Payment successful</h2>
+                                <ol class="breadcrumb text-left mt-10 white">
+                                    <li><a href="<?php echo $baseUrl; ?>/">Home</a></li>
+                                    <li class="active">Confirmation</li>
+                                </ol>
+                            </div>
+                        </div>
                     </div>
-                    <?php } ?>
-                    <h3>Payment Receipt:</h3>
-                    <p><strong>Full Name:</strong> <?php echo htmlspecialchars(explode('_', $fullname)[0]); ?></p>
-                    <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
-                    <p><strong>Transaction ID:</strong> <?php echo htmlspecialchars($transaction_id); ?></p>
-                    <p><strong>Amount:</strong> <?php echo htmlspecialchars($amount.' '.$currency); ?></p>
-                    <p><strong>Item Description:</strong> <?php echo htmlspecialchars($item_description); ?></p>
-                    <?php $sendurl = "../payment-success/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$registerid; ?>
-                    <p style="margin-top: 24px;">
-                        <a href="<?php echo htmlspecialchars($sendurl); ?>" style="display: inline-block; padding: 12px 24px; background: #327e00; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Continue</a>
-                    </p>    
+                </div>
+            </section>
+            <section class="divider">
+                <div class="container pt-50 pb-70">
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="confirmation-hero">
+                                <h1>Payment successful. Your seat is confirmed.</h1>
+                                <p>All booking and course details will be delivered to you via email.</p>
+                            </div>
+                            <?php if (empty($email_failed)) { ?>
+                            <div class="conf-notice">
+                                A confirmation email has been sent to <strong><?php echo htmlspecialchars($email); ?></strong> with your receipt, course details, venue information, <strong>what to bring on the day</strong>, and our contact details. Please check your inbox (and spam folder) and keep it for reference.
+                            </div>
+                            <?php } else { ?>
+                            <div class="conf-notice email-failed">
+                                <strong>We could not send your confirmation email.</strong> Your booking and payment are recorded. Please save your Transaction ID below and contact us for a copy: <?php echo htmlspecialchars($impactem); ?> or <?php echo htmlspecialchars($impactph); ?>.
+                            </div>
+                            <?php } ?>
+                            <div class="conf-summary">
+                                <h3>Course details</h3>
+                                <div class="row-item"><strong>Course</strong> <?php echo htmlspecialchars($course_details['title']); ?></div>
+                                <div class="row-item"><strong>Start</strong> <?php echo $conf_start; ?></div>
+                                <div class="row-item"><strong>End</strong> <?php echo $conf_end; ?></div>
+                                <div class="row-item"><strong>Location</strong> <?php echo htmlspecialchars($conf_location); ?></div>
+                            </div>
+                            <div class="conf-summary">
+                                <h3>Payment receipt</h3>
+                                <div class="row-item"><strong>Name</strong> <?php echo htmlspecialchars(trim($register_details['fname'].' '.$register_details['lname'])); ?></div>
+                                <div class="row-item"><strong>Email</strong> <?php echo htmlspecialchars($email); ?></div>
+                                <div class="row-item"><strong>Transaction ID</strong> <code><?php echo htmlspecialchars($transaction_id); ?></code></div>
+                                <div class="row-item"><strong>Amount</strong> <?php echo htmlspecialchars($amount.' '.$currency); ?></div>
+                            </div>
+                            <p class="text-center" style="margin-top: 28px;">
+                                <a href="<?php echo htmlspecialchars(rtrim($baseUrl, '/') . '/'); ?>" class="btn-continue">Back to website</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <?php include('../include/footer.php'); ?>
+    </div>
+    <?php include('../include/footer_script.php'); ?>
+</body>
+</html>
                 <?php }
         	} else {
         // 		$err = $conn->error;
-        	} ?>
-<?php }else{ ?>
-    <h1>Error! Your transaction has been failed.</h1>
-<?php } ?>
-
-</div>
+        	}
+} else { ?>
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>Transaction failed – Company Name</title>
+    <?php include('../include/head_script.php'); ?>
+</head>
+<body class>
+    <div id="wrapper" class="clearfix">
+        <div class="main-content">
+            <section class="divider">
+                <div class="container pt-50 pb-70">
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="alert alert-danger">
+                                <h2 class="mt-0">Transaction could not be confirmed</h2>
+                                <p>We could not find or confirm this payment. If you were charged, please contact us with your transaction details.</p>
+                                <p><a href="<?php echo $baseUrl; ?>/">Return to home</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <?php include('../include/footer_script.php'); ?>
 </body>
 </html>
+<?php } ?>

@@ -6,10 +6,11 @@
                 <div class="widget dark">
                     <img class="mt-5 mb-20" alt src="images/logo-white.png">
                     <p><?php echo $information['address']; ?></p>
+                    <h5 class="text-white font-weight-600 mt-20 mb-10">Contact us</h5>
                     <ul class="list-inline mt-5">
-                      <?php if(!empty($information['phone'])) { ?><li class="m-0 pl-10 pr-10"> <i class="fa fa-phone text-theme-colored2 mr-5"></i> <a class="text-gray" href="<?php echo $information['phone']; ?> "><?php echo $information['phone']; ?> </a> </li><?php } ?>
-                      <?php if(!empty($information['whatsapp'])) { ?><li class="m-0 pl-10 pr-10"> <i class="fa fa-whatsapp text-theme-colored2 mr-5"></i> <a class="text-gray" href="<?php echo $information['whatsapp']; ?> "><?php echo $information['whatsapp']; ?> </a> </li><?php } ?>
-                      <?php if(!empty($information['email'])) { ?> <li class="m-0 pl-10 pr-10"> <i class="fa fa-envelope-o text-theme-colored2 mr-5"></i> <a class="text-gray" href="mailto:<?php echo $information['email']; ?>"><?php echo $information['email']; ?></a> </li><?php } ?>
+                      <?php if(!empty($information['phone'])) { ?><li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-phone text-theme-colored2 mr-5"></i> <a class="text-gray" href="tel:<?php echo preg_replace('/\s+/', '', $information['phone']); ?>"><?php echo htmlspecialchars($information['phone']); ?></a> </li><?php } ?>
+                      <?php if(!empty($information['whatsapp'])) { ?><li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-whatsapp text-theme-colored2 mr-5"></i> <a class="text-gray" href="<?php echo htmlspecialchars($information['whatsapp']); ?>"><?php echo htmlspecialchars($information['whatsapp']); ?></a> </li><?php } ?>
+                      <?php if(!empty($information['email'])) { ?> <li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-envelope-o text-theme-colored2 mr-5"></i> <strong class="text-uppercase font-11 text-gray">Email us</strong><br><a class="text-theme-colored2 font-weight-600" href="mailto:<?php echo htmlspecialchars($information['email']); ?>"><?php echo htmlspecialchars($information['email']); ?></a> </li><?php } ?>
                     </ul>
                     <ul class="styled-icons icon-sm icon-bordered icon-circled clearfix mt-10">
                         <?php if(!empty($information['facebook'])) { ?><li><a href="<?php echo $information['facebook']; ?>" target="_blank"><i class="fa fa-facebook text-theme-colored2"></i></a></li><?php } ?>
@@ -26,9 +27,7 @@
                     <ul class="angle-double-right list-border">
                         <li><a href="index.php">Home Page</a></li>
                         <li><a href="about.php">About Us</a></li>
-                        <li><a href="#home">Courses</a></li>
                         <li><a href="contact.php">Contact</a></li>
-                        <li><a href="javascript:" data-toggle="modal" data-target="#LoginModal">Student Login</a></li>
                     </ul>
                 </div>
             </div>
@@ -36,7 +35,6 @@
                 <div class="widget dark">
                     <h4 class="widget-title line-bottom-theme-colored-2">Policies</h4>
                     <ul class="angle-double-right list-border">
-                        <li><a href="clients.php">Clients</a></li>
                         <li><a href="terms-conditions.php">Booking Terms and Conditions</a></li>
                         <li><a href="privacy-policy.php" >Privacy Policy</a></li>
                         <li><a href="media-policy.php">Social Media Policy</a></li>
