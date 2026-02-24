@@ -42,7 +42,7 @@
     display: inline;
 }
 .menuzord-menu>li {
-padding:15px 0 !important;
+    margin-left: 4px !important;
 }
 .mandatory, .footnote {
 color: #f00;
