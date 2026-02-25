@@ -8,13 +8,14 @@ require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
 $emailaccount = $conn->query("SELECT * FROM emails WHERE type='support'")->fetch_assoc();
-$impacttitle = $emailaccount['title1'];
-$impactph = $emailaccount['phone'];
-$impactem = $emailaccount['email1']; 
-$course_slots = $conn->query("SELECT * FROM course_slots WHERE id='".$_GET['slotid']."'")->fetch_assoc();
+$impacttitle = $emailaccount ? $emailaccount['title1'] : '';
+$impactph = $emailaccount ? $emailaccount['phone'] : '';
+$impactem = $emailaccount ? $emailaccount['email1'] : '';
+$slotid_get = isset($_GET['slotid']) ? mysqli_real_escape_string($conn, $_GET['slotid']) : '';
+$course_slots = $slotid_get !== '' ? $conn->query("SELECT * FROM course_slots WHERE id='".$slotid_get."'")->fetch_assoc() : null;
 $course_details = !empty($_GET['courseid']) ? $conn->query("SELECT * FROM courses WHERE id='".mysqli_real_escape_string($conn, $_GET['courseid'])."'")->fetch_assoc() : null;
 $sessionemail = ''; $backbutn = '';
-if(isset($_SESSION['client_emaill']) && $course_slots['type'] == 'private') {
+if(isset($_SESSION['client_emaill']) && $course_slots && $course_slots['type'] == 'private') {
     $sessionemail = $_SESSION['client_emaill'];
     $backbutn = '1';
 }
@@ -22,9 +23,10 @@ if(isset($_SESSION['client_emaill']) && $course_slots['type'] == 'private') {
 function genRandomString() {
     $length = 5;
     $characters = '023456789abcdefghijkmnopqrstuvwxyz';
+    $max = strlen($characters) - 1;
     $string = '';
     for ($p = 0; $p < $length; $p++) {
-        $string .= $characters[mt_rand(0, strlen($characters))];
+        $string .= $characters[mt_rand(0, $max)];
     }
     return $string;
 }
@@ -43,6 +45,13 @@ $loggedid = null;
 
 // Process POST before any output so redirect can work (MVP: Full Name, Email, Phone, Course only)
 if (isset($_POST['submit'])) {
+    $courseid = isset($_GET['courseid']) ? $_GET['courseid'] : '';
+    $locid = isset($_GET['locid']) ? $_GET['locid'] : '';
+    $slotid = isset($_GET['slotid']) ? $_GET['slotid'] : '';
+    $cityid = isset($_GET['cityid']) ? $_GET['cityid'] : '';
+    if ($courseid === '' || $locid === '' || $slotid === '' || $cityid === '') {
+        $err = 'Invalid registration link. Missing course/slot parameters. Please use the link from the course page.';
+    } else {
     $fullname = trim(mysqli_real_escape_string($conn, $_POST['fullname']));
     $parts = explode(' ', $fullname, 2);
     $fname = $parts[0];
@@ -50,14 +59,10 @@ if (isset($_POST['submit'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
     $generated_code = genRandomString();
-    $check_random_string_row = $conn->query('SELECT generated_code FROM registration WHERE (generated_code="'.$generated_code.'")')->fetch_assoc();
+    $check_random_string_row = $conn->query('SELECT generated_code FROM registration WHERE (generated_code="'.mysqli_real_escape_string($conn, $generated_code).'")')->fetch_assoc();
     if ($check_random_string_row && $generated_code == $check_random_string_row['generated_code']) {
         $generated_code = genRandomString();
     }
-    $courseid = $_GET['courseid'];
-    $locid = $_GET['locid'];
-    $slotid = $_GET['slotid'];
-    $cityid = $_GET['cityid'];
     $title = $position = $company = $postal_address = $special_requirements = $food_requirements = $instruction = '';
     $workplace_contact = $workplace_email = $emergency_contact = $emergency_phone = '';
     $industry_type = $hsr_or_not = '0';
@@ -74,6 +79,7 @@ if (isset($_POST['submit'])) {
         exit;
     } else {
         $err = $conn->error;
+    }
     }
 }
 
