@@ -23,6 +23,113 @@ $impacttitle = $emailaccount['title1'];
 $impactph = $emailaccount['phone'];
 $impactem = $emailaccount['email1'];
 
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'];
+$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+$basePath = ($scriptDir === '/coursehub' || strpos($scriptDir, '/coursehub/') === 0) ? '/coursehub' : '';
+$baseUrl = $protocol . '://' . $host . $basePath;
+$payPageBase = rtrim($baseUrl, '/') . '/pay';
+
+// Return from Stripe after Pay Now: check payment status and either show completed (redirect to self with tid) or not completed + Try again
+$payment_intent_id = isset($_GET['payment_intent']) ? trim($_GET['payment_intent']) : '';
+if (!empty($payment_intent_id) && !empty($_GET['customer_id'])) {
+    require_once __DIR__ . '/vendor/autoload.php';
+    require_once 'config.php';
+    \Stripe\Stripe::setApiKey(STRIPE_SECRET_API_KEY);
+    $customer_id = trim($_GET['customer_id']);
+    $courseid = isset($_GET['courseid']) ? $_GET['courseid'] : '';
+    $locid = isset($_GET['locid']) ? $_GET['locid'] : '';
+    $slotid = isset($_GET['slotid']) ? $_GET['slotid'] : '';
+    $cityid = isset($_GET['cityid']) ? $_GET['cityid'] : '';
+    $registerid = isset($_GET['registerid']) ? $_GET['registerid'] : '';
+    $redirect_status = isset($_GET['redirect_status']) ? $_GET['redirect_status'] : '';
+    try {
+        $paymentIntent = \Stripe\PaymentIntent::retrieve($payment_intent_id);
+        $payment = $paymentIntent;
+    } catch (Exception $e) {
+        $payment = null;
+    }
+    if ($payment && $payment->status === 'succeeded') {
+        // Save to stripe_payment then redirect to self with tid so success page loads
+        $transaction_id = $payment->id;
+        $amount = ($payment->amount / 100);
+        $currency = $payment->currency;
+        $item_description = isset($payment->description) ? $payment->description : '';
+        $payment_status = $payment->status;
+        $fullname = $email = '';
+        try {
+            $customerData = \Stripe\Customer::retrieve($customer_id);
+            if (!empty($customerData->name)) {
+                $fullname = $customerData->name;
+            }
+            if (!empty($customerData->email)) {
+                $email = $customerData->email;
+            }
+        } catch (Exception $e) {}
+        $db = new DB;
+        $db->query("SELECT id FROM `stripe_payment` WHERE transaction_id=:transaction_id");
+        $db->bind(":transaction_id", $transaction_id);
+        $row = $db->result();
+        if (empty($row)) {
+            $db->query("INSERT INTO `stripe_payment` (`fullname`, `email`, `item_description`, `currency`, `amount`, `transaction_id`, `payment_status`) VALUES (:fullname, :email, :item_description, :currency, :amount, :transaction_id, :payment_status)");
+            $db->bind(":fullname", $fullname);
+            $db->bind(":email", $email);
+            $db->bind(":item_description", $item_description);
+            $db->bind(":currency", $currency);
+            $db->bind(":amount", $amount);
+            $db->bind(":transaction_id", $transaction_id);
+            $db->bind(":payment_status", $payment_status);
+            $db->execute();
+        }
+        $db->close();
+        header("Location: " . $payPageBase . "/status.php?tid=" . urlencode($transaction_id));
+        exit;
+    }
+    // Payment not completed: show Try again page
+    $payPageUrl = $payPageBase . '/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid . '/' . $registerid;
+    ?>
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>Payment not completed – Company Name</title>
+    <?php include('../include/head_script.php'); ?>
+    <style>
+        .status-panel { max-width: 560px; margin: 0 auto; padding: 32px 24px; text-align: center; }
+        .status-panel h2 { margin-top: 0; color: #333; }
+        .btn-try-again { display: inline-block; margin-top: 16px; padding: 0 24px; height: 40px; line-height: 40px; background: #D8701A; color: #fff !important; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .btn-try-again:hover { background: #c46214; color: #fff !important; }
+    </style>
+</head>
+<body class>
+    <div id="wrapper" class="clearfix">
+        <?php include('../include/head.php'); ?>
+        <div class="main-content">
+            <section class="divider">
+                <div class="container pt-50 pb-70">
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="panel panel-default status-panel">
+                                <div class="panel-body">
+                                    <h2>Payment not completed</h2>
+                                    <p>Your payment was not completed. Please try again to confirm your seat.</p>
+                                    <a href="<?php echo htmlspecialchars($payPageUrl); ?>" class="btn btn-primary btn-try-again">Try again</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <?php include('../include/footer_script.php'); ?>
+</body>
+</html>
+<?php
+    exit;
+}
+
 // If transaction ID is not empty 
 if(!empty($_GET['tid'])){
     $transaction_id  = $_GET['tid'];
@@ -44,12 +151,6 @@ if(!empty($_GET['tid'])){
     header("Location: index.php"); 
     exit(); 
 }
-
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'];
-$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
-$basePath = ($scriptDir === '/coursehub' || strpos($scriptDir, '/coursehub/') === 0) ? '/coursehub' : '';
-$baseUrl = $protocol . '://' . $host . $basePath;
 ?>
 <?php if(!empty($row)){
             $print = explode('_', $fullname);

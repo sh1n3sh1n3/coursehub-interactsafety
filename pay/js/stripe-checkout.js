@@ -101,11 +101,19 @@ async function handlePaymentSubmit(e) {
         body: JSON.stringify({ payment_intent_id: payment_intent_id, fullname: fullname, email: email }),
     }).then((r) => r.json());
     
+    // Redirect to status page after payment; Stripe will append payment_intent, payment_intent_client_secret, redirect_status
+    var statusUrl = (payBase ? payBase.replace(/\/+$/, '') + '/' : '') + 'status.php';
+    statusUrl += '?customer_id=' + encodeURIComponent(customer_id);
+    statusUrl += '&courseid=' + encodeURIComponent(courseid);
+    statusUrl += '&locid=' + encodeURIComponent(locid);
+    statusUrl += '&slotid=' + encodeURIComponent(slotid);
+    statusUrl += '&cityid=' + encodeURIComponent(cityid);
+    statusUrl += '&registerid=' + encodeURIComponent(registerid);
+
     const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-            // Make sure to change this to your payment completion page
-            return_url: window.location.href+'?customer_id='+customer_id,
+            return_url: statusUrl,
         },
     });
     
@@ -211,11 +219,9 @@ function showMessage(messageText) {
 function setLoading(isLoading) {
     if (isLoading) {
         submitButton.disabled = true;
-        spinner.classList.remove("hidden");
         submitText.textContent = "Processing...";
     } else {
         submitButton.disabled = false;
-        spinner.classList.add("hidden");
         submitText.textContent = "Pay Now";
     }
 }

@@ -31,6 +31,34 @@ function genRandomString() {
     return $string;
 }
 
+/** Generate 6-digit OTP and optionally send by email. Returns OTP. On local, skips sending. */
+function sendRegistrationOtp($conn, $email, $name, $emailaccount) {
+    $otp = (string) rand(100000, 999999);
+    if ($emailaccount && $emailaccount['status'] == '1') {
+        try {
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->SMTPDebug = 0;
+            $mail->Host       = $emailaccount['host'];
+            $mail->Port       = $emailaccount['port'];
+            $mail->SMTPSecure = 'tls';
+            $mail->SMTPAuth   = true;
+            $mail->IsHTML(true);
+            $mail->Username   = $emailaccount['email'];
+            $mail->Password   = $emailaccount['password'];
+            $mail->addAddress($email, $name);
+            $mail->setFrom($emailaccount['email1'], $emailaccount['title1']);
+            $mail->addReplyTo($emailaccount['email1'], $emailaccount['title1']);
+            $mail->Subject = 'Your verification code - Company Name';
+            $mail->Body    = 'Dear ' . htmlspecialchars($name) . ',<br><br>Your verification code is: <strong>' . $otp . '</strong><br><br>Regards,<br>Company Name';
+            $mail->send();
+        } catch (Exception $e) {
+            // leave $otp set; caller can still use it for local fallback
+        }
+    }
+    return $otp;
+}
+
 // Build base URL for redirects (same logic as head_script.php)
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'];
@@ -73,9 +101,14 @@ if (isset($_POST['submit'])) {
     $last_id = mysqli_insert_id($conn);
     if ($insert) {
         $_SESSION['pin_user'] = $last_id;
-        $msg = 'Data Added Successfully. Please complete payment to confirm your seat.';
-        // No confirmation email here: seat, confirmation email and receipt are sent only after payment success (see pay/status.php)
-        header("Location: ".$redirectBaseUrl."/pay/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$last_id);
+        $otp = sendRegistrationOtp($conn, $email, trim($fullname), $emailaccount);
+        $_SESSION['registration_otp'] = $otp;
+        if ($isLocalhost) {
+            $_SESSION['registration_otp_verified'] = true;
+        }
+        $msg = $isLocalhost ? 'Details saved. Please complete the rest of the form below.' : 'A verification code has been sent to your email. Enter it below to continue.';
+        $redirectUrl = $redirectBaseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid;
+        header("Location: " . $redirectUrl);
         exit;
     } else {
         $err = $conn->error;
@@ -98,11 +131,65 @@ if (isset($_POST['update'])) {
     $sqlquery = "UPDATE registration SET fname = '".$fname."', lname = '".$lname."', email='".$email."', workplace_phone = '".$phone."' WHERE id=".$loggedid;
     $update = $conn->query($sqlquery);
     if ($update) {
-        $msgup = 'Data Added Successfully.';
-        header("Location: ".$redirectBaseUrl."/pay/".$courseid."/".$locid."/".$slotid."/".$cityid."/".$loggedid);
+        $otp = sendRegistrationOtp($conn, $email, trim($fullname), $emailaccount);
+        $_SESSION['registration_otp'] = $otp;
+        if ($isLocalhost) {
+            $_SESSION['registration_otp_verified'] = true;
+        }
+        $msgup = $isLocalhost ? 'Details updated. Please complete the rest of the form below.' : 'A new verification code has been sent to your email.';
+        $redirectUrl = $redirectBaseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid;
+        header("Location: " . $redirectUrl);
         exit;
     } else {
         $errup = $conn->error;
+    }
+}
+
+// Verify OTP (production): compare and set session, then redirect to show full form
+if (isset($_POST['verify_otp']) && isset($_SESSION['pin_user'])) {
+    $courseid = isset($_GET['courseid']) ? $_GET['courseid'] : '';
+    $locid = isset($_GET['locid']) ? $_GET['locid'] : '';
+    $slotid = isset($_GET['slotid']) ? $_GET['slotid'] : '';
+    $cityid = isset($_GET['cityid']) ? $_GET['cityid'] : '';
+    $entered = isset($_POST['otp']) ? trim($_POST['otp']) : '';
+    if (isset($_SESSION['registration_otp']) && $entered === (string)$_SESSION['registration_otp']) {
+        $_SESSION['registration_otp_verified'] = true;
+        unset($_SESSION['registration_otp']);
+        $msg = 'Email verified. Please complete the rest of the form below.';
+    } else {
+        $err = 'Invalid or expired code. Please try again or request a new code.';
+    }
+    $redirectUrl = $redirectBaseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid;
+    header("Location: " . $redirectUrl);
+    exit;
+}
+
+// Full enrollment form submit: update registration, then redirect to payment page
+if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
+    $rid = (int)$_SESSION['pin_user'];
+    $title = mysqli_real_escape_string($conn, $_POST['title'] ?? '');
+    $position = mysqli_real_escape_string($conn, $_POST['position'] ?? '');
+    $company = mysqli_real_escape_string($conn, $_POST['company'] ?? '');
+    $postal_address = mysqli_real_escape_string($conn, $_POST['postal_address'] ?? '');
+    $industry_type = isset($_POST['industry_type']) ? (int)$_POST['industry_type'] : 0;
+    $hsr_or_not = isset($_POST['hsr_or_not']) ? mysqli_real_escape_string($conn, $_POST['hsr_or_not']) : '0';
+    $workplace_contact = mysqli_real_escape_string($conn, $_POST['workplace_contact'] ?? '');
+    $workplace_email = mysqli_real_escape_string($conn, $_POST['workplace_email'] ?? '');
+    $emergency_contact = mysqli_real_escape_string($conn, $_POST['emergency_contact'] ?? '');
+    $emergency_phone = mysqli_real_escape_string($conn, $_POST['emergency_phone'] ?? '');
+    $special_requirements = mysqli_real_escape_string($conn, $_POST['special_requirements'] ?? '');
+    $food_requirements = mysqli_real_escape_string($conn, $_POST['food_requirements'] ?? '');
+    $instruction = mysqli_real_escape_string($conn, $_POST['instruction'] ?? '');
+    $uq = "UPDATE registration SET title='".$title."', position='".$position."', company='".$company."', postal_address='".$postal_address."', industry_type='".$industry_type."', hsr_or_not='".$hsr_or_not."', workplace_contact='".$workplace_contact."', workplace_email='".$workplace_email."', emergency_contact='".$emergency_contact."', emergency_phone='".$emergency_phone."', special_requirements='".$special_requirements."', food_requirements='".$food_requirements."', instruction='".$instruction."' WHERE id=".$rid;
+    if ($conn->query($uq)) {
+        $reg = $conn->query("SELECT courseid, locid, slotid, cityid FROM registration WHERE id=".$rid)->fetch_assoc();
+        if ($reg) {
+            header("Location: ".$redirectBaseUrl."/pay/".$reg['courseid']."/".$reg['locid']."/".$reg['slotid']."/".$reg['cityid']."/".$rid);
+            exit;
+        }
+        $msg = 'Enrollment saved. <a href="'.$redirectBaseUrl.'/pay/'.$_GET['courseid'].'/'.$_GET['locid'].'/'.$_GET['slotid'].'/'.$_GET['cityid'].'/'.$rid.'">Go to payment</a>.';
+    } else {
+        $err = $conn->error;
     }
 }
 ?>
@@ -183,47 +270,163 @@ if (isset($_POST['update'])) {
     							</div>
     						  ";
     						}
-    						if(isset($_SESSION['pin_user']) && !empty($_SESSION['pin_user']) && $_SESSION['pin_user'] != '') {
-    						    $fetchRegis = $conn->query("SELECT * FROM registration WHERE id= '".$_SESSION['pin_user']."'")->fetch_assoc();
-						    ?>
-                        <form method="post" enctype="multipart/form-data" autocomplete="off">
-                            <input type="hidden" name="loggedid" value="<?php echo $fetchRegis['id']; ?>"/>
-                            <div class="panel panel-default">
-                                <div class="panel-heading">Enrolment (MVP)</div>
-                                <div class="panel-body">
-                                    <div class="form-group row">
-                                        <label class="control-label col-sm-3" for="fullname"><span class="mandatory">*</span>Full Name:</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" class="form-control" name="fullname" id="fullname" required placeholder="Enter Full Name" value="<?php echo htmlspecialchars(trim($fetchRegis['fname'].' '.$fetchRegis['lname'])); ?>">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label class="control-label col-sm-3" for="email"><span class="mandatory">*</span>Email:</label>
-                                        <div class="col-sm-9">
-                                            <input type="email" class="form-control" name="email" id="email" required placeholder="Enter Email (used for certificate)" value="<?php echo htmlspecialchars($fetchRegis['email']); ?>">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label class="control-label col-sm-3" for="phone">Phone:</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Phone" value="<?php echo htmlspecialchars($fetchRegis['workplace_phone']); ?>">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label class="control-label col-sm-3">Course:</label>
-                                        <div class="col-sm-9">
-                                            <p class="form-control-static"><?php echo $course_details ? htmlspecialchars($course_details['title']) : '—'; ?></p>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <div class="col-sm-12">
-                                            <button class="btn btn-primary btn-sm" type="submit" name="update">Continue</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                             </form>
-                             <?php } else { ?>
+    						if(!empty($msg) || !empty($msgup)){
+    						  echo "<div class='alert alert-success alert-dismissible'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>".($msg ? $msg : $msgup)."</div>";
+    						}
+    						$showOtpStep = isset($_SESSION['pin_user']) && $_SESSION['pin_user'] && !$isLocalhost && empty($_SESSION['registration_otp_verified']);
+    						$showFullForm = isset($_SESSION['pin_user']) && $_SESSION['pin_user'] && ($isLocalhost || !empty($_SESSION['registration_otp_verified']));
+    						if ($showFullForm) {
+    						    $fetchRegis = $conn->query("SELECT * FROM registration WHERE id='".$_SESSION['pin_user']."'")->fetch_assoc();
+    						    $industry_types = $conn->query("SELECT * FROM industry_type WHERE status='1' ORDER BY title ASC");
+    						?>
+    						<div class="panel panel-default mb-20">
+    						    <div class="panel-heading">Your details</div>
+    						    <div class="panel-body">
+    						        <p><strong>Name:</strong> <?php echo htmlspecialchars(trim($fetchRegis['fname'].' '.$fetchRegis['lname'])); ?> &nbsp;|&nbsp; <strong>Email:</strong> <?php echo htmlspecialchars($fetchRegis['email']); ?> &nbsp;|&nbsp; <strong>Course:</strong> <?php echo $course_details ? htmlspecialchars($course_details['title']) : '—'; ?></p>
+    						    </div>
+    						</div>
+    						<form method="post" enctype="multipart/form-data" autocomplete="off">
+    						    <div class="panel panel-default">
+    						        <div class="panel-heading">Complete your enrolment</div>
+    						        <div class="panel-body">
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Title:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="title" placeholder="e.g. Mr, Ms" value="<?php echo htmlspecialchars($fetchRegis['title']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Position:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="position" value="<?php echo htmlspecialchars($fetchRegis['position']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Company:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="company" value="<?php echo htmlspecialchars($fetchRegis['company']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Postal address:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="postal_address" value="<?php echo htmlspecialchars($fetchRegis['postal_address']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Industry type:</label>
+    						                <div class="col-sm-9">
+    						                    <select class="form-control" name="industry_type"><option value="0">— Select —</option><?php while ($it = $industry_types->fetch_assoc()) { echo '<option value="'.$it['id'].'"'.($fetchRegis['industry_type']==$it['id']?' selected':'').'>'.htmlspecialchars($it['title']).'</option>'; } ?></select>
+    						                </div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">HSR / role:</label>
+    						                <div class="col-sm-9">
+    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="1" <?php if ($fetchRegis['hsr_or_not']=='1') echo 'checked'; ?>> HSR</label>
+    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="2" <?php if ($fetchRegis['hsr_or_not']=='2') echo 'checked'; ?>> Deputy HSR</label>
+    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="3" <?php if ($fetchRegis['hsr_or_not']=='3') echo 'checked'; ?>> Manager/Supervisor</label>
+    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="4" <?php if ($fetchRegis['hsr_or_not']=='4') echo 'checked'; ?>> HSC member</label>
+    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="5" <?php if ($fetchRegis['hsr_or_not']=='5') echo 'checked'; ?>> Other</label>
+    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="0" <?php if (empty($fetchRegis['hsr_or_not']) || $fetchRegis['hsr_or_not']=='0') echo 'checked'; ?>> —</label>
+    						                </div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Workplace contact:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="workplace_contact" value="<?php echo htmlspecialchars($fetchRegis['workplace_contact']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Workplace email:</label>
+    						                <div class="col-sm-9"><input type="email" class="form-control" name="workplace_email" value="<?php echo htmlspecialchars($fetchRegis['workplace_email']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Emergency contact:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="emergency_contact" value="<?php echo htmlspecialchars($fetchRegis['emergency_contact']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Emergency phone:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="emergency_phone" value="<?php echo htmlspecialchars($fetchRegis['emergency_phone']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Special / learning requirements:</label>
+    						                <div class="col-sm-9"><textarea class="form-control" name="special_requirements" rows="2"><?php echo htmlspecialchars($fetchRegis['special_requirements']); ?></textarea></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Food allergies:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="food_requirements" value="<?php echo htmlspecialchars($fetchRegis['food_requirements']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Instruction / notes:</label>
+    						                <div class="col-sm-9"><textarea class="form-control" name="instruction" rows="2"><?php echo htmlspecialchars($fetchRegis['instruction']); ?></textarea></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <div class="col-sm-12"><button class="btn btn-primary btn-sm" type="submit" name="submit_full_btn" value="1">Complete enrolment</button></div>
+    						            </div>
+    						        </div>
+    						    </div>
+    						</form>
+    						<?php } elseif ($showOtpStep) {
+    						    $fetchRegis = $conn->query("SELECT * FROM registration WHERE id='".$_SESSION['pin_user']."'")->fetch_assoc();
+    						?>
+    						<div class="panel panel-default mb-20">
+    						    <div class="panel-heading">Verify your email</div>
+    						    <div class="panel-body">
+    						        <p>We sent a 6-digit code to <strong><?php echo htmlspecialchars($fetchRegis['email']); ?></strong>. Enter it below.</p>
+    						        <form method="post" class="form-inline">
+    						            <input type="text" name="otp" maxlength="6" pattern="[0-9]{6}" placeholder="000000" class="form-control" style="width:120px" required>
+    						            <button type="submit" name="verify_otp" value="1" class="btn btn-primary btn-sm">Verify</button>
+    						        </form>
+    						    </div>
+    						</div>
+    						<form method="post" enctype="multipart/form-data" autocomplete="off">
+    						    <input type="hidden" name="loggedid" value="<?php echo $fetchRegis['id']; ?>"/>
+    						    <div class="panel panel-default">
+    						        <div class="panel-heading">Enrolment (MVP)</div>
+    						        <div class="panel-body">
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Full Name:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="fullname" required value="<?php echo htmlspecialchars(trim($fetchRegis['fname'].' '.$fetchRegis['lname'])); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Email:</label>
+    						                <div class="col-sm-9"><input type="email" class="form-control" name="email" required value="<?php echo htmlspecialchars($fetchRegis['email']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Phone:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="phone" value="<?php echo htmlspecialchars($fetchRegis['workplace_phone']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Course:</label>
+    						                <div class="col-sm-9"><p class="form-control-static"><?php echo $course_details ? htmlspecialchars($course_details['title']) : '—'; ?></p></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <div class="col-sm-12"><button class="btn btn-primary btn-sm" type="submit" name="update">Resend code &amp; Continue</button></div>
+    						            </div>
+    						        </div>
+    						    </div>
+    						</form>
+    						<?php } elseif (isset($_SESSION['pin_user']) && $_SESSION['pin_user']) {
+    						    $fetchRegis = $conn->query("SELECT * FROM registration WHERE id='".$_SESSION['pin_user']."'")->fetch_assoc();
+    						?>
+    						<form method="post" enctype="multipart/form-data" autocomplete="off">
+    						    <input type="hidden" name="loggedid" value="<?php echo $fetchRegis['id']; ?>"/>
+    						    <div class="panel panel-default">
+    						        <div class="panel-heading">Enrolment (MVP)</div>
+    						        <div class="panel-body">
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Full Name:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="fullname" required value="<?php echo htmlspecialchars(trim($fetchRegis['fname'].' '.$fetchRegis['lname'])); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Email:</label>
+    						                <div class="col-sm-9"><input type="email" class="form-control" name="email" required value="<?php echo htmlspecialchars($fetchRegis['email']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Phone:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="phone" value="<?php echo htmlspecialchars($fetchRegis['workplace_phone']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Course:</label>
+    						                <div class="col-sm-9"><p class="form-control-static"><?php echo $course_details ? htmlspecialchars($course_details['title']) : '—'; ?></p></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <div class="col-sm-12"><button class="btn btn-primary btn-sm" type="submit" name="update">Continue</button></div>
+    						            </div>
+    						        </div>
+    						    </div>
+    						</form>
+    						<?php } else { ?>
                              <p id="formerr" style="display:none; color:#e83e8c"></p>
                              <form method="post" enctype="multipart/form-data" autocomplete="off">
                             <div class="panel panel-default">

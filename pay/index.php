@@ -60,19 +60,17 @@ $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $sloti
         .form-control { height:30px !important; }
         #stripe-payment-form .form-control { height: auto !important; padding: 8px 12px; }
         .hidden { display: none !important; }
-        #payment_processing { text-align: center; padding: 20px; }
-        #payment-reinitiate { margin-top: 15px; }
+        #payment_processing { text-align: center; padding: 20px;}
         .loader { display: inline-block; width: 20px; height: 20px; border: 2px solid #ccc; border-top-color: #333; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
         /* Enrollment process buttons: 40px primary, 32px secondary, padding 16px/12px, border-radius 6px */
         /* Enrollment workflow buttons: orange, 32px height */
-        #submit-button { position: relative; min-width: 120px; height: 32px; line-height: 32px; padding: 0 16px; border-radius: 6px; box-sizing: border-box; background: #D8701A !important; border: none !important; }
+        #submit-button { position: relative; min-width: 120px; height: 32px; line-height: 32px; padding: 0 16px; border-radius: 6px; box-sizing: border-box; background: #D8701A !important; border: none !important; display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
         #submit-button:hover:not(:disabled) { background: #c46214 !important; }
         .main-content .btn-primary.btn-sm { height: 32px; line-height: 32px; padding: 0 16px; border-radius: 6px; border: none; box-sizing: border-box; background: #D8701A !important; color: #fff !important; }
         .main-content .btn-primary.btn-sm:hover { background: #c46214 !important; color: #fff !important; }
         .main-content .btn-default.btn-sm { height: 32px; line-height: 32px; padding: 0 12px; border-radius: 6px; box-sizing: border-box; background: #fff !important; color: #333 !important; border: 1px solid #ddd !important; }
         .main-content .btn-default.btn-sm:hover { background: #f5f5f5 !important; color: #333 !important; border-color: #ccc !important; }
-        #submit-button .btn-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
         #submit-button:disabled { cursor: not-allowed; opacity: 0.9; }
         #payment-details-body { padding-bottom: 0; }
         #stripe-payment-form .form-group.mt-20 { margin-bottom: 0; margin-top: 15px; }
@@ -252,9 +250,6 @@ $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $sloti
                                     <div id="payment_processing" class="hidden">
                                         <span class="loader"></span> <strong>Please wait!</strong> Your payment is processing...
                                     </div>
-                                    <div id="payment-reinitiate" class="hidden">
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="reinitiateStripe()">Try again</button>
-                                    </div>
                                 </div>
                             </div>
                             <div class="mt-20 mb-20">
@@ -264,9 +259,11 @@ $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $sloti
                                 <div class="btn-group-inline" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
                                     <a href="<?php echo htmlspecialchars($backUrl); ?>" class="btn btn-default btn-sm">Back</a>
                                     <button type="submit" id="submit-button" form="stripe-payment-form" class="btn btn-primary btn-sm" disabled>
-                                        <span class="btn-spinner hidden" id="spinner" aria-hidden="true"></span>
                                         <span id="submit-text">Pay Now</span>
                                     </button>
+                                    <span id="payment-reinitiate" class="hidden" style="display:inline-block;">
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="reinitiateStripe()">Try again</button>
+                                    </span>
                                 </div>
                             </div>
                             <?php } ?>

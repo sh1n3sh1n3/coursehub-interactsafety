@@ -26,13 +26,23 @@ if(empty($error)) {
         $transaction_id = $payment->id; 
         $amount = ($payment->amount/100); 
         $currency = $payment->currency; 
-        $item_description = $payment->description; 
+        $item_description = isset($payment->description) ? $payment->description : ''; 
         $payment_status = $payment->status; 
             
-        $fulname = $email = ''; 
+        $fullname = $email = ''; 
+        $courseid = $locid = $slotid = $cityid = $registerid = '';
         if(!empty($customerData)){
             if(!empty($customerData->name)) {
                 $fullname = $customerData->name;
+                // Customer name is stored as "Name_courseid_locid_slotid_cityid_registerid" from create_customer
+                $parts = explode('_', $customerData->name);
+                if (count($parts) >= 6) {
+                    $courseid   = $parts[1];
+                    $locid      = $parts[2];
+                    $slotid     = $parts[3];
+                    $cityid     = $parts[4];
+                    $registerid = $parts[5];
+                }
             }
             if(!empty($customerData->email)) {
                 $email = $customerData->email;
