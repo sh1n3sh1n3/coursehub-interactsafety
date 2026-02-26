@@ -29,8 +29,8 @@ include("includes/conn.php");?>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin || Company Name </title>
-	<link rel="shortcut icon" type="image/x-icon" href="../assets/images/favicon.ico">
+    <title>Admin | Interact Safety</title>
+	<link rel="shortcut icon" type="image/x-icon" href="../images/logo/favicon.ico">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
     <link href="css/animate.css" rel="stylesheet">
@@ -58,7 +58,7 @@ include("includes/conn.php");?>
 <body class="gray-bg">
     <div class="passwordBox animated fadeInDown">
         <div>
-		<div><center><img src="../images/logo-white.png" style="width:100%" class="logo-name text-center"/></center></div>
+		<div><center><img src="../images/logo/logo.png" style="width:100%" class="logo-name text-center"/></center></div>
             <div class="text-white text-center mb-5 font-weight-600 brandname" style="">
 				<span class="t1">Welcome<sup>&#174;</sup> Admin</span><br />
 			</div>

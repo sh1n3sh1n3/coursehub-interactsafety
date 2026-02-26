@@ -4,7 +4,7 @@
         </div>
             <ul class="nav navbar-top-links navbar-right">
                 <li style="padding: 20px">
-                    <span class="m-r-sm text-muted welcome-message">Welcome to Company Name .</span>
+                    <span class="m-r-sm text-muted welcome-message">Welcome to Interact Safety.</span>
                 </li>
                 <li>
                     <a href="logout.php">

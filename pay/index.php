@@ -51,9 +51,9 @@ $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $sloti
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="description" content="<?php echo htmlspecialchars($course_details['title']); ?>" />
     <meta name="keywords" content="<?php echo htmlspecialchars($course_details['title']); ?>" />
-    <meta name="author" content="Company Name" />
+    <meta name="author" content="Interact Safety" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title>Payment - Company Name</title>
+    <title>Payment - Interact Safety</title>
     <?php include('../include/head_script.php'); ?>
     <style>
         html { scroll-behavior: smooth; }

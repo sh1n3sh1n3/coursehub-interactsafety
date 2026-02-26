@@ -19,7 +19,7 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
     <meta name="keywords" content="<?php echo $cate['title']; ?> " />
     <meta name="author" content="<?php echo $cate['title']; ?> " />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title><?php echo $cate['title']; ?> | Company Name</title>
+    <title><?php echo $cate['title']; ?> | Interact Safety</title>
     <?php include("include/head_script.php");?>
     <style>
     .course-card { border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: box-shadow 0.2s; }

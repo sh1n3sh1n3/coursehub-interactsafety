@@ -32,10 +32,10 @@ if(isset($_SESSION['pin_user']) && !empty($_SESSION['pin_user']) && $_SESSION['p
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="description" content="<?php echo $blog['title']; ?> " />
     <meta name="keywords" content="<?php echo $blog['title']; ?> " />
-    <meta name="author" content="Company Name" />
+    <meta name="author" content="Interact Safety" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title><?php echo $blog['title']; ?> | Company Name</title>
+    <title><?php echo $blog['title']; ?> | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

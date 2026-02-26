@@ -101,7 +101,7 @@ div[size="A4"] {
 			    <h1 style="margin-top:12;font-family: timesbd;font-size:50px;font-weight:bold;text-align:center;text-transform:uppercase;">'.$users["name"].'</h1>
 			    <h1 style="margin:0;font-family: Montserrat;font-weight:normal;text-align:center;font-size:17px;text-transform:uppercase">Has successfully completed</b></h1>
 			    <h1 style="margin:0;margin-top:15px;margin-left:-35px;font-family:oldeng;font-weight:normal;text-align:center;text-transform:capitalize;color:#d7b46a;font-size: 45px;">'.$course["title"].'</h1>
-        	    <h1 style="font-family: Montserrat;font-weight:normal;text-align:center;font-size: 17px;width: 99%;margin:15px auto;text-transform:uppercase"">and fulfilled all requirements of the skill assessment criteria laid down by RE-FIT<sup>&#174;</sup> for the above certification.</h1>
+        	    <h1 style="font-family: Montserrat;font-weight:normal;text-align:center;font-size: 17px;width: 99%;margin:15px auto;text-transform:uppercase"">and fulfilled all requirements of the skill assessment criteria laid down by Interact Safety for the above certification.</h1>
                 <h1 style="font-family: Montserrat;font-weight:normal;text-align:center;font-size: 17px;width: 60%;margin:0 auto;text-transform:uppercase"">THIS CERTIFICATE WAS AWARDED ON</h1>
                 <h2 style="font-family: Montserrat;font-weight:normal;text-align:center;font-size: 17px;width: 60%;margin:0 auto;text-transform:uppercase">'.date("F d, Y", strtotime($res['datetime'])).'</h2>
     	    </div>
@@ -118,5 +118,5 @@ $customPaper = array(0,0,993,735);$dompdf->setPaper($customPaper);
 $dompdf->set_option('defaultMediaType', 'all');
 $dompdf->set_option('isFontSubsettingEnabled', true);
 $dompdf->render(); 
-$dompdf->stream('RE-FIT Certificate '.$users['name']);
+$dompdf->stream('Interact Safety Certificate '.$users['name']);
 }

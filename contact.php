@@ -10,7 +10,7 @@
     <meta name="author" content="ThemeMascot" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title>Company Name</title>
+    <title>Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>
@@ -33,7 +33,7 @@
                     <div class="section-content">
                         <div class="row">
                             <div class="col-md-12">
-                                <h2 class="text-theme-colored2 font-36">Company Name Safety and Training: Contact</h2>
+                                <h2 class="text-theme-colored2 font-36">Interact Safety: Contact</h2>
                                 <ol class="breadcrumb text-left mt-10 white">
                                     <li><a href="#">Home</a></li>                                    
                                     <li class="active">Contact</li>

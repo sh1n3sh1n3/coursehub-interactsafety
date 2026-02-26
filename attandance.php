@@ -14,7 +14,7 @@ $citiesdata = $conn->query("SELECT * FROM cities WHERE id=".$_GET['cityid'])->fe
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title>Attandance | Company Name</title>
+    <title>Attandance | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

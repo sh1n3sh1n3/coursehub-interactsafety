@@ -7,7 +7,7 @@ $information = $conn->query("SELECT * FROM information WHERE id='1'")->fetch_ass
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>RE-FIT Certified - Invoice</title>
+    <title>Interact Safety - Invoice</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">

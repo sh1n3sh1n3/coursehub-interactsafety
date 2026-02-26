@@ -14,7 +14,7 @@ $policy = $conn->query("SELECT * FROM policy WHERE id='3'")->fetch_assoc();
     <meta name="author" content="ThemeMascot" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title>Social Media Policy | Company Name</title>
+    <title>Social Media Policy | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

@@ -21,7 +21,7 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
     <meta name="author" content="<?php echo $courses_details['title']; ?>" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title><?php echo $courses_details['title']; ?> | Company Name</title>
+    <title><?php echo $courses_details['title']; ?> | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

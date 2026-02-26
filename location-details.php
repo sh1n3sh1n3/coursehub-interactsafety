@@ -21,7 +21,7 @@ $location_details = $conn->query("SELECT * FROM locations WHERE id='".$locid."'"
     <meta name="author" content="<?php echo $location_details['title']; ?>" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title><?php echo $location_details['title']; ?> | Company Name</title>
+    <title><?php echo $location_details['title']; ?> | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

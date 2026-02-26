@@ -48,9 +48,9 @@ if($tbl_sale->num_rows > 0) {
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="description" content=" " />
     <meta name="keywords" content=" " />
-    <meta name="author" content="Company Name" />
+    <meta name="author" content="Interact Safety" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title>Attandance | Company Name</title>
+    <title>Attandance | Interact Safety</title>
     <?php include("include/head_script.php"); ?>
     <style>
     html {
@@ -94,7 +94,7 @@ if($tbl_sale->num_rows > 0) {
             <div class="container p-20">
                <div class="row">
                   <div class="col-md-12 text-center">
-                     <p class="mb-0">Copyright &copy;2024 Company Name. All Rights Reserved</p>
+                     <p class="mb-0">Copyright &copy;2024 Interact Safety. All Rights Reserved</p>
                   </div>
                </div>
             </div>

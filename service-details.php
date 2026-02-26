@@ -25,7 +25,7 @@ $service_details = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM ser
     <meta name="author" content="ThemeMascot" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title><?php echo $service_details['title']; ?> | Company Name</title>
+    <title><?php echo $service_details['title']; ?> | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

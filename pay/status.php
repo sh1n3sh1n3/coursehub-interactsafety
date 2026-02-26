@@ -93,7 +93,7 @@ if (!empty($payment_intent_id) && !empty($_GET['customer_id'])) {
 <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <title>Payment not completed – Company Name</title>
+    <title>Payment not completed – Interact Safety</title>
     <?php include('../include/head_script.php'); ?>
     <style>
         .status-panel { max-width: 560px; margin: 0 auto; padding: 32px 24px; text-align: center; }
@@ -362,7 +362,7 @@ if(!empty($_GET['tid'])){
 <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <title>Transaction failed – Company Name</title>
+    <title>Transaction failed – Interact Safety</title>
     <?php include('../include/head_script.php'); ?>
 </head>
 <body class>

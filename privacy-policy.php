@@ -14,7 +14,7 @@ $policy = $conn->query("SELECT * FROM policy WHERE id='1'")->fetch_assoc();
     <meta name="author" content="ThemeMascot" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title>Privacy Policy | Company Name</title>
+    <title>Privacy Policy | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

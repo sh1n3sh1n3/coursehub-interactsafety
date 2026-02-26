@@ -16,7 +16,7 @@
     <meta name="author" content="ThemeMascot" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title>Services | Company Name</title>
+    <title>Services | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

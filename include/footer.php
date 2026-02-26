@@ -4,20 +4,25 @@
         <div class="row">
             <div class="col-sm-6 col-md-3">
                 <div class="widget dark">
-                    <img class="mt-5 mb-20" alt src="images/logo-white.png">
+                    <a class="sm-pull-center" style="margin: 0px 45px 0 0; width:200px;display: flex; align-items: center; justify-content: start; gap: 10px;" href="index.php">
+                        <img style="max-height:85px;" src="images/logo/logo.png" alt>
+                        <div style="width: 80px; font-size: 24px; color: white!important">
+                            Interact Safety
+                        </div>
+                    </a>
                     <p><?php echo $information['address']; ?></p>
                     <h5 class="text-white font-weight-600 mt-20 mb-10">Contact us</h5>
                     <ul class="list-inline mt-5">
                       <?php if(!empty($information['phone'])) { ?><li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-phone text-theme-colored2 mr-5"></i> <a class="text-gray" href="tel:<?php echo preg_replace('/\s+/', '', $information['phone']); ?>"><?php echo htmlspecialchars($information['phone']); ?></a> </li><?php } ?>
                       <?php if(!empty($information['whatsapp'])) { ?><li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-whatsapp text-theme-colored2 mr-5"></i> <a class="text-gray" href="<?php echo htmlspecialchars($information['whatsapp']); ?>"><?php echo htmlspecialchars($information['whatsapp']); ?></a> </li><?php } ?>
-                      <?php if(!empty($information['email'])) { ?> <li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-envelope-o text-theme-colored2 mr-5"></i> <strong class="text-uppercase font-11 text-gray">Email us</strong><br><a class="text-theme-colored2 font-weight-600" href="mailto:<?php echo htmlspecialchars($information['email']); ?>"><?php echo htmlspecialchars($information['email']); ?></a> </li><?php } ?>
+                      <?php if(!empty($information['email'])) { ?> <li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-envelope-o text-theme-colored2 mr-5"></i> <strong class="text-uppercase font-11 text-gray">Email us</strong><br><a class="" href="mailto:<?php echo htmlspecialchars($information['email']); ?>"><?php echo htmlspecialchars($information['email']); ?></a> </li><?php } ?>
                     </ul>
                     <ul class="styled-icons icon-sm icon-bordered icon-circled clearfix mt-10">
-                        <?php if(!empty($information['facebook'])) { ?><li><a href="<?php echo $information['facebook']; ?>" target="_blank"><i class="fa fa-facebook text-theme-colored2"></i></a></li><?php } ?>
-                        <?php if(!empty($information['instagram'])) { ?><li><a href="<?php echo $information['instagram']; ?>" target="_blank"><i class="fa fa-instagram text-theme-colored2"></i></a></li><?php } ?>
-                        <?php if(!empty($information['youtube'])) { ?><li><a href="<?php echo $information['youtube']; ?>" target="_blank"><i class="fa fa-youtube text-theme-colored2"></i></a></li><?php } ?>
+                        <li><a href="https://www.facebook.com/interactsafety.au" target="_blank"><i class="fa fa-facebook text-theme-colored2"></i></a></li>
+                        <li><a href="https://www.instagram.com/interact_safety" target="_blank"><i class="fa fa-instagram text-theme-colored2"></i></a></li>
+                        <?php if (false) { ?><?php if(!empty($information['youtube'])) { ?><li><a href="<?php echo $information['youtube']; ?>" target="_blank"><i class="fa fa-youtube text-theme-colored2"></i></a></li><?php } ?>
                         <?php if(!empty($information['twitter'])) { ?><li><a href="<?php echo $information['twitter']; ?>" target="_blank"><i class="fa fa-twitter text-theme-colored2"></i></a></li><?php } ?>
-                        <?php if(!empty($information['linkden'])) { ?><li><a href="<?php echo $information['linkden']; ?>" target="_blank"><i class="fa fa-linkedin text-theme-colored2"></i></a></li><?php } ?>
+                        <?php if(!empty($information['linkden'])) { ?><li><a href="<?php echo $information['linkden']; ?>" target="_blank"><i class="fa fa-linkedin text-theme-colored2"></i></a></li><?php } ?><?php } ?>
                     </ul>
                 </div>
             </div>
@@ -72,7 +77,7 @@
         <div class="container pt-20 pb-20">
             <div class="row">
                 <div class="col-md-12">
-                    <p class="font-12 text-black-777 m-0 sm-text-center">Copyright &copy;2026 Company Name. All Rights Reserved</p>
+                    <p class="font-12 text-black-777 m-0 sm-text-center">Copyright &copy;2026 Interact Safety. All Rights Reserved</p>
                 </div>
                 <!--<div class="col-md-6 text-right">
                     <div class="widget no-border m-0">

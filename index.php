@@ -17,7 +17,7 @@
     <?php if (strpos($_SERVER['HTTP_HOST'], 'localhost') === false && strpos($_SERVER['HTTP_HOST'], '127.0.0.1') === false) { ?>
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <?php } ?>
-    <title>Company Name</title>
+    <title>Interact Safety</title>
     <?php include("include/head_script.php"); ?>
     <style>
     #home .row.multi-row-clearfix { display: flex; flex-wrap: wrap; }

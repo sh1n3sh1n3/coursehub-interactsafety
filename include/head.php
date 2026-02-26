@@ -7,11 +7,11 @@
                 <div class="col-md-6">
                     <div class="widget text-white">
                         <ul class="styled-icons icon-sm pull-left flip sm-pull-none sm-text-center mt-5">
-                            <?php if(!empty($information['facebook'])) { ?><li><a href="<?php echo $information['facebook']; ?>" target="_blank"><i class="fa fa-facebook text-white"></i></a></li><?php } ?>
-                                <?php if(!empty($information['instagram'])) { ?><li><a href="<?php echo $information['instagram']; ?>" target="_blank"><i class="fa fa-instagram text-white"></i></a></li><?php } ?>
-                                <?php if(!empty($information['youtube'])) { ?><li><a href="<?php echo $information['youtube']; ?>" target="_blank"><i class="fa fa-youtube text-white"></i></a></li><?php } ?>
+                            <li><a href="https://www.facebook.com/interactsafety.au" target="_blank"><i class="fa fa-facebook text-white"></i></a></li>
+                            <li><a href="https://www.instagram.com/interact_safety" target="_blank"><i class="fa fa-instagram text-white"></i></a></li>
+                            <?php if (false) { ?><?php if(!empty($information['youtube'])) { ?><li><a href="<?php echo $information['youtube']; ?>" target="_blank"><i class="fa fa-youtube text-white"></i></a></li><?php } ?>
                                 <?php if(!empty($information['twitter'])) { ?><li><a href="<?php echo $information['twitter']; ?>" target="_blank"><i class="fa fa-twitter text-white"></i></a></li><?php } ?>
-                                <?php if(!empty($information['linkden'])) { ?><li><a href="<?php echo $information['linkden']; ?>" target="_blank"><i class="fa fa-linkedin text-white"></i></a></li><?php } ?>
+                                <?php if(!empty($information['linkden'])) { ?><li><a href="<?php echo $information['linkden']; ?>" target="_blank"><i class="fa fa-linkedin text-white"></i></a></li><?php } ?><?php } ?>
                         </ul>
                     </div>
                 </div>
@@ -38,26 +38,35 @@
         <div class="container pt-5 pb-5">
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-3">
-                    <a class="menuzord-brand pull-left flip sm-pull-center mb-5" href="index.php"><img style="max-height:85px;" src="images/logo.png" alt></a>
+                    <a class="menuzord-brand pull-left flip sm-pull-center mb-5" style="display: flex; align-items: center; justify-content: center; gap: 10px;" href="index.php">
+                        <img style="max-height:85px;" src="images/logo/logo.png" alt>
+                        <div style="width: 80px; color: #212331!important">
+                            Interact Safety
+                        </div>
+                    </a>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-9">
                     <div class="row">
                         <div class="col-xs-12 col-sm-1 col-md-1  pt-20"></div>
                         <?php if(!empty($information['phone'])) { ?>
 				    	<div class="col-xs-12 col-sm-3 col-md-3  pt-20">
-                            <div class="widget no-border sm-text-center mt-10 mb-10 m-0">
+                            <div class="widget no-border sm-text-center mt-10 mb-10 m-0" style="display: flex; align-items: center; justify-content: center;">
                                 <i class="pe-7s-headphones text-theme-colored2 font-48 mt-0 mr-15 mr-sm-0 sm-display-block pull-left flip sm-pull-none"></i>
-                                <span class="font-12 text-gray text-uppercase d-block">Call us</span>
-                                <h6 class="font-12 text-black m-0"><?php echo htmlspecialchars($information['phone']); ?></h6>
+                                <div>
+                                    <span class="font-12 text-gray text-uppercase d-block">Call us</span>
+                                    <h6 class="font-12 text-black m-0"><?php echo htmlspecialchars($information['phone']); ?></h6>
+                                </div>
                             </div>
                         </div>
                         <?php } ?>
                         <?php if(!empty($information['email'])) { ?>
                         <div class="col-xs-12 col-sm-3 col-md-3  pt-20">
-                            <div class="widget no-border sm-text-center mt-10 mb-10 m-0">
+                            <div class="widget no-border sm-text-center mt-10 mb-10 m-0" style="display: flex; align-items: center; justify-content: center;">
                                 <i class="pe-7s-mail-open text-theme-colored2 font-48 mt-0 mr-15 mr-sm-0 sm-display-block pull-left flip sm-pull-none"></i>
-                                <span class="font-12 text-gray text-uppercase d-block">Email us</span>
-                                <h6 class="font-12 m-0"><a href="mailto:<?php echo htmlspecialchars($information['email']); ?>" class="text-theme-colored2 font-weight-600"><?php echo htmlspecialchars($information['email']); ?></a></h6>
+                                <div>
+                                    <span class="font-12 text-gray text-uppercase d-block">Email us</span>
+                                    <h6 class="font-12 m-0"><a href="mailto:<?php echo htmlspecialchars($information['email']); ?>" class="text-black"><?php echo htmlspecialchars($information['email']); ?></a></h6>
+                                </div>
                             </div>
                         </div>
                          <?php } ?>

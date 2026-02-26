@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>Admin</title>
-<link rel="shortcut icon" type="image/x-icon" href="../assets/images/cs-logo.png">
+<link rel="shortcut icon" type="image/x-icon" href="../images/logo/favicon.ico">
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
 <link href="css/plugins/toastr/toastr.min.css" rel="stylesheet">

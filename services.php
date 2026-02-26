@@ -20,7 +20,7 @@ $cate_details = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM servic
     <meta name="author" content="<?php echo $cate_details['title']; ?>" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title><?php echo $cate_details['title']; ?> | Company Name</title>
+    <title><?php echo $cate_details['title']; ?> | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

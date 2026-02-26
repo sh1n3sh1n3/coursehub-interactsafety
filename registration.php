@@ -49,8 +49,8 @@ function sendRegistrationOtp($conn, $email, $name, $emailaccount) {
             $mail->addAddress($email, $name);
             $mail->setFrom($emailaccount['email1'], $emailaccount['title1']);
             $mail->addReplyTo($emailaccount['email1'], $emailaccount['title1']);
-            $mail->Subject = 'Your verification code - Company Name';
-            $mail->Body    = 'Dear ' . htmlspecialchars($name) . ',<br><br>Your verification code is: <strong>' . $otp . '</strong><br><br>Regards,<br>Company Name';
+            $mail->Subject = 'Your verification code - Interact Safety';
+            $mail->Body    = 'Dear ' . htmlspecialchars($name) . ',<br><br>Your verification code is: <strong>' . $otp . '</strong><br><br>Regards,<br>Interact Safety';
             $mail->send();
         } catch (Exception $e) {
             // leave $otp set; caller can still use it for local fallback
@@ -205,7 +205,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     <meta name="author" content="ThemeMascot" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title>Company Name</title>
+    <title>Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>
@@ -232,7 +232,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
                         <div class="row">
 
                             <div class="col-md-12">
-                                <h2 class="text-theme-colored2 font-36">Company Name Safety and Training: Registration</h2>
+                                <h2 class="text-theme-colored2 font-36">Interact Safety: Registration</h2>
                                 <ol class="breadcrumb text-left mt-10 white">
                                     <li><a href="index.php">Home</a></li>
                                     <li class="active">Registration</li>

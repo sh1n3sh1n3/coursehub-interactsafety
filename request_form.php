@@ -86,7 +86,7 @@ while($fetchcouslot = $course_slots->fetch_assoc()) { $cnt++;$dates='';
     <meta name="author" content="ThemeMascot" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title>Company Name</title>
+    <title>Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>

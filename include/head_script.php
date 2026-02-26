@@ -1,9 +1,17 @@
-<base href="https://coursehub.interactsafety.com.au/" >
-<link href="images/favicon.png" rel="shortcut icon" type="image/png">
-<link href="images/apple-touch-icon.png" rel="apple-touch-icon">
-<link href="images/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-<link href="images/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-<link href="images/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+<?php
+// Use current request URL so local (localhost) and production work without redirecting to production
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+$scriptDir = isset($_SERVER['SCRIPT_NAME']) ? dirname($_SERVER['SCRIPT_NAME']) : '';
+$basePath = ($scriptDir === '/coursehub' || strpos($scriptDir, '/coursehub/') === 0) ? '/coursehub' : '';
+$baseHref = rtrim($protocol . '://' . $host . $basePath, '/') . '/';
+?>
+<base href="<?php echo htmlspecialchars($baseHref); ?>">
+<link href="images/logo/favicon.ico" rel="shortcut icon" type="image/x-icon">
+<link href="images/logo/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
+<link href="images/logo/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
+<link href="images/logo/apple-touch-icon.png" rel="apple-touch-icon">
+<link href="images/logo/site.webmanifest" rel="manifest">
 <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
 <link href="css/jquery-ui.min.css" rel="stylesheet" type="text/css">
 <link href="css/animate.css" rel="stylesheet" type="text/css">
