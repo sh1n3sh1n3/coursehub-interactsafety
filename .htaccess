@@ -87,6 +87,12 @@ RewriteRule ^registration$ registration.php [NC,L]
 RewriteRule ^registration/([0-9]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9_-]+)$ registration.php?courseid=$1&locid=$2&slotid=$3&cityid=$4 [NC,L]
 
 ############################################
+# Pay (payment page)
+############################################
+RewriteRule ^pay/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)$ pay/index.php?courseid=$1&locid=$2&slotid=$3&cityid=$4&registerid=$5 [NC,L]
+
+
+############################################
 # Waiting
 ############################################
 RewriteRule ^waiting$ waiting.php [NC,L]
