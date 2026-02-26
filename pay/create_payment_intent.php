@@ -5,8 +5,14 @@ Website: https://www.allphptricks.com
 */
 require_once 'stripe_header.php';
 
-// Define the product item price and convert it to cents
-$product_price = round(AMOUNT*100);
+// Define the product item price and convert it to cents (Stripe uses smallest currency unit)
+$product_price = (int) round((float) AMOUNT * 100);
+
+if ($product_price < 1) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Invalid amount. Please return to the course page and try again.']);
+    exit;
+}
 
 try { 
     // Create PaymentIntent with amount, currency and description
@@ -25,7 +31,7 @@ try {
     ]; 
     
     echo json_encode($output); 
-} catch (Error $e) {
+} catch (\Throwable $e) {
     http_response_code(500); 
     echo json_encode(['error' => $e->getMessage()]); 
 } 
