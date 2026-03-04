@@ -1,4 +1,21 @@
-<?php $information = $conn->query("SELECT * FROM information WHERE id='1'")->fetch_assoc(); ?>
+<?php
+$information = $conn->query("SELECT * FROM information WHERE id='1'")->fetch_assoc();
+// Course detail links for footer (same logic as index.php: first course in category)
+$footerHsrInitialHref = '#';
+$footerHsrRefresherHref = '#';
+$catInitial = $conn->query("SELECT id FROM category WHERE status='1' AND (title LIKE '%Initial%' OR title LIKE '%initial%') ORDER BY title ASC LIMIT 1");
+if ($catInitial && $catInitial->num_rows > 0) {
+    $cid = $catInitial->fetch_assoc()['id'];
+    $first = $conn->query("SELECT id, replace(slug,' ','-') as slug FROM courses WHERE catid='".$cid."' ORDER BY id ASC LIMIT 1");
+    if ($first && $first->num_rows > 0) { $f = $first->fetch_assoc(); $footerHsrInitialHref = 'courses-detail/'.$f['id'].'/'.$f['slug']; }
+}
+$catRefresher = $conn->query("SELECT id FROM category WHERE status='1' AND (title LIKE '%Refresher%' OR title LIKE '%refresher%') ORDER BY title ASC LIMIT 1");
+if ($catRefresher && $catRefresher->num_rows > 0) {
+    $cid = $catRefresher->fetch_assoc()['id'];
+    $first = $conn->query("SELECT id, replace(slug,' ','-') as slug FROM courses WHERE catid='".$cid."' ORDER BY id ASC LIMIT 1");
+    if ($first && $first->num_rows > 0) { $f = $first->fetch_assoc(); $footerHsrRefresherHref = 'courses-detail/'.$f['id'].'/'.$f['slug']; }
+}
+?>
 <footer id="footer" class="footer" data-bg-color="#212331">
     <div class="container pt-70 pb-40">
         <div class="row">
@@ -10,74 +27,59 @@
                             Interact Safety
                         </div>
                     </a>
-                    <p><?php echo $information['address']; ?></p>
+                    <?php if(!empty($information['address'])) { ?> <p class="mt-15 font-12 mb-0"><?php echo ($information['address']); ?></p><?php } ?>
                     <h5 class="text-white font-weight-600 mt-20 mb-10">Contact us</h5>
-                    <ul class="list-inline mt-5">
-                      <?php if(!empty($information['phone'])) { ?><li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-phone text-theme-colored2 mr-5"></i> <a class="text-gray" href="tel:<?php echo preg_replace('/\s+/', '', $information['phone']); ?>"><?php echo htmlspecialchars($information['phone']); ?></a> </li><?php } ?>
-                      <?php if(!empty($information['whatsapp'])) { ?><li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-whatsapp text-theme-colored2 mr-5"></i> <a class="text-gray" href="<?php echo htmlspecialchars($information['whatsapp']); ?>"><?php echo htmlspecialchars($information['whatsapp']); ?></a> </li><?php } ?>
-                      <?php if(!empty($information['email'])) { ?> <li class="m-0 pl-10 pr-10 mb-10"> <i class="fa fa-envelope-o text-theme-colored2 mr-5"></i> <strong class="text-uppercase font-11 text-gray">Email us</strong><br><a class="" href="mailto:<?php echo htmlspecialchars($information['email']); ?>"><?php echo htmlspecialchars($information['email']); ?></a> </li><?php } ?>
+                    <ul class="list mt-5">
+                      <?php if(!empty($information['phone'])) { ?><li class="m-0 pl-0 pr-10"> <i class="fa fa-phone text-theme-colored2 mr-5"></i> <a class="text-gray" href="tel:<?php echo preg_replace('/\s+/', '', $information['phone']); ?>"><?php echo htmlspecialchars($information['phone']); ?></a> </li><?php } ?>
+                      <?php if(!empty($information['email'])) { ?> <li class="m-0 pl-0 pr-10"> <i class="fa fa-envelope-o text-theme-colored2 mr-5"></i><a class="" href="mailto:<?php echo htmlspecialchars($information['email']); ?>"><?php echo htmlspecialchars($information['email']); ?></a> </li><?php } ?>
                     </ul>
-                    <ul class="styled-icons icon-sm icon-bordered icon-circled clearfix mt-10">
-                        <li><a href="https://www.facebook.com/interactsafety.au" target="_blank"><i class="fa fa-facebook text-theme-colored2"></i></a></li>
-                        <li><a href="https://www.instagram.com/interact_safety" target="_blank"><i class="fa fa-instagram text-theme-colored2"></i></a></li>
-                        <?php if (false) { ?><?php if(!empty($information['youtube'])) { ?><li><a href="<?php echo $information['youtube']; ?>" target="_blank"><i class="fa fa-youtube text-theme-colored2"></i></a></li><?php } ?>
-                        <?php if(!empty($information['twitter'])) { ?><li><a href="<?php echo $information['twitter']; ?>" target="_blank"><i class="fa fa-twitter text-theme-colored2"></i></a></li><?php } ?>
-                        <?php if(!empty($information['linkden'])) { ?><li><a href="<?php echo $information['linkden']; ?>" target="_blank"><i class="fa fa-linkedin text-theme-colored2"></i></a></li><?php } ?><?php } ?>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-3">
-                <div class="widget dark">
-                    <h4 class="widget-title line-bottom-theme-colored-2">Useful Links</h4>
-                    <ul class="angle-double-right list-border">
-                        <li><a href="index.php">Home Page</a></li>
-                        <li><a href="about.php">About Us</a></li>
-                        <li><a href="contact.php">Contact</a></li>
+                    <ul class="styled-icons icon-sm icon-bordered icon-circled clearfix mt-10">                        
+                      <?php if(!empty($information['facebook']) && $information['facebook'] != '#') { ?><li><a href="<?php echo $information['facebook']; ?>" target="_blank"><i class="fa fa-facebook text-theme-colored2"></i></a></li><?php } ?>
+                      <?php if(!empty($information['instagram']) && $information['instagram'] != '#') { ?><li><a href="<?php echo $information['instagram']; ?>" target="_blank"><i class="fa fa-instagram text-theme-colored2"></i></a></li><?php } ?>
+                      <?php if(!empty($information['youtube']) && $information['youtube'] != '#') { ?><li><a href="<?php echo $information['youtube']; ?>" target="_blank"><i class="fa fa-youtube text-theme-colored2"></i></a></li><?php } ?>
+                      <?php if(!empty($information['twitter']) && $information['twitter'] != '#') { ?><li><a href="<?php echo $information['twitter']; ?>" target="_blank"><i class="fa fa-twitter text-theme-colored2"></i></a></li><?php } ?>
+                      <?php if(!empty($information['linkden']) && $information['linkden'] != '#') { ?><li><a href="<?php echo $information['linkden']; ?>" target="_blank"><i class="fa fa-linkedin text-theme-colored2"></i></a></li><?php } ?>
                     </ul>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3">
-                <div class="widget dark">
-                    <h4 class="widget-title line-bottom-theme-colored-2">Policies</h4>
-                    <ul class="angle-double-right list-border">
-                        <li><a href="terms-conditions.php">Booking Terms and Conditions</a></li>
-                        <li><a href="privacy-policy.php" >Privacy Policy</a></li>
-                        <li><a href="media-policy.php">Social Media Policy</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-3">
-                <div class="widget dark">
-                    <h4 class="widget-title line-bottom-theme-colored-2">Opening Hours</h4>
-                    <div class="opening-hours">
-                        <ul class="list-border">
-                            <li class="clearfix">
-                                <span> Mon - Tues : </span>
-                                <div class="value pull-right"> 6.00 am - 10.00 pm </div>
-                            </li>
-                            <li class="clearfix">
-                                <span> Wednes - Thurs :</span>
-                                <div class="value pull-right"> 8.00 am - 6.00 pm </div>
-                            </li>
-                            <li class="clearfix">
-                                <span> Fri : </span>
-                                <div class="value pull-right"> 3.00 pm - 8.00 pm </div>
-                            </li>
-                            <li class="clearfix">
-                                <span> Sun : </span>
-                                <div class="value pull-right bg-theme-colored2 text-white closed"> Closed </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+                  <div class="widget dark">
+                      <h4 class="widget-title line-bottom-theme-colored-2">Useful Links</h4>
+                      <ul class="angle-double-right list-border">
+                          <li><a href="index.php">Home</a></li>
+                          <li style="letter-spacing: -0.5px;"><a href="<?php echo htmlspecialchars($footerHsrInitialHref); ?>">HSR Initial OHS Training Course (5 Days)</a></li>
+                          <li style="letter-spacing: -0.5px;"><a href="<?php echo htmlspecialchars($footerHsrRefresherHref); ?>">HSR Refresher OHS Training Course (1 Day)</a></li>
+                          <li><a href="contact.php">Group Bookings &amp; On-Site Training</a></li>
+                          <li><a href="contact.php">Contact</a></li>
+                      </ul>
+                  </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                  <div class="widget dark">
+                      <h4 class="widget-title line-bottom-theme-colored-2">Policies</h4>
+                      <ul class="angle-double-right list-border">
+                          <li><a href="terms-conditions.php">Booking Terms and Conditions</a></li>
+                          <li><a href="privacy-policy.php">Privacy Policy</a></li>
+                          <li><a href="cancellation-policy.php">Cancellation &amp; Rescheduling Policy</a></li>
+                          <li><a href="refund-policy.php">Refund Policy</a></li>
+                      </ul>
+                  </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                  <div class="widget dark">
+                      <h4 class="widget-title line-bottom-theme-colored-2">Enquiries &amp; Course Bookings</h4>
+                      <p class="text-gray mb-10">Email: <a href="mailto:info@interactsafety.com.au" class="text-theme-colored2">info@interactsafety.com.au</a></p>
+                      <p class="font-12 text-gray mb-10">To ensure accurate enrolment details and confirmed training records, all bookings and enquiries are managed via email.</p>
+                      <p class="font-12 text-gray mb-0"><strong class="text-white">Response Time:</strong> 1–2 Business Days</p>
+                  </div>
+              </div>
         </div>
     </div>
     <div class="footer-bottom" data-bg-color="#2b2d3b">
         <div class="container pt-20 pb-20">
             <div class="row">
                 <div class="col-md-12">
-                    <p class="font-12 text-black-777 m-0 sm-text-center">Copyright &copy;2026 Interact Safety. All Rights Reserved</p>
+                    <p class="font-12 text-black-777 m-0 sm-text-center">© 2026 Interact Safety Pty Ltd. All Rights Reserved.</p>
                 </div>
                 <!--<div class="col-md-6 text-right">
                     <div class="widget no-border m-0">

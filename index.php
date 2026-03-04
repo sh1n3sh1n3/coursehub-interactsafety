@@ -67,13 +67,30 @@
             <section id="home" class="bg-gray-lighter pt-40 pb-40">
                 <div class="container pt-40 pb-40 bg-white">
                     <div class="section-content">
+                        <div class="section-title text-center mb-40">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h2 class="text-uppercase title mt-0">Health and Safety Courses</h2>
+                                    <div class="double-line-bottom-theme-colored-2 mx-auto"></div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row multi-row-clearfix">
                             	<?php $count=0;
 					$courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE status='1' order by title ASC");
-					while($fetchcourses = $courses->fetch_assoc()) {$count++; $id = $fetchcourses['id'];  ?>
+					while($fetchcourses = $courses->fetch_assoc()) {
+						$count++; $id = $fetchcourses['id'];
+						$firstCourse = $conn->query("SELECT id, replace(slug,' ','-') as slug FROM courses WHERE catid='".$id."' ORDER BY id ASC LIMIT 1");
+						if ($firstCourse && $firstCourse->num_rows > 0) {
+							$first = $firstCourse->fetch_assoc();
+							$cardHref = 'courses-detail/'.$first['id'].'/'.$first['slug'];
+						} else {
+							$cardHref = '#';
+						}
+					?>
                             <div class="col-sm-6 col-md-4">
                                 <div class="event-list bg-silver-light maxwidth500">
-                                    <a href="courses/<?php echo $fetchcourses['id']; ?>/<?php echo $fetchcourses['slug']; ?>">
+                                    <a href="<?php echo $cardHref; ?>"<?php if ($cardHref === '#'): ?> onclick="return false;"<?php endif; ?>>
                                     <div class="event-list-details border-1px bg-white clearfix text-center" style="overflow:hidden">
                                         <h5 class="text-uppercase font-weight-600 font-16"><?php echo $fetchcourses['title']; ?></h5>
                                     </div>

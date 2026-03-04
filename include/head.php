@@ -24,10 +24,12 @@
                         <li class="m-0 pl-10"> <a href="account.php" class="text-white"><i class="fa fa-user-o mr-5 text-white"></i> My Account </a> </li>
                         <li class="m-0 pl-10"> <a href="logout.php" class="text-white"><i class="fa fa-sign-out mr-5 text-white"></i> Logout </a> </li>
                         <?php } else { ?>
+                        <!-- Login and Register removed - enrolments only, no student portals
                         <li class="m-0 pl-10"> <a href="javascript:" data-toggle="modal" data-target="#LoginModal" class="text-white"><i class="fa fa-user-o mr-5 text-white"></i> Login </a> </li>
                         <li class="m-0 pl-10 pr-10">
                             <a href="javascript:" data-toggle="modal" data-target="#AccountModal" class="text-white"><i class="fa fa-edit mr-5"></i>Register</a>
                         </li>
+                        -->
                         <?php } ?>
                     </ul>
                 </div>

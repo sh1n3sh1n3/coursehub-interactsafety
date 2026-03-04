@@ -58,7 +58,7 @@ include("includes/conn.php");?>
 <body class="gray-bg">
     <div class="passwordBox animated fadeInDown">
         <div>
-		<div><center><img src="../images/logo/logo.png" style="width:100%" class="logo-name text-center"/></center></div>
+		<div><center><img src="../images/logo/logo.png" style="width:120px;height:120px" class="logo-name text-center"/></center></div>
             <div class="text-white text-center mb-5 font-weight-600 brandname" style="">
 				<span class="t1">Welcome<sup>&#174;</sup> Admin</span><br />
 			</div>
