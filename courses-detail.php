@@ -244,6 +244,7 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
                             <div class="sidebar sidebar-left mt-sm-30 ml-30 ml-sm-0">
                                 <?php
                                 $d = $courses_details;
+                                $course_cover = ($courseid == '1') ? 'HSR-Initial-Course.png' : $d['image'];
                                 $dur = !empty($d['duration']) ? $d['duration'] . ' ' . (!empty($d['duration_type']) ? $d['duration_type'] : 'Days') : '';
                                 $delivery = !empty($d['delivery_types']) ? htmlspecialchars($d['delivery_types']) : 'Face-to-face and on-site options available';
                                 if ($courseid == '1') {
@@ -323,6 +324,7 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
                                             <div class="pull-right ml-5"><span class="info-title">Course Price</span><h4 class="mt-0">$<?php echo htmlspecialchars($d['price']); ?></h4></div>
                                         </li>
                                     </ul>
+                                    <div class="mt-15"><img src="assets/images/course/<?php echo htmlspecialchars($course_cover); ?>" alt="<?php echo htmlspecialchars($d['title']); ?>" class="img-fullwidth"></div>
                                 </div>
                                 <div class="widget course-sidebar-info p-15">
                                     <h4 class="info-title widget-title line-bottom-theme-colored-2 mb-10">Quick Contact</h4>
