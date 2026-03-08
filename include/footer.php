@@ -21,11 +21,8 @@ if ($catRefresher && $catRefresher->num_rows > 0) {
         <div class="row">
             <div class="col-sm-6 col-md-3">
                 <div class="widget dark">
-                    <a class="sm-pull-center" style="margin: 0px 45px 0 0; width:200px;display: flex; align-items: center; justify-content: start; gap: 10px;" href="index.php">
-                        <img style="max-height:85px;" src="images/logo/logo.png" alt>
-                        <div style="width: 80px; font-size: 24px; color: white!important">
-                            Interact Safety
-                        </div>
+                    <a class="sm-pull-center" style="margin: 0px 45px 0 0; width:320px;max-width:100%;display: flex; align-items: center; justify-content: start;" href="index.php">
+                        <img src="images/logo/white-logo.svg" alt="Interact Safety" style="width:320px;height:50px;max-width:100%;object-fit:contain;">
                     </a>
                     <?php if(!empty($information['address'])) { ?> <p class="mt-15 font-12 mb-0"><?php echo ($information['address']); ?></p><?php } ?>
                     <h5 class="text-white font-weight-600 mt-20 mb-10">Contact us</h5>

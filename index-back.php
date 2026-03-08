@@ -538,7 +538,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <img class="mt-5 mb-20" alt src="images/logo/logo.png">
+                            <img class="mt-5 mb-20" alt src="images/logo/logo.svg">
                         </div>
                     </div>
                 </div>

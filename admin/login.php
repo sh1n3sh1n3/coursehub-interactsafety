@@ -58,8 +58,8 @@ include("includes/conn.php");?>
 <body class="gray-bg">
     <div class="passwordBox animated fadeInDown">
         <div>
-		<div><center><img src="../images/logo/logo.png" style="width:120px;height:120px" class="logo-name text-center"/></center></div>
-            <div class="text-white text-center mb-5 font-weight-600 brandname" style="">
+		<div><center><img src="../images/logo/logo.svg" alt="Interact Safety" style="width:320px;height:50px;max-width:100%;object-fit:contain;" class="logo-name text-center"/></center></div>
+            <div class="text-white text-center mb-5 font-weight-600 brandname">
 				<span class="t1">Welcome<sup>&#174;</sup> Admin</span><br />
 			</div>
 			<?php echo $err; ?>

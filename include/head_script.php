@@ -1,9 +1,33 @@
 <?php
-// Use current request URL so local (localhost) and production work without redirecting to production
+// Build the site base URL from the actual project path so assets work in both
+// document-root installs and subfolder installs like /Coursehub/.
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-$scriptDir = isset($_SERVER['SCRIPT_NAME']) ? dirname($_SERVER['SCRIPT_NAME']) : '';
-$basePath = ($scriptDir === '/coursehub' || strpos($scriptDir, '/coursehub/') === 0) ? '/coursehub' : '';
+$projectRoot = realpath(dirname(__DIR__));
+$documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : false;
+$basePath = '';
+
+if ($projectRoot && $documentRoot) {
+    $normalizedProjectRoot = str_replace('\\', '/', $projectRoot);
+    $normalizedDocumentRoot = rtrim(str_replace('\\', '/', $documentRoot), '/');
+
+    if (strpos($normalizedProjectRoot, $normalizedDocumentRoot) === 0) {
+        $basePath = substr($normalizedProjectRoot, strlen($normalizedDocumentRoot));
+    }
+}
+
+if ($basePath === '' && !empty($_SERVER['SCRIPT_NAME'])) {
+    $scriptParts = explode('/', trim($_SERVER['SCRIPT_NAME'], '/'));
+    if (count($scriptParts) > 1) {
+        $basePath = '/' . $scriptParts[0];
+    }
+}
+
+$basePath = '/' . trim(str_replace('\\', '/', $basePath), '/');
+if ($basePath === '/') {
+    $basePath = '';
+}
+
 $baseHref = rtrim($protocol . '://' . $host . $basePath, '/') . '/';
 ?>
 <base href="<?php echo htmlspecialchars($baseHref); ?>">

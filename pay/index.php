@@ -35,11 +35,34 @@ $_SESSION['courseid'] = $courseid;
 
 require_once 'config.php';
 
-// Build base URL for back link (same as head_script)
+// Build base URL for back link so subfolder installs like /Coursehub/ work.
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'];
-$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
-$basePath = ($scriptDir === '/coursehub' || strpos($scriptDir, '/coursehub/') === 0) ? '/coursehub' : '';
+$projectRoot = realpath(dirname(__DIR__));
+$documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : false;
+$basePath = '';
+
+if ($projectRoot && $documentRoot) {
+    $normalizedProjectRoot = str_replace('\\', '/', $projectRoot);
+    $normalizedDocumentRoot = rtrim(str_replace('\\', '/', $documentRoot), '/');
+
+    if (strpos($normalizedProjectRoot, $normalizedDocumentRoot) === 0) {
+        $basePath = substr($normalizedProjectRoot, strlen($normalizedDocumentRoot));
+    }
+}
+
+if ($basePath === '' && !empty($_SERVER['SCRIPT_NAME'])) {
+    $scriptParts = explode('/', trim($_SERVER['SCRIPT_NAME'], '/'));
+    if (count($scriptParts) > 1) {
+        $basePath = '/' . $scriptParts[0];
+    }
+}
+
+$basePath = '/' . trim(str_replace('\\', '/', $basePath), '/');
+if ($basePath === '/') {
+    $basePath = '';
+}
+
 $baseUrl = $protocol . '://' . $host . $basePath;
 $payBaseUrl = rtrim($baseUrl, '/') . '/pay'; // used for Stripe JS (avoid double slash after head_script overwrites $baseUrl)
 $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid;

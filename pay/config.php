@@ -14,7 +14,7 @@ define("STRIPE_SECRET_API_KEY", "sk_test_51RRmNFFpmzbyKL2OdtPBpEk11D3MnfqyIU17ZY
 define("STRIPE_PUBLISHABLE_KEY", "pk_test_51RRmNFFpmzbyKL2Ot3r9TiZ78lSbxbm61lUg9cBo2PhCNILv8LMQLwkha6gmAhWAZ0ENGKxHMFhGFx2ZP2NRHHzB00KKp6bmsH");
 
 //Sample Product Details
-define('CURRENCY', 'USD');
+define('CURRENCY', 'AUD');
 define('AMOUNT', $priceval);
 define('DESCRIPTION', $ordertitle);
 

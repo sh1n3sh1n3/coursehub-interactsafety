@@ -51,7 +51,7 @@ try {
         sendJson(['error' => 'Invalid amount. Please return to the course page and try again.']);
     }
 
-    $currency = defined('CURRENCY') ? CURRENCY : 'USD';
+    $currency = defined('CURRENCY') ? CURRENCY : 'AUD';
     $description = defined('DESCRIPTION') ? DESCRIPTION : 'Course payment';
 
     $paymentIntent = \Stripe\PaymentIntent::create([ 

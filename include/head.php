@@ -40,18 +40,15 @@
         <div class="container pt-5 pb-5">
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-3">
-                    <a class="menuzord-brand pull-left flip sm-pull-center mb-5" style="display: flex; align-items: center; justify-content: center; gap: 10px;" href="index.php">
-                        <img style="max-height:85px;" src="images/logo/logo.png" alt>
-                        <div style="width: 80px; color: #212331!important">
-                            Interact Safety
-                        </div>
+                    <a class="menuzord-brand pull-left flip sm-pull-center mb-5" style="display: flex; align-items: center; justify-content: center;" href="index.php">
+                        <img src="images/logo/logo.svg" alt="Interact Safety" style="width:320px;height:50px;max-width:100%;object-fit:contain;">
                     </a>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-9">
                     <div class="row">
-                        <div class="col-xs-12 col-sm-1 col-md-1  pt-20"></div>
+                        <div class="col-xs-12 col-sm-1 col-md-1"></div>
                         <?php if(!empty($information['phone'])) { ?>
-				    	<div class="col-xs-12 col-sm-3 col-md-3  pt-20">
+				    	<div class="col-xs-12 col-sm-3 col-md-3">
                             <div class="widget no-border sm-text-center mt-10 mb-10 m-0" style="display: flex; align-items: center; justify-content: center;">
                                 <i class="pe-7s-headphones text-theme-colored2 font-48 mt-0 mr-15 mr-sm-0 sm-display-block pull-left flip sm-pull-none"></i>
                                 <div>
@@ -62,7 +59,7 @@
                         </div>
                         <?php } ?>
                         <?php if(!empty($information['email'])) { ?>
-                        <div class="col-xs-12 col-sm-3 col-md-3  pt-20">
+                        <div class="col-xs-12 col-sm-3 col-md-3">
                             <div class="widget no-border sm-text-center mt-10 mb-10 m-0" style="display: flex; align-items: center; justify-content: center;">
                                 <i class="pe-7s-mail-open text-theme-colored2 font-48 mt-0 mr-15 mr-sm-0 sm-display-block pull-left flip sm-pull-none"></i>
                                 <div>
@@ -72,7 +69,7 @@
                             </div>
                         </div>
                          <?php } ?>
-                         <div class="col-xs-12 col-sm-5 col-md-5  pt-20">
+                         <div class="col-xs-12 col-sm-5 col-md-5">
                             <div class="widget no-border sm-text-center mt-10 mb-10 m-0">
                                 <div class="col-sm-2"></div><a href="#" class="font-12 text-gray text-uppercase">Private Course Code</a>
                                 <form id="importformheader" name="importformheader" class="rest-form mb-0" method="post" action="javascript:">

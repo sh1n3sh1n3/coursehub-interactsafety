@@ -25,10 +25,44 @@ $impactem = $emailaccount['email1'];
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'];
-$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
-$basePath = ($scriptDir === '/coursehub' || strpos($scriptDir, '/coursehub/') === 0) ? '/coursehub' : '';
+$projectRoot = realpath(dirname(__DIR__));
+$documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : false;
+$basePath = '';
+
+if ($projectRoot && $documentRoot) {
+    $normalizedProjectRoot = str_replace('\\', '/', $projectRoot);
+    $normalizedDocumentRoot = rtrim(str_replace('\\', '/', $documentRoot), '/');
+
+    if (strpos($normalizedProjectRoot, $normalizedDocumentRoot) === 0) {
+        $basePath = substr($normalizedProjectRoot, strlen($normalizedDocumentRoot));
+    }
+}
+
+if ($basePath === '' && !empty($_SERVER['SCRIPT_NAME'])) {
+    $scriptParts = explode('/', trim($_SERVER['SCRIPT_NAME'], '/'));
+    if (count($scriptParts) > 1) {
+        $basePath = '/' . $scriptParts[0];
+    }
+}
+
+$basePath = '/' . trim(str_replace('\\', '/', $basePath), '/');
+if ($basePath === '/') {
+    $basePath = '';
+}
+
 $baseUrl = $protocol . '://' . $host . $basePath;
 $payPageBase = rtrim($baseUrl, '/') . '/pay';
+
+function formatPaymentAmount($amount, $currency) {
+    $formattedAmount = number_format((float) $amount, 2, '.', ',');
+    $normalizedCurrency = strtoupper(trim((string) $currency));
+
+    if ($normalizedCurrency === '' || $normalizedCurrency === 'AUD') {
+        return '$' . $formattedAmount;
+    }
+
+    return $formattedAmount . ' ' . $normalizedCurrency;
+}
 
 // Return from Stripe after Pay Now: check payment status and either show completed (redirect to self with tid) or not completed + Try again
 $payment_intent_id = isset($_GET['payment_intent']) ? trim($_GET['payment_intent']) : '';
@@ -133,6 +167,7 @@ if (!empty($payment_intent_id) && !empty($_GET['customer_id'])) {
 // If transaction ID is not empty 
 if(!empty($_GET['tid'])){
     $transaction_id  = $_GET['tid'];
+    $email_status = isset($_SESSION['payment_email_status'][$transaction_id]) ? $_SESSION['payment_email_status'][$transaction_id] : null;
 
     $db = new DB;
     // Fetch the transaction details from DB using Transaction ID
@@ -146,6 +181,7 @@ if(!empty($_GET['tid'])){
         $item_description = $row['item_description'];
         $currency = $row['currency'];
         $amount = $row['amount'];
+        $display_amount = formatPaymentAmount($amount, $currency);
     }
 }else{ 
     header("Location: index.php"); 
@@ -183,12 +219,15 @@ if(!empty($_GET['tid'])){
         	$invoiceno = 'CN/'.$minyear.'-'.$maxyear.'/'.$vrno;
         	$orderno = 'ORD'.$minyear.'-'.$maxyear.$vrno;
         	$seeltdata = $conn->query("SELECT * FROM sale WHERE courseid=".$courseid." AND slotid=".$slotid." AND user=".$register_details['id']."");
+            $insert = false;
+            $email_failed = ($email_status === 'failed');
             if($seeltdata->num_rows ==  0) { 
         	    $sql="INSERT INTO sale (date, invoiceno, vrno, orderno, courseid, slotid, user, fname, lname, email, address1,assign_to,assigned,industry_type,paymenttag,paymentmethod,paymentid,amount,netamount,hsrornot,position,company,postal_address,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, instruction) SELECT now(), '".$invoiceno."','".$vrno."','".$orderno."','".$courseid."','".$slotid."',id, fname,lname,email,postal_address,'".$course_slots['teacherid']."',1,'".$register_details['industry_type']."',1,'Online','".$transaction_id."','".$course_details['price']."','".$course_details['price']."','".$register_details['hsr_or_not']."', '".$register_details['position']."','".$register_details['company']."','".$register_details['postal_address']."','".$register_details['workplace_contact']."','".$register_details['workplace_email']."','".$register_details['workplace_phone']."','".$register_details['emergency_contact']."','".$register_details['emergency_phone']."','".$register_details['special_requirements']."','".$register_details['food_requirements']."','".$register_details['instruction']."' from registration where id='".$registerid."'";
         	    $insert = $conn->query($sql);
         	}
-        	if($seeltdata->num_rows > 0 || $insert){
-        	    $last_id = $conn->insert_id;
+            $saleCreatedNow = !empty($insert);
+        	if($seeltdata->num_rows > 0 || $saleCreatedNow){
+        	    $last_id = $saleCreatedNow ? $conn->insert_id : 0;
         	    // Payment success: mark registration as paid (seat confirmed, course register populated)
         	    $conn->query("UPDATE registration SET payment_status = 'paid' WHERE id = '".mysqli_real_escape_string($conn, $registerid)."'");
         	    if (!empty($_SESSION['client_course_code'])) {
@@ -200,7 +239,8 @@ if(!empty($_GET['tid'])){
         	        $pencount = $fetchremain_places['count'] + 1;
         	        $conn->query("UPDATE remain_places SET count=".$pencount." WHERE courseid = ".$courseid." AND slotid=".$slotid."");
         	    }
-        	    if($emailaccount['status'] == '1') {
+                $display_amount = formatPaymentAmount($amount, $currency);
+        	    if($emailaccount['status'] == '1' && $saleCreatedNow) {
         		    $userdataname = trim(($register_details['title'] ?? '').' '.$register_details['fname'].' '.$register_details['lname']);
         		    $email = $register_details['email'];
         		    $course_link = $baseUrl."/courses-detail/".$fetchcourses['id']."/".$fetchcourses['slug'];
@@ -216,7 +256,7 @@ if(!empty($_GET['tid'])){
         		    $txt1 .= "<li><strong>Course:</strong> ".htmlspecialchars($course_details['title'])."</li>";
         		    $txt1 .= "<li><strong>Start:</strong> ".$start_date."</li>";
         		    $txt1 .= "<li><strong>End:</strong> ".$end_date."</li>";
-        		    $txt1 .= "<li><strong>Amount paid:</strong> ".htmlspecialchars($amount.' '.$currency)."</li>";
+        		    $txt1 .= "<li><strong>Amount paid:</strong> ".htmlspecialchars($display_amount)."</li>";
         		    $txt1 .= "<li><strong>Transaction ID (receipt):</strong> ".htmlspecialchars($transaction_id)."</li>";
         		    if ($course_link) $txt1 .= "<li><a href='".htmlspecialchars($course_link)."' target='_blank'>View course details</a></li>";
         		    $txt1 .= "</ul>";
@@ -255,11 +295,14 @@ if(!empty($_GET['tid'])){
                             $_SESSION['orderprice'] = '';
                             $_SESSION['ordertitle'] = '';
                             $email_failed = false;
+                            $_SESSION['payment_email_status'][$transaction_id] = 'sent';
                         } else {
                             $email_failed = true;
+                            $_SESSION['payment_email_status'][$transaction_id] = 'failed';
                         }
                     } catch (Exception $e) {
                         $email_failed = true;
+                        $_SESSION['payment_email_status'][$transaction_id] = 'failed';
                     }
                     $_SESSION['orderprice'] = '';
                     $_SESSION['ordertitle'] = '';
@@ -337,7 +380,7 @@ if(!empty($_GET['tid'])){
                                 <div class="row-item"><strong>Name</strong> <?php echo htmlspecialchars(trim($register_details['fname'].' '.$register_details['lname'])); ?></div>
                                 <div class="row-item"><strong>Email</strong> <?php echo htmlspecialchars($email); ?></div>
                                 <div class="row-item"><strong>Transaction ID</strong> <code><?php echo htmlspecialchars($transaction_id); ?></code></div>
-                                <div class="row-item"><strong>Amount</strong> <?php echo htmlspecialchars($amount.' '.$currency); ?></div>
+                                <div class="row-item"><strong>Amount</strong> <?php echo htmlspecialchars($display_amount); ?></div>
                             </div>
                             <p class="text-center" style="margin-top: 28px;">
                                 <a href="<?php echo htmlspecialchars(rtrim($baseUrl, '/') . '/'); ?>" class="btn-continue">Back to website</a>

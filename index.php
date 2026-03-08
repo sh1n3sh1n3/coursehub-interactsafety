@@ -45,7 +45,7 @@
                         <div class="row">
                             <div class="col-md-7">
                                 <?php $aboutus = $conn->query("SELECT * FROM aboutus WHERE id='1'")->fetch_assoc(); ?>
-                                <h2 class="text-uppercase text-theme-colored mt-0 mt-sm-30">About the business and myself</h2>
+                                <h2 class="text-uppercase text-theme-colored mt-0 mt-sm-30">The Interact Safety Approach.</h2>
                                 <div class="double-line-bottom-theme-colored-2"></div>
                                 <?php $string = $aboutus['description'];
                                     if (strlen($string) > 2500) {
@@ -70,7 +70,7 @@
                         <div class="section-title text-center mb-40">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <h2 class="text-uppercase title mt-0">Health and Safety Courses</h2>
+                                    <h2 class="text-uppercase title mt-0">WorkSafe-Approved HSR Training Courses</h2>
                                     <div class="double-line-bottom-theme-colored-2 mx-auto"></div>
                                 </div>
                             </div>
@@ -110,7 +110,7 @@
                     <div class="section-title">
                         <div class="row">
                             <div class="col-md-12">
-                                <h2 class="text-uppercase title">Here is what  <span class="text-theme-colored2">our clients </span>say about us </h2>
+                                <h2 class="text-uppercase title">What People Say About Interact Safety</h2>
                                 <!--<p class="text-uppercase mb-0">Student and Parents Opinion</p>-->
                                 <div class="double-line-bottom-theme-colored-2"></div>
                             </div>
