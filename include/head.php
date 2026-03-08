@@ -6,12 +6,12 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="widget text-white">
-                        <ul class="styled-icons icon-sm icon-bordered icon-circled clearfix mt-10">
-                          <?php if(!empty($information['facebook']) && $information['facebook'] != '#') { ?><li><a href="<?php echo $information['facebook']; ?>" target="_blank"><i class="fa fa-facebook text-theme-colored2"></i></a></li><?php } ?>
-                          <?php if(!empty($information['instagram']) && $information['instagram'] != '#') { ?><li><a href="<?php echo $information['instagram']; ?>" target="_blank"><i class="fa fa-instagram text-theme-colored2"></i></a></li><?php } ?>
-                          <?php if(!empty($information['youtube']) && $information['youtube'] != '#') { ?><li><a href="<?php echo $information['youtube']; ?>" target="_blank"><i class="fa fa-youtube text-theme-colored2"></i></a></li><?php } ?>
-                          <?php if(!empty($information['twitter']) && $information['twitter'] != '#') { ?><li><a href="<?php echo $information['twitter']; ?>" target="_blank"><i class="fa fa-twitter text-theme-colored2"></i></a></li><?php } ?>
-                          <?php if(!empty($information['linkden']) && $information['linkden'] != '#') { ?><li><a href="<?php echo $information['linkden']; ?>" target="_blank"><i class="fa fa-linkedin text-theme-colored2"></i></a></li><?php } ?>
+                        <ul class="styled-icons icon-sm pull-left flip sm-pull-none sm-text-center mt-5">
+                            <?php if(!empty($information['facebook'] && $information['facebook'] != '#')) { ?><li><a href="<?php echo $information['facebook']; ?>" target="_blank"><i class="fa fa-facebook text-white"></i></a></li><?php } ?>
+                            <?php if(!empty($information['instagram'] && $information['instagram'] != '#')) { ?><li><a href="<?php echo $information['instagram']; ?>" target="_blank"><i class="fa fa-instagram text-white"></i></a></li><?php } ?>
+                            <?php if(!empty($information['youtube'] && $information['youtube'] != '#')) { ?><li><a href="<?php echo $information['youtube']; ?>" target="_blank"><i class="fa fa-youtube text-white"></i></a></li><?php } ?>
+                            <?php if(!empty($information['twitter'] && $information['twitter'] != '#')) { ?><li><a href="<?php echo $information['twitter']; ?>" target="_blank"><i class="fa fa-twitter text-white"></i></a></li><?php } ?>
+                            <?php if(!empty($information['linkden'] && $information['linkden'] != '#')) { ?><li><a href="<?php echo $information['linkden']; ?>" target="_blank"><i class="fa fa-linkedin text-white"></i></a></li><?php } ?>
                         </ul>
                     </div>
                 </div>
