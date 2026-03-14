@@ -11,9 +11,21 @@ $emailaccount = $conn->query("SELECT * FROM emails WHERE type='support'")->fetch
 $impacttitle = $emailaccount ? $emailaccount['title1'] : '';
 $impactph = $emailaccount ? $emailaccount['phone'] : '';
 $impactem = $emailaccount ? $emailaccount['email1'] : '';
-$slotid_get = isset($_GET['slotid']) ? mysqli_real_escape_string($conn, $_GET['slotid']) : '';
-$course_slots = $slotid_get !== '' ? $conn->query("SELECT * FROM course_slots WHERE id='".$slotid_get."'")->fetch_assoc() : null;
-$course_details = !empty($_GET['courseid']) ? $conn->query("SELECT * FROM courses WHERE id='".mysqli_real_escape_string($conn, $_GET['courseid'])."'")->fetch_assoc() : null;
+$courseid_get = (isset($_GET['courseid']) && ctype_digit((string) $_GET['courseid'])) ? (int) $_GET['courseid'] : 0;
+$locid_get = (isset($_GET['locid']) && ctype_digit((string) $_GET['locid'])) ? (int) $_GET['locid'] : 0;
+$slotid_get = (isset($_GET['slotid']) && ctype_digit((string) $_GET['slotid'])) ? (int) $_GET['slotid'] : 0;
+$cityid_get = (isset($_GET['cityid']) && ctype_digit((string) $_GET['cityid'])) ? (int) $_GET['cityid'] : 0;
+$course_slots = $slotid_get > 0 ? $conn->query("SELECT * FROM course_slots WHERE id='".$slotid_get."'")->fetch_assoc() : null;
+$course_details = $courseid_get > 0 ? $conn->query("SELECT * FROM courses WHERE id='".$courseid_get."'")->fetch_assoc() : null;
+$registrationLinkIsValid = $courseid_get > 0
+    && $locid_get > 0
+    && $slotid_get > 0
+    && $cityid_get > 0
+    && !empty($course_details)
+    && !empty($course_slots)
+    && (int) $course_slots['courseid'] === $courseid_get
+    && (int) $course_slots['locid'] === $locid_get
+    && (int) $course_slots['cityid'] === $cityid_get;
 $sessionemail = ''; $backbutn = '';
 if(isset($_SESSION['client_emaill']) && $course_slots && $course_slots['type'] == 'private') {
     $sessionemail = $_SESSION['client_emaill'];
@@ -94,13 +106,17 @@ $err = $msg = $errup = $msgup = '';
 $last_id = null;
 $loggedid = null;
 
+if (!$registrationLinkIsValid) {
+    $err = 'Invalid registration link. Please use the link from the course page.';
+}
+
 // Process POST before any output so redirect can work (MVP: Full Name, Email, Phone, Course only)
 if (isset($_POST['submit'])) {
-    $courseid = isset($_GET['courseid']) ? $_GET['courseid'] : '';
-    $locid = isset($_GET['locid']) ? $_GET['locid'] : '';
-    $slotid = isset($_GET['slotid']) ? $_GET['slotid'] : '';
-    $cityid = isset($_GET['cityid']) ? $_GET['cityid'] : '';
-    if ($courseid === '' || $locid === '' || $slotid === '' || $cityid === '') {
+    $courseid = $courseid_get;
+    $locid = $locid_get;
+    $slotid = $slotid_get;
+    $cityid = $cityid_get;
+    if (!$registrationLinkIsValid) {
         $err = 'Invalid registration link. Missing course/slot parameters. Please use the link from the course page.';
     } else {
     $fullname = trim(mysqli_real_escape_string($conn, $_POST['fullname']));
@@ -140,6 +156,9 @@ if (isset($_POST['submit'])) {
 }
 
 if (isset($_POST['update'])) {
+    if (!$registrationLinkIsValid) {
+        $errup = 'Invalid registration link. Please use the link from the course page.';
+    } else {
     $fullname = trim(mysqli_real_escape_string($conn, $_POST['fullname']));
     $parts = explode(' ', $fullname, 2);
     $fname = $parts[0];
@@ -147,10 +166,10 @@ if (isset($_POST['update'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
     $loggedid = (int)$_POST['loggedid'];
-    $courseid = $_GET['courseid'];
-    $locid = $_GET['locid'];
-    $slotid = $_GET['slotid'];
-    $cityid = $_GET['cityid'];
+    $courseid = $courseid_get;
+    $locid = $locid_get;
+    $slotid = $slotid_get;
+    $cityid = $cityid_get;
     $sqlquery = "UPDATE registration SET fname = '".$fname."', lname = '".$lname."', email='".$email."', workplace_phone = '".$phone."' WHERE id=".$loggedid;
     $update = $conn->query($sqlquery);
     if ($update) {
@@ -166,14 +185,18 @@ if (isset($_POST['update'])) {
     } else {
         $errup = $conn->error;
     }
+    }
 }
 
 // Verify OTP (production): compare and set session, then redirect to show full form
 if (isset($_POST['verify_otp']) && isset($_SESSION['pin_user'])) {
-    $courseid = isset($_GET['courseid']) ? $_GET['courseid'] : '';
-    $locid = isset($_GET['locid']) ? $_GET['locid'] : '';
-    $slotid = isset($_GET['slotid']) ? $_GET['slotid'] : '';
-    $cityid = isset($_GET['cityid']) ? $_GET['cityid'] : '';
+    $courseid = $courseid_get;
+    $locid = $locid_get;
+    $slotid = $slotid_get;
+    $cityid = $cityid_get;
+    if (!$registrationLinkIsValid) {
+        $err = 'Invalid registration link. Please use the link from the course page.';
+    } else {
     $entered = isset($_POST['otp']) ? trim($_POST['otp']) : '';
     if (isset($_SESSION['registration_otp']) && $entered === (string)$_SESSION['registration_otp']) {
         $_SESSION['registration_otp_verified'] = true;
@@ -185,10 +208,14 @@ if (isset($_POST['verify_otp']) && isset($_SESSION['pin_user'])) {
     $redirectUrl = $redirectBaseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid;
     header("Location: " . $redirectUrl);
     exit;
+    }
 }
 
 // Full enrollment form submit: update registration, then redirect to payment page
 if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
+    if (!$registrationLinkIsValid) {
+        $err = 'Invalid registration link. Please use the link from the course page.';
+    } else {
     $rid = (int)$_SESSION['pin_user'];
     $title = mysqli_real_escape_string($conn, $_POST['title'] ?? '');
     $position = mysqli_real_escape_string($conn, $_POST['position'] ?? '');
@@ -213,6 +240,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         $msg = 'Enrollment saved. <a href="'.$redirectBaseUrl.'/pay/'.$_GET['courseid'].'/'.$_GET['locid'].'/'.$_GET['slotid'].'/'.$_GET['cityid'].'/'.$rid.'">Go to payment</a>.';
     } else {
         $err = $conn->error;
+    }
     }
 }
 ?>

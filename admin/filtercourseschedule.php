@@ -18,7 +18,6 @@
 <?php $count=0; 
 
 $isPublished = $_POST['isPublished'];
-$catid = $_POST['catid'];
 $teacherid = $_POST['teacherid'];
 $delivery_types = $_POST['delivery_types'];
 $dates='';
@@ -29,9 +28,6 @@ if(!empty($isPublished) && $isPublished != '') {
     } else {
         $query .= " AND course_slots.isPublished='".$isPublished."'";
     }
-}
-if(!empty($catid) && $catid != '') {
-    $query .= " AND courses.catid='".$catid."'";
 }
 if(!empty($delivery_types) && $delivery_types != '') {
     $query .= " AND courses.delivery_types='".$delivery_types."'";

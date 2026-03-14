@@ -2,7 +2,6 @@
 $courseid=$_GET['id'];
 
 $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'")->fetch_assoc();
-$cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE id=".$courses_details['catid'])->fetch_assoc();
 //require_once('phpmailer/class.phpmailer.php');
   //  $emailaccount = $conn->query("SELECT * FROM emails WHERE type='support'")->fetch_assoc();
     //$refitcertifiedph = $emailaccount['phone'];
@@ -61,7 +60,6 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
                                 <h2 class="text-theme-colored2 font-36"><?php echo htmlspecialchars($courses_details['title']); ?></h2>
                                 <ol class="breadcrumb text-left mt-10 white">
                                     <li><a href="index.php">Home</a></li>
-                                    <li><a href="courses/<?php echo $cate['id']; ?>/<?php echo $cate['slug']; ?>"><?php echo $cate['title']; ?></a></li>
                                     <li class="active"><?php echo htmlspecialchars($courses_details['title']); ?></li>
                                 </ol>
                             </div>

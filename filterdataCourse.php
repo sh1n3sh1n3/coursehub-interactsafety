@@ -1,10 +1,9 @@
 <?php session_start(); include('include/conn.php'); 
-$catid=$_POST['catid'];
 $val=$_POST['val'];
 if($val == 'all') { ?>
 <div class="bg-silver-deep" style="padding:15px"><b>All Records</b></div>
 <?php
-$courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM courses WHERE status='1' and catid='".$catid."'  order by title ASC");
+$courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM courses WHERE status='1' AND isPublished='1' order by title ASC");
 if($courses->num_rows > 0) {
 while($fetchcourses = $courses->fetch_assoc()) {
     $id = $fetchcourses['id'];
@@ -39,7 +38,7 @@ while($fetchcourses = $courses->fetch_assoc()) {
     $course_slots = $conn->query("SELECT * FROM course_slots WHERE locid='".$val."'");
     if($course_slots->num_rows > 0) {
     while($fetchcourse_slots = $course_slots->fetch_assoc()) {
-    $courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM courses WHERE status='1' and catid='".$catid."' AND id='".$fetchcourse_slots['courseid']."'  order by title ASC");
+    $courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM courses WHERE status='1' AND isPublished='1' AND id='".$fetchcourse_slots['courseid']."' order by title ASC");
     while($fetchcourses = $courses->fetch_assoc()) {
         $id = $fetchcourses['id'];
         $price = isset($fetchcourses['price']) && $fetchcourses['price'] !== '' ? $fetchcourses['price'] : null;

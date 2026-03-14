@@ -25,7 +25,7 @@
     #home .event-list { flex: 1; display: flex; flex-direction: column; min-height: 100%; }
     #home .event-list a { flex: 1; display: flex; flex-direction: column; }
     #home .event-list-details { flex: 0 0 auto; min-height: 80px; height: 80px; display: flex; align-items: center; justify-content: center; padding: 15px; }
-    #home .event-list-details h5 { margin: 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    #home .event-list-details h5 { margin: 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     #home .event-list .thumb { flex: 0 0 200px; height: 200px; overflow: hidden; display: block; }
     #home .event-list .thumb img { object-fit: cover; width: 100%; height: 100%; display: block; transform: scale(1.3); transition: transform 0.4s ease; }
     #home .event-list:hover .thumb img { transform: scale(1.5); }
@@ -77,25 +77,19 @@
                         </div>
                         <div class="row multi-row-clearfix">
                             	<?php $count=0;
-					$courses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE status='1' order by title ASC");
+					$courses = $conn->query("SELECT *, replace(slug,' ','-') as slug FROM courses WHERE status='1' AND isPublished='1' ORDER BY title ASC");
 					while($fetchcourses = $courses->fetch_assoc()) {
-						$count++; $id = $fetchcourses['id'];
-						$firstCourse = $conn->query("SELECT id, replace(slug,' ','-') as slug FROM courses WHERE catid='".$id."' ORDER BY id ASC LIMIT 1");
-						if ($firstCourse && $firstCourse->num_rows > 0) {
-							$first = $firstCourse->fetch_assoc();
-							$cardHref = 'courses-detail/'.$first['id'].'/'.$first['slug'];
-						} else {
-							$cardHref = '#';
-						}
+						$count++;
+						$cardHref = 'courses-detail/'.$fetchcourses['id'].'/'.$fetchcourses['slug'];
 					?>
                             <div class="col-sm-6 col-md-4">
                                 <div class="event-list bg-silver-light maxwidth500">
-                                    <a href="<?php echo $cardHref; ?>"<?php if ($cardHref === '#'): ?> onclick="return false;"<?php endif; ?>>
+                                    <a href="<?php echo $cardHref; ?>">
                                     <div class="event-list-details border-1px bg-white clearfix text-center" style="overflow:hidden">
                                         <h5 class="text-uppercase font-weight-600 font-16"><?php echo $fetchcourses['title']; ?></h5>
                                     </div>
                                     <div class="thumb">
-                                        <img src="assets/images/category/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
+                                        <img src="assets/images/course/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
                                     </div></a>
                                 </div>
                             </div>
