@@ -1,36 +1,4 @@
-<?php
-// Build the site base URL from the actual project path so assets work in both
-// document-root installs and subfolder installs like /Coursehub/.
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-$projectRoot = realpath(dirname(__DIR__));
-$documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : false;
-$basePath = '';
-
-if ($projectRoot && $documentRoot) {
-    $normalizedProjectRoot = str_replace('\\', '/', $projectRoot);
-    $normalizedDocumentRoot = rtrim(str_replace('\\', '/', $documentRoot), '/');
-
-    if (strpos($normalizedProjectRoot, $normalizedDocumentRoot) === 0) {
-        $basePath = substr($normalizedProjectRoot, strlen($normalizedDocumentRoot));
-    }
-}
-
-if ($basePath === '' && !empty($_SERVER['SCRIPT_NAME'])) {
-    $scriptParts = explode('/', trim($_SERVER['SCRIPT_NAME'], '/'));
-    if (count($scriptParts) > 1) {
-        $basePath = '/' . $scriptParts[0];
-    }
-}
-
-$basePath = '/' . trim(str_replace('\\', '/', $basePath), '/');
-if ($basePath === '/') {
-    $basePath = '';
-}
-
-$baseHref = rtrim($protocol . '://' . $host . $basePath, '/') . '/';
-?>
-<base href="<?php echo htmlspecialchars($baseHref); ?>">
+<base href="https://coursehub.interactsafety.com.au/">
 <link href="images/logo/favicon.ico" rel="shortcut icon" type="image/x-icon">
 <link href="images/logo/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
 <link href="images/logo/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
@@ -54,89 +22,111 @@ $baseHref = rtrim($protocol . '://' . $host . $basePath, '/') . '/';
 <link href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" rel="stylesheet" type="text/css">
 <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
 <style>
-.select2-container--default .select2-selection--single {
-    border: 1px solid #eee;
-}
-.select2-container .select2-selection--single .select2-selection__rendered {
-    padding-left: 12px;
-    padding-right: 12px;
-}
-.dataTables_length {
-    display: inline;
-    margin-left: 5px;
-}
-.dataTables_info {
-    float: left;
-    display: inline;
-}
-.dataTables_paginate.paging_simple_numbers {
-    float: right;
-    display: inline;
-}
-.menuzord-menu>li {
-    margin-left: 4px !important;
-}
-.mandatory, .footnote {
-color: #f00;
-font-weight: bold;
-}
-.account-tabs.nav-tabs>li {
-    width:100%;
-}
-.account-tabs.nav-tabs>li>a {
-    border-bottom: 1px solid #ddd !important;
-}
-.account-tabs.nav-tabs>li.active>a, .account-tabs.nav-tabs>li.active>a:focus, .account-tabs.nav-tabs>li.active>a:hover {
-    border-bottom: 1px solid #fc9928 !important;
-    background: #f9f9f6;
-}
-.account-box .panel-default {
-    border-color: transparent !Important;
-}
-.testimonial-box {
-    padding: 25px 25px 25px 50px;
-    margin-bottom: 25px;
-    background: #ebebeb !important;
-    position: relative;
-    font-style:italic;
-}
-.testimonial-content.testimonial-div::after {
-    width: 50px;
-    height: 45px;
-    background: #165F9A;
-    text-align: center;
-    font-size: 22px;
-    color: #fff;
-    line-height: 45px;
-    position: absolute;
-    top: 37px;
-    left: -19px;
-    opacity: 1;
-}
-.testimonial .testimonial-box:after {
-    content: "";
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background: #ebebeb !important;
-    position: absolute;
-    bottom: -10px;
-    left: 22px;
-    transform: rotate(45deg);
-}
-.testimonial-content.testimonial-div {
-    margin-top: 0;
-    margin-left: 25px;
-    position: relative;
-}
-.sortable-handler { touch-action: auto; }
-html, body, #wrapper {
-    overflow-y: auto !important;
-    height: auto !important;
-}
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #eee;
+    }
 
-* {
-    touch-action: auto !important;
-}
+    .select2-container .select2-selection--single .select2-selection__rendered {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
 
+    .dataTables_length {
+        display: inline;
+        margin-left: 5px;
+    }
+
+    .dataTables_info {
+        float: left;
+        display: inline;
+    }
+
+    .dataTables_paginate.paging_simple_numbers {
+        float: right;
+        display: inline;
+    }
+
+    .menuzord-menu>li {
+        margin-left: 4px !important;
+    }
+
+    .mandatory,
+    .footnote {
+        color: #f00;
+        font-weight: bold;
+    }
+
+    .account-tabs.nav-tabs>li {
+        width: 100%;
+    }
+
+    .account-tabs.nav-tabs>li>a {
+        border-bottom: 1px solid #ddd !important;
+    }
+
+    .account-tabs.nav-tabs>li.active>a,
+    .account-tabs.nav-tabs>li.active>a:focus,
+    .account-tabs.nav-tabs>li.active>a:hover {
+        border-bottom: 1px solid #fc9928 !important;
+        background: #f9f9f6;
+    }
+
+    .account-box .panel-default {
+        border-color: transparent !Important;
+    }
+
+    .testimonial-box {
+        padding: 25px 25px 25px 50px;
+        margin-bottom: 25px;
+        background: #ebebeb !important;
+        position: relative;
+        font-style: italic;
+    }
+
+    .testimonial-content.testimonial-div::after {
+        width: 50px;
+        height: 45px;
+        background: #165F9A;
+        text-align: center;
+        font-size: 22px;
+        color: #fff;
+        line-height: 45px;
+        position: absolute;
+        top: 37px;
+        left: -19px;
+        opacity: 1;
+    }
+
+    .testimonial .testimonial-box:after {
+        content: "";
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: #ebebeb !important;
+        position: absolute;
+        bottom: -10px;
+        left: 22px;
+        transform: rotate(45deg);
+    }
+
+    .testimonial-content.testimonial-div {
+        margin-top: 0;
+        margin-left: 25px;
+        position: relative;
+    }
+
+    .sortable-handler {
+        touch-action: auto;
+    }
+
+    html,
+    body,
+    #wrapper {
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+
+    * {
+        touch-action: auto !important;
+    }
 </style>

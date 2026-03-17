@@ -74,32 +74,7 @@ function sendRegistrationOtp($conn, $email, $name, $emailaccount) {
 // Build base URL for redirects so subfolder installs like /Coursehub/ work.
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'];
-$projectRoot = realpath(__DIR__);
-$documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : false;
-$basePath = '';
-
-if ($projectRoot && $documentRoot) {
-    $normalizedProjectRoot = str_replace('\\', '/', $projectRoot);
-    $normalizedDocumentRoot = rtrim(str_replace('\\', '/', $documentRoot), '/');
-
-    if (strpos($normalizedProjectRoot, $normalizedDocumentRoot) === 0) {
-        $basePath = substr($normalizedProjectRoot, strlen($normalizedDocumentRoot));
-    }
-}
-
-if ($basePath === '' && !empty($_SERVER['SCRIPT_NAME'])) {
-    $scriptParts = explode('/', trim($_SERVER['SCRIPT_NAME'], '/'));
-    if (count($scriptParts) > 1) {
-        $basePath = '/' . $scriptParts[0];
-    }
-}
-
-$basePath = '/' . trim(str_replace('\\', '/', $basePath), '/');
-if ($basePath === '/') {
-    $basePath = '';
-}
-
-$redirectBaseUrl = $protocol . '://' . $host . $basePath;
+$redirectBaseUrl = $protocol . '://' . $host;
 $isLocalhost = (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false);
 
 $err = $msg = $errup = $msgup = '';
