@@ -26,7 +26,7 @@ $impactem = $emailaccount['email1'];
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'];
-$baseUrl = $protocol . '://' . $host . $basePath;
+$baseUrl = $protocol . '://' . $host;
 $payPageBase = rtrim($baseUrl, '/') . '/pay';
 
 function formatPaymentAmount($amount, $currency)
