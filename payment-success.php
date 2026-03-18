@@ -67,9 +67,9 @@
     		    $userdataname = trim(($register_details['title'] ?? '').' '.$register_details['fname'].' '.$register_details['lname']);
     		    $email = $register_details['email'];
     		    $course_link = $urlcourse."courses-detail/".$fetchcourses['id']."/".$fetchcourses['slug'];
-    		    $start_date = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])).' at '.date('g:i A', strtotime($fetchdates['starttime'])) : '—';
-    		    $end_date = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '—';
-    		    $location_text = ($course_city ? $course_city['name'].' — ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
+    		    $start_date = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])).' at '.date('g:i A', strtotime($fetchdates['starttime'])) : '-';
+    		    $end_date = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '-';
+    		    $location_text = ($course_city ? $course_city['name'].' - ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
     		    $map_link = !empty($course_locations['maplink']) ? $course_locations['maplink'] : '';
     		    $what_to_bring = !empty($course_slots['remarks']) ? trim($course_slots['remarks']) : 'Photo ID; notepad and pen; any materials advised in your course joining instructions.';
     		    $txt1 = "<p>Hi ".htmlspecialchars($register_details['fname']).",</p>";
@@ -104,12 +104,13 @@
                     $mail->SMTPSecure = 'tls';
                     $mail->SMTPAuth   = true;
                     $mail->IsHTML(true);
+                    $mail->CharSet    = 'UTF-8';
                     $mail->Username   = $emailaccount['email'];
                     $mail->Password   = $emailaccount['password'];
                     $mail->addAddress($email, $userdataname);
                     $mail->setFrom($impactem, $impacttitle);
                     $mail->addReplyTo($impactem, $impacttitle);
-                    $mail->Subject = "Seat confirmed – ".$course_details['title'];
+                    $mail->Subject = "Seat confirmed - ".$course_details['title'];
                     $mail->Body    = $txt1;
                     $mail->Send();
                 } catch (Exception $e) {
@@ -142,9 +143,9 @@
 
 	?>
 <?php
-    $conf_start = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])).' at '.date('g:i A', strtotime($fetchdates['starttime'])) : '—';
-    $conf_end = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '—';
-    $conf_location = ($course_city ? $course_city['name'].' — ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
+    $conf_start = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])).' at '.date('g:i A', strtotime($fetchdates['starttime'])) : '-';
+    $conf_end = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '-';
+    $conf_location = ($course_city ? $course_city['name'].' - ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
     $student_email = $register_details['email'];
 ?>
 <!DOCTYPE html>
@@ -152,8 +153,8 @@
 <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <meta name="description" content="Booking confirmed – <?php echo htmlspecialchars($course_details['title']); ?>" />
-    <title>Booking confirmed – <?php echo htmlspecialchars($course_details['title']); ?></title>
+    <meta name="description" content="Booking confirmed - <?php echo htmlspecialchars($course_details['title']); ?>" />
+    <title>Booking confirmed - <?php echo htmlspecialchars($course_details['title']); ?></title>
     <?php include("include/head_script.php"); ?>
     <style>
         .confirmation-hero { background: linear-gradient(135deg, #0d6b4c 0%, #0a5a3d 100%); color: #fff; padding: 32px 24px; border-radius: 8px; text-align: center; margin-bottom: 28px; }
