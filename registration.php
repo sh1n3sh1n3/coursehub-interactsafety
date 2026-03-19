@@ -32,6 +32,19 @@ if(isset($_SESSION['client_emaill']) && $course_slots && $course_slots['type'] =
     $backbutn = '1';
 }
 
+// Session enrolment must match this URL (prevents wrong-course session reuse)
+if ($registrationLinkIsValid && !empty($_SESSION['pin_user'])) {
+    $pu = (int) $_SESSION['pin_user'];
+    $chk = $conn->query("SELECT id, slotid, courseid, locid, cityid FROM registration WHERE id=" . $pu)->fetch_assoc();
+    if (!$chk
+        || (int) $chk['slotid'] !== $slotid_get
+        || (int) $chk['courseid'] !== $courseid_get
+        || (int) $chk['locid'] !== $locid_get
+        || (int) $chk['cityid'] !== $cityid_get) {
+        unset($_SESSION['pin_user'], $_SESSION['registration_otp'], $_SESSION['registration_otp_verified'], $_SESSION['registration_resume_flow'], $_SESSION['registration_welcome_complete']);
+    }
+}
+
 function genRandomString() {
     $length = 5;
     $characters = '023456789abcdefghijkmnopqrstuvwxyz';
@@ -41,6 +54,36 @@ function genRandomString() {
         $string .= $characters[mt_rand(0, $max)];
     }
     return $string;
+}
+
+function registrationEmailNormalized($email) {
+    return strtolower(trim((string) $email));
+}
+
+/** Existing registration row for this scheduled course (slot) and email (case-insensitive). */
+function findRegistrationBySlotEmail($conn, $slotid, $emailNorm) {
+    $slotid = (int) $slotid;
+    $e = mysqli_real_escape_string($conn, $emailNorm);
+    $res = $conn->query("SELECT * FROM registration WHERE slotid=" . $slotid . " AND LOWER(TRIM(email)) = '" . $e . "' ORDER BY id ASC LIMIT 1");
+    return ($res && $res->num_rows) ? $res->fetch_assoc() : null;
+}
+
+/** Paid or has a sale row for this course slot = fully enrolled. */
+function registrationIsFullyEnrolled($conn, $row) {
+    if (!$row) {
+        return false;
+    }
+    if (!empty($row['payment_status']) && strtolower((string) $row['payment_status']) === 'paid') {
+        return true;
+    }
+    $uid = (int) $row['id'];
+    $slot = (int) $row['slotid'];
+    $course = (int) $row['courseid'];
+    if ($uid <= 0) {
+        return false;
+    }
+    $r = $conn->query("SELECT id FROM sale WHERE user=" . $uid . " AND slotid=" . $slot . " AND courseid=" . $course . " LIMIT 1");
+    return $r && $r->num_rows > 0;
 }
 
 /** Generate 6-digit OTP and optionally send by email. Returns OTP. On local, skips sending. */
@@ -98,8 +141,38 @@ if (isset($_POST['submit'])) {
     $parts = explode(' ', $fullname, 2);
     $fname = $parts[0];
     $lname = isset($parts[1]) ? $parts[1] : '';
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $emailRaw = trim((string) $_POST['email']);
+    $email = mysqli_real_escape_string($conn, $emailRaw);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
+    $emailNorm = registrationEmailNormalized($emailRaw);
+    $existing = findRegistrationBySlotEmail($conn, $slotid, $emailNorm);
+
+    if ($existing && registrationIsFullyEnrolled($conn, $existing)) {
+        $err = 'This email is already registered for this scheduled course. You are already enrolled. If you need to change your booking, please contact Interact Safety.';
+    } elseif ($existing) {
+        // Same email + slot, not yet paid: update single row (no duplicate)
+        $rid = (int) $existing['id'];
+        $sqlUp = "UPDATE registration SET fname='" . $fname . "', lname='" . $lname . "', email='" . $email . "', workplace_phone='" . $phone . "', courseid='" . $courseid . "', locid='" . $locid . "', slotid='" . $slotid . "', cityid='" . $cityid . "' WHERE id=" . $rid;
+        if ($conn->query($sqlUp)) {
+            $_SESSION['pin_user'] = $rid;
+            unset($_SESSION['registration_otp_verified']);
+            $_SESSION['registration_resume_flow'] = true;
+            $otp = sendRegistrationOtp($conn, $emailRaw, trim((string) $_POST['fullname']), $emailaccount);
+            $_SESSION['registration_otp'] = $otp;
+            if ($isLocalhost) {
+                $_SESSION['registration_otp_verified'] = true;
+                $_SESSION['registration_welcome_complete'] = true;
+                unset($_SESSION['registration_resume_flow']);
+            }
+            $msg = $isLocalhost
+                ? 'Welcome back. Your enrolment details are loaded below — complete your enrollment to continue.'
+                : 'This email already has a pending enrolment for this course. A verification code has been sent — enter it below to continue and complete your enrollment.';
+            $redirectUrl = $redirectBaseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid;
+            header("Location: " . $redirectUrl);
+            exit;
+        }
+        $err = $conn->error;
+    } else {
     $generated_code = genRandomString();
     $check_random_string_row = $conn->query('SELECT generated_code FROM registration WHERE (generated_code="'.mysqli_real_escape_string($conn, $generated_code).'")')->fetch_assoc();
     if ($check_random_string_row && $generated_code == $check_random_string_row['generated_code']) {
@@ -109,13 +182,14 @@ if (isset($_POST['submit'])) {
     $workplace_contact = $workplace_email = $emergency_contact = $emergency_phone = '';
     $industry_type = $hsr_or_not = '0';
     $password = '';
-    // Pending enrolment only: no seat, no confirmation email until payment succeeds
+    unset($_SESSION['registration_resume_flow']);
+    // Pending enrolment only: no seat until payment succeeds
     $sql = "INSERT INTO registration (title,fname,lname,email,position,company,postal_address,courseid,locid,slotid,cityid,industry_type,hsr_or_not,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, password, generated_code, instruction, verifyEmail, payment_status) VALUES ('".$title."','".$fname."','".$lname."','".$email."','".$position."','".$company."','".$postal_address."','".$courseid."','".$locid."', '".$slotid."', '".$cityid."', '".$industry_type."', '".$hsr_or_not."', '".$workplace_contact."', '".$workplace_email."','".$phone."', '".$emergency_contact."', '".$emergency_phone."', '".$special_requirements."', '".$food_requirements."', '".$password."', '".$generated_code."', '".$instruction."', '1', 'pending')";
     $insert = $conn->query($sql);
     $last_id = mysqli_insert_id($conn);
     if ($insert) {
         $_SESSION['pin_user'] = $last_id;
-        $otp = sendRegistrationOtp($conn, $email, trim($fullname), $emailaccount);
+        $otp = sendRegistrationOtp($conn, $emailRaw, trim((string) $_POST['fullname']), $emailaccount);
         $_SESSION['registration_otp'] = $otp;
         if ($isLocalhost) {
             $_SESSION['registration_otp_verified'] = true;
@@ -128,6 +202,7 @@ if (isset($_POST['submit'])) {
         $err = $conn->error;
     }
     }
+    }
 }
 
 if (isset($_POST['update'])) {
@@ -138,17 +213,35 @@ if (isset($_POST['update'])) {
     $parts = explode(' ', $fullname, 2);
     $fname = $parts[0];
     $lname = isset($parts[1]) ? $parts[1] : '';
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $emailRaw = trim((string) $_POST['email']);
+    $email = mysqli_real_escape_string($conn, $emailRaw);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
     $loggedid = (int)$_POST['loggedid'];
     $courseid = $courseid_get;
     $locid = $locid_get;
     $slotid = $slotid_get;
     $cityid = $cityid_get;
-    $sqlquery = "UPDATE registration SET fname = '".$fname."', lname = '".$lname."', email='".$email."', workplace_phone = '".$phone."' WHERE id=".$loggedid;
+    $pin = isset($_SESSION['pin_user']) ? (int) $_SESSION['pin_user'] : 0;
+    if ($loggedid !== $pin || $loggedid <= 0) {
+        $errup = 'Session expired. Please start again from the course page.';
+    } else {
+    $rowSelf = $conn->query("SELECT * FROM registration WHERE id=" . $loggedid)->fetch_assoc();
+    if (!$rowSelf || (int) $rowSelf['slotid'] !== $slotid) {
+        $errup = 'Invalid enrolment. Please use the link from the course page.';
+    } else {
+    $emailNorm = registrationEmailNormalized($emailRaw);
+    $other = findRegistrationBySlotEmail($conn, $slotid, $emailNorm);
+    if ($other && (int) $other['id'] !== $loggedid) {
+        if (registrationIsFullyEnrolled($conn, $other)) {
+            $errup = 'This email is already registered for this scheduled course. You are already enrolled.';
+        } else {
+            $errup = 'This email is already used for a pending enrolment on this course. Use that email to continue, or contact Interact Safety.';
+        }
+    } else {
+    $sqlquery = "UPDATE registration SET fname = '".$fname."', lname = '".$lname."', email='".$email."', workplace_phone = '".$phone."' WHERE id=".$loggedid." AND slotid=".$slotid;
     $update = $conn->query($sqlquery);
     if ($update) {
-        $otp = sendRegistrationOtp($conn, $email, trim($fullname), $emailaccount);
+        $otp = sendRegistrationOtp($conn, $emailRaw, trim((string) $_POST['fullname']), $emailaccount);
         $_SESSION['registration_otp'] = $otp;
         if ($isLocalhost) {
             $_SESSION['registration_otp_verified'] = true;
@@ -159,6 +252,9 @@ if (isset($_POST['update'])) {
         exit;
     } else {
         $errup = $conn->error;
+    }
+    }
+    }
     }
     }
 }
@@ -176,7 +272,11 @@ if (isset($_POST['verify_otp']) && isset($_SESSION['pin_user'])) {
     if (isset($_SESSION['registration_otp']) && $entered === (string)$_SESSION['registration_otp']) {
         $_SESSION['registration_otp_verified'] = true;
         unset($_SESSION['registration_otp']);
-        $msg = 'Email verified. Please complete the rest of the form below.';
+        if (!empty($_SESSION['registration_resume_flow'])) {
+            $_SESSION['registration_welcome_complete'] = true;
+            unset($_SESSION['registration_resume_flow']);
+        }
+        $msg = 'Email verified. Complete your enrollment below.';
     } else {
         $err = 'Invalid or expired code. Please try again or request a new code.';
     }
@@ -192,6 +292,10 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         $err = 'Invalid registration link. Please use the link from the course page.';
     } else {
     $rid = (int)$_SESSION['pin_user'];
+    $slotChk = $conn->query("SELECT id FROM registration WHERE id=" . $rid . " AND slotid=" . (int)$slotid_get)->fetch_assoc();
+    if (!$slotChk) {
+        $err = 'Your enrolment does not match this course. Please start again from the course page.';
+    } else {
     $title = mysqli_real_escape_string($conn, $_POST['title'] ?? '');
     $position = mysqli_real_escape_string($conn, $_POST['position'] ?? '');
     $company = mysqli_real_escape_string($conn, $_POST['company'] ?? '');
@@ -215,6 +319,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         $msg = 'Enrollment saved. <a href="'.$redirectBaseUrl.'/pay/'.$_GET['courseid'].'/'.$_GET['locid'].'/'.$_GET['slotid'].'/'.$_GET['cityid'].'/'.$rid.'">Go to payment</a>.';
     } else {
         $err = $conn->error;
+    }
     }
     }
 }
@@ -304,6 +409,10 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						if ($showFullForm) {
     						    $fetchRegis = $conn->query("SELECT * FROM registration WHERE id='".$_SESSION['pin_user']."'")->fetch_assoc();
     						    $industry_types = $conn->query("SELECT * FROM industry_type WHERE status='1' ORDER BY title ASC");
+    						    if (!empty($_SESSION['registration_welcome_complete'])) {
+    						        echo "<div class='alert alert-info alert-dismissible'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Complete Your Enrollment</strong> — your saved details are shown below. Update anything needed, then finish to go to payment.</div>";
+    						        unset($_SESSION['registration_welcome_complete']);
+    						    }
     						?>
     						<div class="panel panel-default mb-20">
     						    <div class="panel-heading">Your details</div>
@@ -313,7 +422,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						</div>
     						<form method="post" enctype="multipart/form-data" autocomplete="off">
     						    <div class="panel panel-default">
-    						        <div class="panel-heading">Complete your enrolment</div>
+    						        <div class="panel-heading">Complete Your Enrollment</div>
     						        <div class="panel-body">
     						            <div class="form-group row">
     						                <label class="control-label col-sm-3">Title:</label>
