@@ -4,12 +4,6 @@
 RewriteEngine On
 
 ############################################
-# Force HTTPS (SAFE for POST / CKEditor)
-############################################
-RewriteCond %{HTTPS} !=on
-RewriteRule ^ https://coursehub.interactsafety.com.au%{REQUEST_URI} [R=301,L]
-
-############################################
 # Home
 ############################################
 RewriteRule ^$ index.php [NC,L]
