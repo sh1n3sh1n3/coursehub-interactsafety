@@ -53,6 +53,23 @@
                                 <div class="double-line-bottom-theme-colored-2"></div>
                                 <?php
                                 $aboutDescription = (string)($aboutus['description'] ?? '');
+                                // Normalize pasted rich text (e.g., Google Docs HTML) to clean semantic markup.
+                                $aboutDescription = str_replace(["\r\n", "\r"], "\n", $aboutDescription);
+                                $aboutDescription = preg_replace('/<span\b[^>]*>/i', '', $aboutDescription);
+                                $aboutDescription = str_replace('</span>', '', $aboutDescription);
+                                $aboutDescription = preg_replace('/<div\b[^>]*>/i', '<p>', $aboutDescription);
+                                $aboutDescription = str_replace('</div>', '</p>', $aboutDescription);
+                                $aboutDescription = strip_tags($aboutDescription, '<p><ul><ol><li><a><strong><em><b><i><h2><h3><h4><br>');
+                                $aboutDescription = preg_replace('/<(p|ul|ol|li|h2|h3|h4|strong|em|b|i|br)\b[^>]*>/i', '<$1>', $aboutDescription);
+                                $aboutDescription = preg_replace_callback('/<a\b[^>]*>/i', function($m) {
+                                    if (preg_match('/href\s*=\s*([\'"])(.*?)\1/i', $m[0], $hrefMatch)) {
+                                        $href = htmlspecialchars($hrefMatch[2], ENT_QUOTES, 'UTF-8');
+                                        return '<a href="' . $href . '">';
+                                    }
+                                    return '<a>';
+                                }, $aboutDescription);
+                                $aboutDescription = preg_replace('/<a>(.*?)<\/a>/is', '$1', $aboutDescription);
+                                $aboutDescription = preg_replace('/<(p|li)>\s*(?:&nbsp;|&#160;|<br>|\\s)*<\/\\1>/i', '', $aboutDescription);
                                 // Remove empty list items that render as stray bullets.
                                 $aboutDescription = preg_replace('/<li\b[^>]*>\s*(?:&nbsp;|&#160;|<br\s*\/?>|\s)*<\/li>/i', '', $aboutDescription);
                                 // Some editor content stores <li> without a surrounding <ul>/<ol>.
