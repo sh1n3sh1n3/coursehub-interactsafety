@@ -54,6 +54,18 @@
 	    
     	if($insert){
     	    $last_id = $conn->insert_id;
+            $_SESSION['registration_prefill'] = [
+                'fullname' => trim((string) (($register_details['fname'] ?? '') . ' ' . ($register_details['lname'] ?? ''))),
+                'email' => (string) ($register_details['email'] ?? ''),
+                'phone' => (string) ($register_details['workplace_phone'] ?? '')
+            ];
+            unset(
+                $_SESSION['pin_user'],
+                $_SESSION['registration_otp'],
+                $_SESSION['registration_otp_verified'],
+                $_SESSION['registration_resume_flow'],
+                $_SESSION['registration_welcome_complete']
+            );
     	    if (!empty($_SESSION['client_course_code'])) {
     	        $conn->query("UPDATE private_course SET registration_id = '".mysqli_real_escape_string($conn, $registerid)."', sale_id='".$last_id."', status='sold' WHERE course_code = '".mysqli_real_escape_string($conn, $_SESSION['client_course_code'])."' AND course_id='".mysqli_real_escape_string($conn, $courseid)."' AND slot_id='".mysqli_real_escape_string($conn, $slotid)."'");
     	    }

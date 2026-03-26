@@ -93,6 +93,10 @@ $isLocalhost = (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1
 $err = $msg = $errup = $msgup = '';
 $last_id = null;
 $loggedid = null;
+$registrationPrefill = isset($_SESSION['registration_prefill']) && is_array($_SESSION['registration_prefill']) ? $_SESSION['registration_prefill'] : [];
+$prefillFullname = trim((string)($registrationPrefill['fullname'] ?? ''));
+$prefillEmail = trim((string)($registrationPrefill['email'] ?? ''));
+$prefillPhone = trim((string)($registrationPrefill['phone'] ?? ''));
 
 if (!$registrationLinkIsValid) {
     $err = 'Invalid registration link. Please use the link from the course page.';
@@ -131,6 +135,11 @@ if (isset($_POST['submit'])) {
     $last_id = mysqli_insert_id($conn);
     if ($insert) {
         $_SESSION['pin_user'] = $last_id;
+        $_SESSION['registration_prefill'] = [
+            'fullname' => trim((string) $_POST['fullname']),
+            'email' => $emailRaw,
+            'phone' => trim((string) $_POST['phone'])
+        ];
         $otp = sendRegistrationOtp($conn, $emailRaw, trim((string) $_POST['fullname']), $emailaccount);
         $_SESSION['registration_otp'] = $otp;
         if ($isLocalhost) {
@@ -172,6 +181,11 @@ if (isset($_POST['update'])) {
     $sqlquery = "UPDATE registration SET fname = '".$fname."', lname = '".$lname."', email='".$email."', workplace_phone = '".$phone."' WHERE id=".$loggedid." AND slotid=".$slotid;
     $update = $conn->query($sqlquery);
     if ($update) {
+        $_SESSION['registration_prefill'] = [
+            'fullname' => trim((string) $_POST['fullname']),
+            'email' => $emailRaw,
+            'phone' => trim((string) $_POST['phone'])
+        ];
         $otp = sendRegistrationOtp($conn, $emailRaw, trim((string) $_POST['fullname']), $emailaccount);
         $_SESSION['registration_otp'] = $otp;
         if ($isLocalhost) {
@@ -650,13 +664,13 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
                                     <div class="form-group row">
                                         <label class="control-label col-sm-3" for="fullname"><span class="mandatory">*</span>Student Name:</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" name="fullname" id="fullname" required placeholder="Enter Full Name">
+                                            <input type="text" class="form-control" name="fullname" id="fullname" required placeholder="Enter Full Name" value="<?php echo htmlspecialchars($prefillFullname); ?>">
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label class="control-label col-sm-3" for="email"><span class="mandatory">*</span>Booking / Confirmation Email:</label>
                                         <div class="col-sm-9">
-                                            <input type="email" class="form-control" name="email" id="email" required placeholder="Enter booking or confirmation email" oninput="checkuniq(this.value,'email')">
+                                            <input type="email" class="form-control" name="email" id="email" required placeholder="Enter booking or confirmation email" oninput="checkuniq(this.value,'email')" value="<?php echo htmlspecialchars($prefillEmail); ?>">
                                             <p class="help-block" style="margin-bottom:0;">Course confirmation and enrolment details will be sent to this email address.</p>
                                             <p id="emailerr" style="display:none; color:#e83e8c"></p>
                                         </div>
@@ -664,7 +678,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
                                     <div class="form-group row">
                                         <label class="control-label col-sm-3" for="phone">Phone (optional):</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Phone">
+                                            <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Phone" value="<?php echo htmlspecialchars($prefillPhone); ?>">
                                         </div>
                                     </div>
                                     <div class="form-group row">

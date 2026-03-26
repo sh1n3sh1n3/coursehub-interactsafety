@@ -235,6 +235,20 @@ if (!empty($_GET['tid'])) {
         $last_id = $saleCreatedNow ? $conn->insert_id : 0;
         // Payment success: mark registration as paid (seat confirmed, course register populated)
         $conn->query("UPDATE registration SET payment_status = 'paid' WHERE id = '" . mysqli_real_escape_string($conn, $registerid) . "'");
+        // Reset active registration flow so next booking starts at "Your details",
+        // while keeping basic details prefilled for convenience.
+        $_SESSION['registration_prefill'] = [
+            'fullname' => trim((string) (($register_details['fname'] ?? '') . ' ' . ($register_details['lname'] ?? ''))),
+            'email' => (string) ($register_details['email'] ?? ''),
+            'phone' => (string) ($register_details['workplace_phone'] ?? '')
+        ];
+        unset(
+            $_SESSION['pin_user'],
+            $_SESSION['registration_otp'],
+            $_SESSION['registration_otp_verified'],
+            $_SESSION['registration_resume_flow'],
+            $_SESSION['registration_welcome_complete']
+        );
         if (!empty($_SESSION['client_course_code'])) {
             $conn->query("UPDATE private_course SET registration_id = " . $registerid . ", sale_id=" . $last_id . ", status='sold' WHERE course_code = '" . mysqli_real_escape_string($conn, $_SESSION['client_course_code']) . "' AND course_id=" . $courseid . " AND slot_id=" . $slotid . "");
         }
