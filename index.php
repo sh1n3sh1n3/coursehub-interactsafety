@@ -47,15 +47,7 @@
                                 <?php $aboutus = $conn->query("SELECT * FROM aboutus WHERE id='1'")->fetch_assoc(); ?>
                                 <h2 class="text-uppercase text-theme-colored mt-0 mt-sm-30">The Interact Safety Approach.</h2>
                                 <div class="double-line-bottom-theme-colored-2"></div>
-                                <?php $string = $aboutus['description'];
-                                    if (strlen($string) > 2500) {
-                                        $stringCut = substr($string, 0, 2500);
-                                        $endPoint = strrpos($stringCut, ' ');
-                                        $string = $endPoint ? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
-                                        $string .= '... <br><a href="about.php" class="btn btn-colored btn-theme-colored2 text-white btn-lg pl-40 pr-40 mt-15">Read More</a>';
-                                    }
-                                    echo $string;
-                                ?>
+                                <?php echo $aboutus['description']; ?>
                             </div>
                             <div class="col-md-5">
                                 <img class="img-fullwidth maxwidth500" src="assets/images/about/<?php echo $aboutus['image']; ?>" alt="About the business">
