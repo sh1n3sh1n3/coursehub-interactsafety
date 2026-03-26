@@ -29,6 +29,10 @@
     #home .event-list .thumb { flex: 0 0 200px; height: 200px; overflow: hidden; display: block; }
     #home .event-list .thumb img { object-fit: cover; width: 100%; height: 100%; display: block; transform: scale(1.3); transition: transform 0.4s ease; }
     #home .event-list:hover .thumb img { transform: scale(1.5); }
+    #about .about-copy p { margin: 0 0 12px; }
+    #about .about-copy ul,
+    #about .about-copy ol { margin: 0; padding-left: 22px; }
+    #about .about-copy li { margin: 0 0 10px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -47,7 +51,16 @@
                                 <?php $aboutus = $conn->query("SELECT * FROM aboutus WHERE id='1'")->fetch_assoc(); ?>
                                 <h2 class="text-uppercase text-theme-colored mt-0 mt-sm-30">The Interact Safety Approach.</h2>
                                 <div class="double-line-bottom-theme-colored-2"></div>
-                                <?php echo $aboutus['description']; ?>
+                                <?php
+                                $aboutDescription = (string)($aboutus['description'] ?? '');
+                                // Remove empty list items that render as stray bullets.
+                                $aboutDescription = preg_replace('/<li\b[^>]*>\s*(?:&nbsp;|&#160;|<br\s*\/?>|\s)*<\/li>/i', '', $aboutDescription);
+                                // Some editor content stores <li> without a surrounding <ul>/<ol>.
+                                if (preg_match('/<li\b/i', $aboutDescription) && !preg_match('/<(ul|ol)\b/i', $aboutDescription)) {
+                                    $aboutDescription = '<ul class="about-list">' . $aboutDescription . '</ul>';
+                                }
+                                ?>
+                                <div class="about-copy"><?php echo $aboutDescription; ?></div>
                             </div>
                             <div class="col-md-5">
                                 <img class="img-fullwidth maxwidth500" src="assets/images/about/<?php echo $aboutus['image']; ?>" alt="About the business">
