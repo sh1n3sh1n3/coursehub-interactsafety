@@ -436,18 +436,21 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						<form method="post" enctype="multipart/form-data" autocomplete="off">
     						    <input type="hidden" name="loggedid" value="<?php echo $fetchRegis['id']; ?>"/>
     						    <div class="panel panel-default">
-    						        <div class="panel-heading">Enrolment (MVP)</div>
+    						        <div class="panel-heading">Student &amp; Booking Contact Details</div>
     						        <div class="panel-body">
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Full Name:</label>
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Student Name:</label>
     						                <div class="col-sm-9"><input type="text" class="form-control" name="fullname" required value="<?php echo htmlspecialchars(trim($fetchRegis['fname'].' '.$fetchRegis['lname'])); ?>"></div>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Email:</label>
-    						                <div class="col-sm-9"><input type="email" class="form-control" name="email" required value="<?php echo htmlspecialchars($fetchRegis['email']); ?>"></div>
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Booking / Confirmation Email:</label>
+    						                <div class="col-sm-9">
+    						                    <input type="email" class="form-control" name="email" required value="<?php echo htmlspecialchars($fetchRegis['email']); ?>">
+    						                    <p class="help-block" style="margin-bottom:0;">Course confirmation and enrolment details will be sent to this email address.</p>
+    						                </div>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Phone:</label>
+    						                <label class="control-label col-sm-3">Phone (optional):</label>
     						                <div class="col-sm-9"><input type="text" class="form-control" name="phone" value="<?php echo htmlspecialchars($fetchRegis['workplace_phone']); ?>"></div>
     						            </div>
     						            <div class="form-group row">
@@ -455,7 +458,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						                <div class="col-sm-9"><p class="form-control-static"><?php echo $course_details ? htmlspecialchars($course_details['title']) : '—'; ?></p></div>
     						            </div>
     						            <div class="form-group row">
-    						                <div class="col-sm-12"><button class="btn btn-primary btn-sm" type="submit" name="update">Resend code &amp; Continue</button></div>
+    						                <div class="col-sm-12"><button class="btn btn-primary btn-sm" type="submit" name="update">Continue to Enrolment</button></div>
     						            </div>
     						        </div>
     						    </div>
@@ -466,18 +469,21 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						<form method="post" enctype="multipart/form-data" autocomplete="off">
     						    <input type="hidden" name="loggedid" value="<?php echo $fetchRegis['id']; ?>"/>
     						    <div class="panel panel-default">
-    						        <div class="panel-heading">Enrolment (MVP)</div>
+    						        <div class="panel-heading">Student &amp; Booking Contact Details</div>
     						        <div class="panel-body">
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Full Name:</label>
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Student Name:</label>
     						                <div class="col-sm-9"><input type="text" class="form-control" name="fullname" required value="<?php echo htmlspecialchars(trim($fetchRegis['fname'].' '.$fetchRegis['lname'])); ?>"></div>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Email:</label>
-    						                <div class="col-sm-9"><input type="email" class="form-control" name="email" required value="<?php echo htmlspecialchars($fetchRegis['email']); ?>"></div>
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Booking / Confirmation Email:</label>
+    						                <div class="col-sm-9">
+    						                    <input type="email" class="form-control" name="email" required value="<?php echo htmlspecialchars($fetchRegis['email']); ?>">
+    						                    <p class="help-block" style="margin-bottom:0;">Course confirmation and enrolment details will be sent to this email address.</p>
+    						                </div>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Phone:</label>
+    						                <label class="control-label col-sm-3">Phone (optional):</label>
     						                <div class="col-sm-9"><input type="text" class="form-control" name="phone" value="<?php echo htmlspecialchars($fetchRegis['workplace_phone']); ?>"></div>
     						            </div>
     						            <div class="form-group row">
@@ -485,7 +491,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						                <div class="col-sm-9"><p class="form-control-static"><?php echo $course_details ? htmlspecialchars($course_details['title']) : '—'; ?></p></div>
     						            </div>
     						            <div class="form-group row">
-    						                <div class="col-sm-12"><button class="btn btn-primary btn-sm" type="submit" name="update">Continue</button></div>
+    						                <div class="col-sm-12"><button class="btn btn-primary btn-sm" type="submit" name="update">Continue to Enrolment</button></div>
     						            </div>
     						        </div>
     						    </div>
@@ -494,23 +500,24 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
                              <p id="formerr" style="display:none; color:#e83e8c"></p>
                              <form method="post" enctype="multipart/form-data" autocomplete="off">
                             <div class="panel panel-default">
-                                <div class="panel-heading">Enrolment (MVP)</div>
+                                <div class="panel-heading">Student &amp; Booking Contact Details</div>
                                 <div class="panel-body">
                                     <div class="form-group row">
-                                        <label class="control-label col-sm-3" for="fullname"><span class="mandatory">*</span>Full Name:</label>
+                                        <label class="control-label col-sm-3" for="fullname"><span class="mandatory">*</span>Student Name:</label>
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" name="fullname" id="fullname" required placeholder="Enter Full Name">
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label class="control-label col-sm-3" for="email"><span class="mandatory">*</span>Email:</label>
+                                        <label class="control-label col-sm-3" for="email"><span class="mandatory">*</span>Booking / Confirmation Email:</label>
                                         <div class="col-sm-9">
-                                            <input type="email" class="form-control" name="email" id="email" required placeholder="Enter Email (used for certificate)" oninput="checkuniq(this.value,'email')">
+                                            <input type="email" class="form-control" name="email" id="email" required placeholder="Enter booking or confirmation email" oninput="checkuniq(this.value,'email')">
+                                            <p class="help-block" style="margin-bottom:0;">Course confirmation and enrolment details will be sent to this email address.</p>
                                             <p id="emailerr" style="display:none; color:#e83e8c"></p>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label class="control-label col-sm-3" for="phone">Phone:</label>
+                                        <label class="control-label col-sm-3" for="phone">Phone (optional):</label>
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Phone">
                                         </div>
@@ -523,7 +530,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
                                     </div>
                                     <div class="form-group row">
                                         <div class="col-sm-12">
-                                            <button class="btn btn-primary btn-sm" type="submit" name="submit">Submit</button>
+                                            <button class="btn btn-primary btn-sm" type="submit" name="submit">Continue to Enrolment</button>
                                         </div>
                                     </div>
                                 </div>
