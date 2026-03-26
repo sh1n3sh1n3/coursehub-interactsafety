@@ -148,6 +148,13 @@
 					<li  class="<?= (($activePage == 'testimonials') || ($activePage == 'editTestimonial')) ? 'active' : ''; ?>"><a href="testimonials.php">Testimonial Register</a></li>
 				</ul>
 		    </li>-->
+			<li class="<?= (($activePage == 'addTestimonial') || ($activePage == 'testimonials') || ($activePage == 'editTestimonial')) ? 'active' : ''; ?>">
+				<a href="#"><i class="fa fa-quote-left"></i> <span class="nav-label">Reviews</span><span class="fa arrow"></span></a>
+				<ul class="nav nav-second-level collapse">
+					<li class="<?= (($activePage == 'addTestimonial')) ? 'active' : ''; ?>"><a href="addTestimonial.php">Add Review</a></li>
+					<li class="<?= (($activePage == 'testimonials') || ($activePage == 'editTestimonial')) ? 'active' : ''; ?>"><a href="testimonials.php">Review Register</a></li>
+				</ul>
+			</li>
 			<li class="<?= (($activePage == 'privacy') || ($activePage == 'terms') || ($activePage == 'refund')) ? 'active' : ''; ?>">
 				<a href="#"><i class="fa fa-lock"></i> <span class="nav-label">Policies</span><span class="fa arrow"></span></a>
 				<ul class="nav nav-second-level collapse">
