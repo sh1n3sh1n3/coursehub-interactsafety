@@ -277,7 +277,18 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         'other' => 'Other'
     ];
 
-    if ($company === '' || $position === '' || !in_array($hsr_or_not, $allowedRoles, true) || $workplace_contact === '' || $workplace_email_raw === '' || !filter_var($workplace_email_raw, FILTER_VALIDATE_EMAIL) || $industry_type <= 0) {
+    $roleToPosition = [
+        '1' => 'HSR',
+        '2' => 'Deputy HSR',
+        '3' => 'Supervisor',
+        '5' => 'Other'
+    ];
+    // Backward compatibility: form now posts role (`hsr_or_not`) instead of `position`.
+    if ($position === '' && isset($roleToPosition[$hsr_or_not])) {
+        $position = $roleToPosition[$hsr_or_not];
+    }
+
+    if ($company === '' || !in_array($hsr_or_not, $allowedRoles, true) || $workplace_contact === '' || $workplace_email_raw === '' || !filter_var($workplace_email_raw, FILTER_VALIDATE_EMAIL) || $industry_type <= 0) {
         $err = 'Please complete all required fields in Student Information and Workplace Contact sections.';
     } else {
         $special_opts = array_values(array_unique(array_values(array_filter(array_map('trim', $special_opts), function($v) use ($allowedSupport) {
