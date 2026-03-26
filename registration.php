@@ -296,29 +296,96 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     if (!$slotChk) {
         $err = 'Your enrolment does not match this course. Please start again from the course page.';
     } else {
-    $title = mysqli_real_escape_string($conn, $_POST['title'] ?? '');
-    $position = mysqli_real_escape_string($conn, $_POST['position'] ?? '');
-    $company = mysqli_real_escape_string($conn, $_POST['company'] ?? '');
-    $postal_address = mysqli_real_escape_string($conn, $_POST['postal_address'] ?? '');
+    $title = '';
+    $position = trim((string) ($_POST['position'] ?? ''));
+    $company = trim((string) ($_POST['company'] ?? ''));
+    $postal_address = '';
     $industry_type = isset($_POST['industry_type']) ? (int)$_POST['industry_type'] : 0;
-    $hsr_or_not = isset($_POST['hsr_or_not']) ? mysqli_real_escape_string($conn, $_POST['hsr_or_not']) : '0';
-    $workplace_contact = mysqli_real_escape_string($conn, $_POST['workplace_contact'] ?? '');
-    $workplace_email = mysqli_real_escape_string($conn, $_POST['workplace_email'] ?? '');
-    $emergency_contact = mysqli_real_escape_string($conn, $_POST['emergency_contact'] ?? '');
-    $emergency_phone = mysqli_real_escape_string($conn, $_POST['emergency_phone'] ?? '');
-    $special_requirements = mysqli_real_escape_string($conn, $_POST['special_requirements'] ?? '');
-    $food_requirements = mysqli_real_escape_string($conn, $_POST['food_requirements'] ?? '');
-    $instruction = mysqli_real_escape_string($conn, $_POST['instruction'] ?? '');
-    $uq = "UPDATE registration SET title='".$title."', position='".$position."', company='".$company."', postal_address='".$postal_address."', industry_type='".$industry_type."', hsr_or_not='".$hsr_or_not."', workplace_contact='".$workplace_contact."', workplace_email='".$workplace_email."', emergency_contact='".$emergency_contact."', emergency_phone='".$emergency_phone."', special_requirements='".$special_requirements."', food_requirements='".$food_requirements."', instruction='".$instruction."' WHERE id=".$rid;
-    if ($conn->query($uq)) {
+    $hsr_or_not = isset($_POST['hsr_or_not']) ? trim((string) $_POST['hsr_or_not']) : '';
+    $workplace_contact = trim((string) ($_POST['workplace_contact'] ?? ''));
+    $workplace_email_raw = trim((string) ($_POST['workplace_email'] ?? ''));
+    $workplace_phone = trim((string) ($_POST['workplace_phone'] ?? ''));
+    $special_opts = isset($_POST['special_requirements']) && is_array($_POST['special_requirements']) ? $_POST['special_requirements'] : [];
+    $special_other = trim((string) ($_POST['special_requirements_other'] ?? ''));
+    $food_opts = isset($_POST['food_requirements']) && is_array($_POST['food_requirements']) ? $_POST['food_requirements'] : [];
+    $food_other = trim((string) ($_POST['food_requirements_other'] ?? ''));
+    $instruction = '';
+    $emergency_contact = '';
+    $emergency_phone = '';
+
+    $allowedRoles = ['1', '2', '3', '5'];
+    $allowedSupport = ['language_support', 'literacy_support', 'learning_difficulty', 'hearing_impairment', 'vision_impairment', 'other'];
+    $allowedFood = ['none', 'nuts', 'dairy', 'gluten', 'seafood_shellfish', 'eggs', 'other'];
+    $supportLabels = [
+        'language_support' => 'Language support',
+        'literacy_support' => 'Literacy support',
+        'learning_difficulty' => 'Learning difficulty',
+        'hearing_impairment' => 'Hearing impairment',
+        'vision_impairment' => 'Vision impairment',
+        'other' => 'Other'
+    ];
+    $foodLabels = [
+        'none' => 'None',
+        'nuts' => 'Nuts',
+        'dairy' => 'Dairy',
+        'gluten' => 'Gluten',
+        'seafood_shellfish' => 'Seafood / shellfish',
+        'eggs' => 'Eggs',
+        'other' => 'Other'
+    ];
+
+    if ($company === '' || $position === '' || !in_array($hsr_or_not, $allowedRoles, true) || $workplace_contact === '' || $workplace_email_raw === '' || !filter_var($workplace_email_raw, FILTER_VALIDATE_EMAIL) || $industry_type <= 0) {
+        $err = 'Please complete all required fields in Student Information and Workplace Contact sections.';
+    } else {
+        $special_opts = array_values(array_unique(array_values(array_filter(array_map('trim', $special_opts), function($v) use ($allowedSupport) {
+            return in_array($v, $allowedSupport, true);
+        }))));
+        $food_opts = array_values(array_unique(array_values(array_filter(array_map('trim', $food_opts), function($v) use ($allowedFood) {
+            return in_array($v, $allowedFood, true);
+        }))));
+
+        $special_store_parts = [];
+        foreach ($special_opts as $opt) {
+            if ($opt === 'other') {
+                continue;
+            }
+            $special_store_parts[] = $supportLabels[$opt];
+        }
+        if (in_array('other', $special_opts, true) && $special_other !== '') {
+            $special_store_parts[] = 'Other: ' . $special_other;
+        }
+
+        $food_store_parts = [];
+        foreach ($food_opts as $opt) {
+            if ($opt === 'other') {
+                continue;
+            }
+            $food_store_parts[] = $foodLabels[$opt];
+        }
+        if (in_array('other', $food_opts, true) && $food_other !== '') {
+            $food_store_parts[] = 'Other: ' . $food_other;
+        }
+
+        $special_requirements = mysqli_real_escape_string($conn, implode(', ', $special_store_parts));
+        $food_requirements = mysqli_real_escape_string($conn, implode(', ', $food_store_parts));
+        $position_db = mysqli_real_escape_string($conn, $position);
+        $company_db = mysqli_real_escape_string($conn, $company);
+        $workplace_contact_db = mysqli_real_escape_string($conn, $workplace_contact);
+        $workplace_email = mysqli_real_escape_string($conn, $workplace_email_raw);
+        $workplace_phone_db = mysqli_real_escape_string($conn, $workplace_phone);
+        $hsr_or_not_db = mysqli_real_escape_string($conn, $hsr_or_not);
+
+        $uq = "UPDATE registration SET title='".$title."', position='".$position_db."', company='".$company_db."', postal_address='".$postal_address."', industry_type='".$industry_type."', hsr_or_not='".$hsr_or_not_db."', workplace_contact='".$workplace_contact_db."', workplace_email='".$workplace_email."', workplace_phone='".$workplace_phone_db."', emergency_contact='".$emergency_contact."', emergency_phone='".$emergency_phone."', special_requirements='".$special_requirements."', food_requirements='".$food_requirements."', instruction='".$instruction."' WHERE id=".$rid;
+        if ($conn->query($uq)) {
         $reg = $conn->query("SELECT courseid, locid, slotid, cityid FROM registration WHERE id=".$rid)->fetch_assoc();
         if ($reg) {
             header("Location: ".$redirectBaseUrl."/pay/".$reg['courseid']."/".$reg['locid']."/".$reg['slotid']."/".$reg['cityid']."/".$rid);
             exit;
         }
         $msg = 'Enrollment saved. <a href="'.$redirectBaseUrl.'/pay/'.$_GET['courseid'].'/'.$_GET['locid'].'/'.$_GET['slotid'].'/'.$_GET['cityid'].'/'.$rid.'">Go to payment</a>.';
-    } else {
-        $err = $conn->error;
+        } else {
+            $err = $conn->error;
+        }
     }
     }
     }
@@ -342,7 +409,31 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     ?>
     <style>
         html { scroll-behavior: smooth; }
-        .form-control { height:30px !important; }
+        .form-control,
+        input.form-control,
+        select.form-control {
+            height: 34px !important;
+        }
+        textarea.form-control {
+            min-height: 34px !important;
+        }
+        .select2-container--default .select2-selection--single {
+            height: 34px !important;
+            border: 1px solid #ccc !important;
+            border-radius: 0 !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 34px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 34px !important;
+        }
+        .select2-container--default .select2-selection--multiple {
+            min-height: 34px !important;
+            border: 1px solid #ccc !important;
+            border-radius: 0 !important;
+            overflow-y: auto;
+        }
         .select2-container {width:100% !important;}
         /* Enrollment process buttons: orange, 32px height */
         .main-content .btn-primary.btn-sm,
@@ -409,6 +500,49 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						if ($showFullForm) {
     						    $fetchRegis = $conn->query("SELECT * FROM registration WHERE id='".$_SESSION['pin_user']."'")->fetch_assoc();
     						    $industry_types = $conn->query("SELECT * FROM industry_type WHERE status='1' ORDER BY title ASC");
+    						    $savedSupportRaw = array_values(array_filter(array_map('trim', explode(',', (string) $fetchRegis['special_requirements']))));
+    						    $savedFoodRaw = array_values(array_filter(array_map('trim', explode(',', (string) $fetchRegis['food_requirements']))));
+    						    $selectedSupport = [];
+    						    $selectedFood = [];
+    						    $supportOtherText = '';
+    						    $foodOtherText = '';
+    						    foreach ($savedSupportRaw as $sr) {
+    						        if (stripos($sr, 'Other:') === 0) {
+    						            $selectedSupport[] = 'other';
+    						            $supportOtherText = trim(substr($sr, 6));
+    						            continue;
+    						        }
+    						        $map = [
+    						            'Language support' => 'language_support',
+    						            'Literacy support' => 'literacy_support',
+    						            'Learning difficulty' => 'learning_difficulty',
+    						            'Hearing impairment' => 'hearing_impairment',
+    						            'Vision impairment' => 'vision_impairment',
+    						            'Other' => 'other'
+    						        ];
+    						        if (isset($map[$sr])) {
+    						            $selectedSupport[] = $map[$sr];
+    						        }
+    						    }
+    						    foreach ($savedFoodRaw as $fr) {
+    						        if (stripos($fr, 'Other:') === 0) {
+    						            $selectedFood[] = 'other';
+    						            $foodOtherText = trim(substr($fr, 6));
+    						            continue;
+    						        }
+    						        $map = [
+    						            'None' => 'none',
+    						            'Nuts' => 'nuts',
+    						            'Dairy' => 'dairy',
+    						            'Gluten' => 'gluten',
+    						            'Seafood / shellfish' => 'seafood_shellfish',
+    						            'Eggs' => 'eggs',
+    						            'Other' => 'other'
+    						        ];
+    						        if (isset($map[$fr])) {
+    						            $selectedFood[] = $map[$fr];
+    						        }
+    						    }
     						    if (!empty($_SESSION['registration_welcome_complete'])) {
     						        echo "<div class='alert alert-info alert-dismissible'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Complete Your Enrollment</strong> — your saved details are shown below. Update anything needed, then finish to go to payment.</div>";
     						        unset($_SESSION['registration_welcome_complete']);
@@ -425,65 +559,76 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						        <div class="panel-heading">Complete Your Enrollment</div>
     						        <div class="panel-body">
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Title:</label>
-    						                <div class="col-sm-9"><input type="text" class="form-control" name="title" placeholder="e.g. Mr, Ms" value="<?php echo htmlspecialchars($fetchRegis['title']); ?>"></div>
+    						                <label class="control-label col-sm-12"><strong>Student Information</strong></label>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Position:</label>
-    						                <div class="col-sm-9"><input type="text" class="form-control" name="position" value="<?php echo htmlspecialchars($fetchRegis['position']); ?>"></div>
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Company:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="company" required value="<?php echo htmlspecialchars($fetchRegis['company']); ?>"></div>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Company:</label>
-    						                <div class="col-sm-9"><input type="text" class="form-control" name="company" value="<?php echo htmlspecialchars($fetchRegis['company']); ?>"></div>
-    						            </div>
-    						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Postal address:</label>
-    						                <div class="col-sm-9"><input type="text" class="form-control" name="postal_address" value="<?php echo htmlspecialchars($fetchRegis['postal_address']); ?>"></div>
-    						            </div>
-    						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Industry type:</label>
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Role:</label>
     						                <div class="col-sm-9">
-    						                    <select class="form-control" name="industry_type"><option value="0">— Select —</option><?php while ($it = $industry_types->fetch_assoc()) { echo '<option value="'.$it['id'].'"'.($fetchRegis['industry_type']==$it['id']?' selected':'').'>'.htmlspecialchars($it['title']).'</option>'; } ?></select>
+    						                    <select class="form-control" name="hsr_or_not" required>
+    						                        <option value="">— Select —</option>
+    						                        <option value="1" <?php if ($fetchRegis['hsr_or_not']=='1') echo 'selected'; ?>>HSR</option>
+    						                        <option value="2" <?php if ($fetchRegis['hsr_or_not']=='2') echo 'selected'; ?>>Deputy HSR</option>
+    						                        <option value="3" <?php if ($fetchRegis['hsr_or_not']=='3') echo 'selected'; ?>>Supervisor</option>
+    						                        <option value="5" <?php if ($fetchRegis['hsr_or_not']=='5') echo 'selected'; ?>>Other</option>
+    						                    </select>
     						                </div>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">HSR / role:</label>
+    						                <label class="control-label col-sm-12"><strong>Workplace Contact (for WorkSafe reporting &amp; course communication)</strong></label>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Workplace Contact Name:</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="workplace_contact" required value="<?php echo htmlspecialchars($fetchRegis['workplace_contact']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Workplace Contact Email:</label>
+    						                <div class="col-sm-9"><input type="email" class="form-control" name="workplace_email" required value="<?php echo htmlspecialchars($fetchRegis['workplace_email']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3">Workplace Contact Phone (optional):</label>
+    						                <div class="col-sm-9"><input type="text" class="form-control" name="workplace_phone" value="<?php echo htmlspecialchars($fetchRegis['workplace_phone']); ?>"></div>
+    						            </div>
+    						            <div class="form-group row">
+    						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Industry:</label>
     						                <div class="col-sm-9">
-    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="1" <?php if ($fetchRegis['hsr_or_not']=='1') echo 'checked'; ?>> HSR</label>
-    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="2" <?php if ($fetchRegis['hsr_or_not']=='2') echo 'checked'; ?>> Deputy HSR</label>
-    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="3" <?php if ($fetchRegis['hsr_or_not']=='3') echo 'checked'; ?>> Manager/Supervisor</label>
-    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="4" <?php if ($fetchRegis['hsr_or_not']=='4') echo 'checked'; ?>> HSC member</label>
-    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="5" <?php if ($fetchRegis['hsr_or_not']=='5') echo 'checked'; ?>> Other</label>
-    						                    <label class="radio-inline"><input type="radio" name="hsr_or_not" value="0" <?php if (empty($fetchRegis['hsr_or_not']) || $fetchRegis['hsr_or_not']=='0') echo 'checked'; ?>> —</label>
+    						                    <select class="form-control js-uniform-select" name="industry_type" required><option value="0">— Select —</option><?php while ($it = $industry_types->fetch_assoc()) { echo '<option value="'.$it['id'].'"'.($fetchRegis['industry_type']==$it['id']?' selected':'').'>'.htmlspecialchars($it['title']).'</option>'; } ?></select>
     						                </div>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Workplace contact:</label>
-    						                <div class="col-sm-9"><input type="text" class="form-control" name="workplace_contact" value="<?php echo htmlspecialchars($fetchRegis['workplace_contact']); ?>"></div>
+    						                <label class="control-label col-sm-12"><strong>Additional Information</strong></label>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Workplace email:</label>
-    						                <div class="col-sm-9"><input type="email" class="form-control" name="workplace_email" value="<?php echo htmlspecialchars($fetchRegis['workplace_email']); ?>"></div>
+    						                <label class="control-label col-sm-3">Support Requirements (optional):</label>
+    						                <div class="col-sm-9">
+    						                    <select class="form-control js-uniform-select" name="special_requirements[]" multiple>
+    						                        <option value="language_support" <?php if (in_array('language_support', $selectedSupport, true)) echo 'selected'; ?>>Language support (English not first language)</option>
+    						                        <option value="literacy_support" <?php if (in_array('literacy_support', $selectedSupport, true)) echo 'selected'; ?>>Literacy support</option>
+    						                        <option value="learning_difficulty" <?php if (in_array('learning_difficulty', $selectedSupport, true)) echo 'selected'; ?>>Learning difficulty</option>
+    						                        <option value="hearing_impairment" <?php if (in_array('hearing_impairment', $selectedSupport, true)) echo 'selected'; ?>>Hearing impairment</option>
+    						                        <option value="vision_impairment" <?php if (in_array('vision_impairment', $selectedSupport, true)) echo 'selected'; ?>>Vision impairment</option>
+    						                        <option value="other" <?php if (in_array('other', $selectedSupport, true)) echo 'selected'; ?>>Other</option>
+    						                    </select>
+    						                    <input type="text" class="form-control mt-10" name="special_requirements_other" placeholder="Other support requirement (optional)" value="<?php echo htmlspecialchars($supportOtherText); ?>">
+    						                </div>
     						            </div>
     						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Emergency contact:</label>
-    						                <div class="col-sm-9"><input type="text" class="form-control" name="emergency_contact" value="<?php echo htmlspecialchars($fetchRegis['emergency_contact']); ?>"></div>
-    						            </div>
-    						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Emergency phone:</label>
-    						                <div class="col-sm-9"><input type="text" class="form-control" name="emergency_phone" value="<?php echo htmlspecialchars($fetchRegis['emergency_phone']); ?>"></div>
-    						            </div>
-    						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Special / learning requirements:</label>
-    						                <div class="col-sm-9"><textarea class="form-control" name="special_requirements" rows="2"><?php echo htmlspecialchars($fetchRegis['special_requirements']); ?></textarea></div>
-    						            </div>
-    						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Food allergies:</label>
-    						                <div class="col-sm-9"><input type="text" class="form-control" name="food_requirements" value="<?php echo htmlspecialchars($fetchRegis['food_requirements']); ?>"></div>
-    						            </div>
-    						            <div class="form-group row">
-    						                <label class="control-label col-sm-3">Instruction / notes:</label>
-    						                <div class="col-sm-9"><textarea class="form-control" name="instruction" rows="2"><?php echo htmlspecialchars($fetchRegis['instruction']); ?></textarea></div>
+    						                <label class="control-label col-sm-3">Food Allergies (optional):</label>
+    						                <div class="col-sm-9">
+    						                    <select class="form-control js-uniform-select" name="food_requirements[]" multiple>
+    						                        <option value="none" <?php if (in_array('none', $selectedFood, true)) echo 'selected'; ?>>None</option>
+    						                        <option value="nuts" <?php if (in_array('nuts', $selectedFood, true)) echo 'selected'; ?>>Nuts</option>
+    						                        <option value="dairy" <?php if (in_array('dairy', $selectedFood, true)) echo 'selected'; ?>>Dairy</option>
+    						                        <option value="gluten" <?php if (in_array('gluten', $selectedFood, true)) echo 'selected'; ?>>Gluten</option>
+    						                        <option value="seafood_shellfish" <?php if (in_array('seafood_shellfish', $selectedFood, true)) echo 'selected'; ?>>Seafood / shellfish</option>
+    						                        <option value="eggs" <?php if (in_array('eggs', $selectedFood, true)) echo 'selected'; ?>>Eggs</option>
+    						                        <option value="other" <?php if (in_array('other', $selectedFood, true)) echo 'selected'; ?>>Other</option>
+    						                    </select>
+    						                    <input type="text" class="form-control mt-10" name="food_requirements_other" placeholder="Other food allergy (optional)" value="<?php echo htmlspecialchars($foodOtherText); ?>">
+    						                </div>
     						            </div>
     						            <div class="form-group row">
     						                <div class="col-sm-12"><button class="btn btn-primary btn-sm" type="submit" name="submit_full_btn" value="1">Complete enrolment</button></div>
@@ -752,6 +897,11 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         }
         $(document).ready(function (e) {
             $('input').attr('autocomplete','off');
+            if ($.fn.select2) {
+                $('.js-uniform-select').select2({
+                    width: '100%'
+                });
+            }
          $("#reservation_form_popup_login").on('submit',(function(e) {
           e.preventDefault();
           $.ajax({
