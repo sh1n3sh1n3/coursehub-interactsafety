@@ -49,7 +49,9 @@
 							$err = $msg = '';
 							if(isset($_POST['submit'])) {
 								$name = mysqli_real_escape_string($conn, $_POST['name']);
-								$designation = mysqli_real_escape_string($conn, $_POST['designation']);
+								$designation = mysqli_real_escape_string($conn, $_POST['role']);
+								$organisation = mysqli_real_escape_string($conn, $_POST['organisation']);
+								$video_reel = mysqli_real_escape_string($conn, isset($_POST['video_reel']) ? $_POST['video_reel'] : '');
 								$content = mysqli_real_escape_string($conn, $_POST['content']);
 								$image='';
                     			if(isset($_FILES["image"]['name']) && !empty($_FILES["image"]['name'])){ 
@@ -81,7 +83,7 @@
                     					}
                     				}
                     			}
-							$insert = $conn->query("INSERT INTO testimonials (name,designation,content,image) VALUES ('".$name."','".$designation."','".$content."','".$image."')");
+							$insert = $conn->query("INSERT INTO testimonials (name,designation,organisation,video_reel,content,image) VALUES ('".$name."','".$designation."','".$organisation."','".$video_reel."','".$content."','".$image."')");
 							if($insert){
 								$msg = 'Data Added Successfully.';
 							} else {
@@ -114,8 +116,16 @@
                                     <div class="col-sm-10"><input type="text" class="form-control" required name="name"></div>
                                 </div>
                                 <div class="hr-line-dashed"></div>              
-                                <div class="form-group  row"><label class="col-sm-2 col-form-label">Designation</label>
-                                    <div class="col-sm-10"><input type="text" class="form-control" required name="designation"></div>
+                                <div class="form-group  row"><label class="col-sm-2 col-form-label">Role</label>
+                                    <div class="col-sm-10"><input type="text" class="form-control" required name="role" placeholder="e.g. Training Manager"></div>
+                                </div>
+                                <div class="hr-line-dashed"></div>              
+                                <div class="form-group  row"><label class="col-sm-2 col-form-label">Organisation</label>
+                                    <div class="col-sm-10"><input type="text" class="form-control" name="organisation" placeholder="Company or organisation name"></div>
+                                </div>
+                                <div class="hr-line-dashed"></div>              
+                                <div class="form-group  row"><label class="col-sm-2 col-form-label">Video reel</label>
+                                    <div class="col-sm-10"><input type="url" class="form-control" name="video_reel" placeholder="YouTube, Vimeo, or direct video URL (optional)"></div>
                                 </div>
                                 <div class="hr-line-dashed"></div>              
                                 <div class="form-group  row"><label class="col-sm-2 col-form-label">Comment</label>

@@ -49,7 +49,9 @@
 							$err = $msg = '';
 							if(isset($_POST['submit'])) {
 								$name = mysqli_real_escape_string($conn, $_POST['name']);
-								$designation = mysqli_real_escape_string($conn, $_POST['designation']);
+								$designation = mysqli_real_escape_string($conn, $_POST['role']);
+								$organisation = mysqli_real_escape_string($conn, $_POST['organisation']);
+								$video_reel = mysqli_real_escape_string($conn, isset($_POST['video_reel']) ? $_POST['video_reel'] : '');
 								$content = mysqli_real_escape_string($conn, $_POST['content']);
 								$id = mysqli_real_escape_string($conn, $_POST['id']);
 								$image='';
@@ -84,7 +86,7 @@
                     			}else{
                     				$image = mysqli_real_escape_string($conn, $_POST['oldimg']);
                     			}
-							$insert = $conn->query("UPDATE testimonials SET designation= '".$designation."', content= '".$content."', name= '".$name."', image= '".$image."' WHERE id=".$id);
+							$insert = $conn->query("UPDATE testimonials SET designation= '".$designation."', organisation= '".$organisation."', video_reel= '".$video_reel."', content= '".$content."', name= '".$name."', image= '".$image."' WHERE id=".$id);
 							if($insert){
 								$msg = 'Data Updated Successfully.';
 							} else {
@@ -116,11 +118,19 @@
                             <form method="post" enctype="multipart/form-data">
 							<input type="hidden" name="id" value="<?php echo $testimonial['id']; ?>"/>
                                 <div class="form-group  row"><label class="col-sm-2 col-form-label">Name</label>
-                                    <div class="col-sm-10"><input type="text" class="form-control" required name="name" value="<?php echo $testimonial['name']; ?>"></div>
+                                    <div class="col-sm-10"><input type="text" class="form-control" required name="name" value="<?php echo htmlspecialchars($testimonial['name']); ?>"></div>
                                 </div>
 								<div class="hr-line-dashed"></div>              
-                                <div class="form-group  row"><label class="col-sm-2 col-form-label">Designation</label>
-                                    <div class="col-sm-10"><input type="text" class="form-control" required name="designation" value="<?php echo $testimonial['designation']; ?>"></div>
+                                <div class="form-group  row"><label class="col-sm-2 col-form-label">Role</label>
+                                    <div class="col-sm-10"><input type="text" class="form-control" required name="role" value="<?php echo htmlspecialchars($testimonial['designation']); ?>"></div>
+                                </div>
+                                <div class="hr-line-dashed"></div>              
+                                <div class="form-group  row"><label class="col-sm-2 col-form-label">Organisation</label>
+                                    <div class="col-sm-10"><input type="text" class="form-control" name="organisation" value="<?php echo htmlspecialchars(isset($testimonial['organisation']) ? $testimonial['organisation'] : ''); ?>" placeholder="Company or organisation name"></div>
+                                </div>
+                                <div class="hr-line-dashed"></div>              
+                                <div class="form-group  row"><label class="col-sm-2 col-form-label">Video reel</label>
+                                    <div class="col-sm-10"><input type="url" class="form-control" name="video_reel" value="<?php echo htmlspecialchars(isset($testimonial['video_reel']) ? $testimonial['video_reel'] : ''); ?>" placeholder="YouTube, Vimeo, or direct video URL (optional)"></div>
                                 </div>
                                 <div class="hr-line-dashed"></div>              
                                 <div class="form-group  row"><label class="col-sm-2 col-form-label">Comment</label>

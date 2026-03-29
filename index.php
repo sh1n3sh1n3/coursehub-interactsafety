@@ -1,4 +1,22 @@
-<?php session_start(); include('include/conn.php'); 
+<?php session_start(); include('include/conn.php');
+if (!function_exists('testimonial_embed_src')) {
+	function testimonial_embed_src($url) {
+		$url = trim($url);
+		if ($url === '') {
+			return array('type' => '', 'src' => '');
+		}
+		if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $m)) {
+			return array('type' => 'iframe', 'src' => 'https://www.youtube.com/embed/' . $m[1]);
+		}
+		if (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $url, $m)) {
+			return array('type' => 'iframe', 'src' => 'https://player.vimeo.com/video/' . $m[1]);
+		}
+		if (preg_match('/\.(mp4|webm|ogg)(\?|#|$)/i', $url)) {
+			return array('type' => 'video', 'src' => $url);
+		}
+		return array('type' => 'link', 'src' => $url);
+	}
+}
 //require_once('phpmailer/class.phpmailer.php');
   //  $emailaccount = $conn->query("SELECT * FROM emails WHERE type='support'")->fetch_assoc();
     //$refitcertifiedph = $emailaccount['phone'];
@@ -145,8 +163,26 @@
                                         </div>
                                         <div class="testimonial-content">
                                             <h4 class="mt-0 font-weight-300"><?php echo $fetchtestimonials['content']; ?></h4>
-                                            <h5 class="mt-10 font-16 mb-0"><?php echo $fetchtestimonials['name']; ?></h5>
-                                            <h6 class="mt-5"><?php echo $fetchtestimonials['designation']; ?></h6>
+                                            <h5 class="mt-10 font-16 mb-0"><?php echo htmlspecialchars($fetchtestimonials['name']); ?></h5>
+                                            <h6 class="mt-5 mb-0"><?php echo htmlspecialchars($fetchtestimonials['designation']); ?></h6>
+                                            <?php if (!empty($fetchtestimonials['organisation'])) { ?>
+                                            <p class="mt-5 mb-0 font-14 text-gray"><?php echo htmlspecialchars($fetchtestimonials['organisation']); ?></p>
+                                            <?php }
+											$vr = isset($fetchtestimonials['video_reel']) ? trim($fetchtestimonials['video_reel']) : '';
+											if ($vr !== '') {
+												$em = testimonial_embed_src($vr);
+												if ($em['type'] === 'iframe') { ?>
+                                            <div class="mt-15 embed-responsive embed-responsive-16by9" style="max-width:100%;clear:both">
+                                                <iframe class="embed-responsive-item" src="<?php echo htmlspecialchars($em['src']); ?>" allowfullscreen loading="lazy" title="Video reel"></iframe>
+                                            </div>
+											<?php } elseif ($em['type'] === 'video') { ?>
+                                            <div class="mt-15">
+                                                <video controls preload="metadata" style="max-width:100%;height:auto" title="Video reel"><source src="<?php echo htmlspecialchars($em['src']); ?>"></video>
+                                            </div>
+											<?php } else { ?>
+                                            <p class="mt-10 mb-0"><a href="<?php echo htmlspecialchars($em['src']); ?>" target="_blank" rel="noopener noreferrer">Watch video reel</a></p>
+											<?php }
+											} ?>
                                         </div>
                                     </div>
                                 </div>
