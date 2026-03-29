@@ -46,7 +46,9 @@
                         <th>Status</th>
                         <th>Image</th>
                         <th>Name</th>
-                        <th>Designation</th>
+                        <th>Role</th>
+                        <th>Organisation</th>
+                        <th>Video</th>
                         <th>Comment</th>
                     </tr>
                     </thead>
@@ -62,8 +64,10 @@
 						</td>
 						<td><?php if($fetch['status']=='1') {echo '<span class="label label-primary">Active</span>';}else {echo '<span class="label label-default">Not Active</span>';} ?></td>
                         <td><img src="../assets/images/testimonials/<?php echo $fetch['image']; ?>" style="width:75px;height:75px;"/></td>
-                        <td><?php echo $fetch['name']; ?></td>
-                        <td><?php echo $fetch['designation']; ?></td>
+                        <td><?php echo htmlspecialchars($fetch['name']); ?></td>
+                        <td><?php echo htmlspecialchars($fetch['designation']); ?></td>
+                        <td><?php echo htmlspecialchars(isset($fetch['organisation']) ? $fetch['organisation'] : ''); ?></td>
+                        <td><?php if (!empty($fetch['video_reel'])) { echo '<span class="label label-info">Yes</span>'; } else { echo '—'; } ?></td>
                         <td><?php echo $fetch['content']; ?></td>
                     </tr>
 					<?php } ?>
