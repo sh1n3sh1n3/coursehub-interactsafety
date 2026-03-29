@@ -54,6 +54,18 @@
 	    
     	if($insert){
     	    $last_id = $conn->insert_id;
+            $_SESSION['registration_prefill'] = [
+                'fullname' => trim((string) (($register_details['fname'] ?? '') . ' ' . ($register_details['lname'] ?? ''))),
+                'email' => (string) ($register_details['email'] ?? ''),
+                'phone' => (string) ($register_details['workplace_phone'] ?? '')
+            ];
+            unset(
+                $_SESSION['pin_user'],
+                $_SESSION['registration_otp'],
+                $_SESSION['registration_otp_verified'],
+                $_SESSION['registration_resume_flow'],
+                $_SESSION['registration_welcome_complete']
+            );
     	    if (!empty($_SESSION['client_course_code'])) {
     	        $conn->query("UPDATE private_course SET registration_id = '".mysqli_real_escape_string($conn, $registerid)."', sale_id='".$last_id."', status='sold' WHERE course_code = '".mysqli_real_escape_string($conn, $_SESSION['client_course_code'])."' AND course_id='".mysqli_real_escape_string($conn, $courseid)."' AND slot_id='".mysqli_real_escape_string($conn, $slotid)."'");
     	    }
@@ -71,30 +83,67 @@
     		    $end_date = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '-';
     		    $location_text = ($course_city ? $course_city['name'].' - ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
     		    $map_link = !empty($course_locations['maplink']) ? $course_locations['maplink'] : '';
-    		    $what_to_bring = !empty($course_slots['remarks']) ? trim($course_slots['remarks']) : 'Photo ID; notepad and pen; any materials advised in your course joining instructions.';
-    		    $txt1 = "<p>Hi ".htmlspecialchars($register_details['fname']).",</p>";
-    		    $txt1 .= "<p><strong>Your seat is confirmed.</strong> Thank you for your payment. Please find your booking and course information below.</p>";
-    		    $txt1 .= "<h3 style='margin-top:24px;'>Course details</h3>";
-    		    $txt1 .= "<ul style='line-height:1.6;'>";
-    		    $txt1 .= "<li><strong>Course:</strong> ".htmlspecialchars($course_details['title'])."</li>";
-    		    $txt1 .= "<li><strong>Start:</strong> ".$start_date."</li>";
-    		    $txt1 .= "<li><strong>End:</strong> ".$end_date."</li>";
-    		    $txt1 .= "<li><a href='".htmlspecialchars($course_link)."' target='_blank'>View course details</a></li>";
-    		    $txt1 .= "</ul>";
-    		    $txt1 .= "<h3 style='margin-top:24px;'>Location</h3>";
-    		    $txt1 .= "<p>".htmlspecialchars($location_text)."</p>";
-    		    if ($map_link) $txt1 .= "<p><a href='".htmlspecialchars($map_link)."' target='_blank'>View on map</a></p>";
-    		    if (!empty($course_slots['remarks'])) $txt1 .= "<p><strong>Venue notes:</strong> ".nl2br(htmlspecialchars($course_slots['remarks']))."</p>";
-    		    $txt1 .= "<h3 style='margin-top:24px;'>What to bring</h3>";
-    		    $txt1 .= "<p>".nl2br(htmlspecialchars($what_to_bring))."</p>";
-    		    $txt1 .= "<p><strong>Please keep this email for reference and bring the items listed above on the day.</strong></p>";
-    		    $txt1 .= "<h3 style='margin-top:24px;'>Contact details</h3>";
-    		    $txt1 .= "<p>If you have any questions or need to change your booking, please contact us:</p>";
-    		    $txt1 .= "<ul style='line-height:1.6;'>";
-    		    $txt1 .= "<li><strong>Email:</strong> <a href='mailto:".htmlspecialchars($impactem)."'>".htmlspecialchars($impactem)."</a></li>";
-    		    $txt1 .= "<li><strong>Phone:</strong> ".htmlspecialchars($impactph)."</li>";
-    		    $txt1 .= "</ul>";
-    		    $txt1 .= "<p style='margin-top:24px;'>Regards,<br>".htmlspecialchars($impacttitle)."</p>";
+    		    $course_dates_list = '';
+    		    $day_index = 0;
+    		    $courseDatesForEmail = $conn->query("SELECT * FROM course_dates WHERE slot_id='".$course_slots['id']."' ORDER BY date ASC, starttime ASC");
+    		    while ($cd = $courseDatesForEmail->fetch_assoc()) {
+    		        $day_index++;
+    		        $course_dates_list .= "<li><strong>Day ".$day_index.":</strong> ".date('l, j F Y', strtotime($cd['date']))." (".date('g:i A', strtotime($cd['starttime']))." - ".date('g:i A', strtotime($cd['endtime'])).")</li>";
+    		    }
+    		    if ($course_dates_list === '') {
+    		        $course_dates_list = "<li>-</li>";
+    		    }
+    		    $paid_on = date('d-M-Y');
+    		    $attendee_names = trim(($register_details['title'] ?? '').' '.$register_details['fname'].' '.$register_details['lname']);
+    		    $display_amount = '$'.number_format((float)$course_details['price'], 2);
+    		    $receipt_txn = $orderno;
+    		    $receiptBody = "<p><strong>Payment received</strong></p>";
+    		    $receiptBody .= "<p>Thank you for your booking. This email confirms that payment has been successfully received for the ".htmlspecialchars($course_details['title']).".</p>";
+    		    $receiptBody .= "<h3 style='margin-top:24px;'>Receipt Details</h3>";
+    		    $receiptBody .= "<ul style='line-height:1.6;'><li><strong>Course:</strong> ".htmlspecialchars($course_details['title'])."</li><li><strong>Invoice Number:</strong> ".htmlspecialchars($invoiceno)."</li><li><strong>Date Paid:</strong> ".htmlspecialchars($paid_on)."</li><li><strong>Payment Method:</strong> Credit Card / Stripe</li></ul>";
+    		    $receiptBody .= "<h3 style='margin-top:24px;'>Payment Summary</h3>";
+    		    $receiptBody .= "<ul style='line-height:1.6;'><li><strong>Amount Paid:</strong> ".htmlspecialchars($display_amount)."</li><li><strong>Transaction ID:</strong> ".htmlspecialchars($receipt_txn)."</li></ul>";
+    		    $receiptBody .= "<h3 style='margin-top:24px;'>Attendee(s)</h3>";
+    		    $receiptBody .= "<ul style='line-height:1.6;'><li>".htmlspecialchars($attendee_names)."</li></ul>";
+    		    $receiptBody .= "<h3 style='margin-top:24px;'>Important</h3>";
+    		    $receiptBody .= "<p>A separate email has been sent with full course details, including dates, location, and attendance information.</p>";
+    		    $receiptBody .= "<h3 style='margin-top:24px;'>Need Help?</h3>";
+    		    $receiptBody .= "<p>If you have any questions regarding this payment or require a formal tax invoice:</p>";
+    		    $receiptBody .= "<ul style='line-height:1.6;'><li><strong>Email:</strong> <a href='mailto:info@interactsafety.com.au'>info@interactsafety.com.au</a></li></ul>";
+    		    $receiptBody .= "<h3 style='margin-top:24px;'>Thank You</h3>";
+    		    $receiptBody .= "<p>We appreciate your commitment to workplace health and safety.</p>";
+    		    $receiptBody .= "<p style='margin-top:24px;'>Regards,<br>Interact Safety Training Team</p>";
+
+    		    $confirmBody = "<p>Hi ".htmlspecialchars($register_details['fname']).",</p>";
+    		    $confirmBody .= "<p>Your booking for the ".htmlspecialchars($course_details['title'])." has been confirmed.</p>";
+    		    $confirmBody .= "<p>This WorkSafe-approved training will provide you with the knowledge and practical skills to effectively represent your designated work group and contribute to improving workplace health and safety.</p>";
+    		    $confirmBody .= "<h3 style='margin-top:24px;'>Course Details</h3>";
+    		    $confirmBody .= "<ul style='line-height:1.6;'><li><strong>Course:</strong> ".htmlspecialchars($course_details['title'])."</li><li><strong>Dates:</strong><ul style='margin-top:6px;'>".$course_dates_list."</ul></li><li><strong>Location:</strong> ".htmlspecialchars($location_text)."</li></ul>";
+    		    $confirmBody .= "<p><strong>Additional details:</strong></p>";
+    		    if (!empty($course_slots['remarks'])) $confirmBody .= "<p>".nl2br(htmlspecialchars($course_slots['remarks']))."</p>";
+    		    if ($map_link) $confirmBody .= "<p><a href='".htmlspecialchars($map_link)."' target='_blank'>View map link</a></p>";
+    		    $confirmBody .= "<h3 style='margin-top:24px;'>What to Expect</h3>";
+    		    $confirmBody .= "<p>This course is designed to be practical, engaging, and directly relevant to your workplace.</p>";
+    		    $confirmBody .= "<p>Throughout the program, you will:</p>";
+    		    $confirmBody .= "<ul style='line-height:1.6;'><li>Work through real workplace scenarios</li><li>Take part in group discussions and activities</li><li>Build confidence in your role as a Health and Safety Representative</li><li>Understand your powers and entitlements under the OHS Act</li></ul>";
+    		    $confirmBody .= "<p>You'll leave with practical tools you can take straight back into your workplace.</p>";
+    		    $confirmBody .= "<h3 style='margin-top:24px;'>Important Information for HSRs</h3>";
+    		    $confirmBody .= "<p>Under the Occupational Health and Safety Act 2004:</p>";
+    		    $confirmBody .= "<ul style='line-height:1.6;'><li>HSRs are entitled to attend approved training</li><li>HSRs have the right to choose their training course in consultation with their employer</li></ul>";
+    		    $confirmBody .= "<h3 style='margin-top:24px;'>Attendance Requirements</h3>";
+    		    $confirmBody .= "<ul style='line-height:1.6;'><li>Attendance is required across all scheduled sessions</li><li>Participation is expected throughout the course</li><li>Late arrival or missed sessions may impact course completion</li></ul>";
+    		    $confirmBody .= "<h3 style='margin-top:24px;'>What's Provided</h3>";
+    		    $confirmBody .= "<p>To support your learning, the following will be provided:</p>";
+    		    $confirmBody .= "<ul style='line-height:1.6;'><li>Training folder and course materials</li><li>Morning tea and lunch (sandwiches/wraps)</li><li>Tea and coffee</li></ul>";
+    		    $confirmBody .= "<p>If you prefer to bring your own lunch or explore other options, there are a variety of cafes and shops located nearby. A fridge is also available for your use.</p>";
+    		    $confirmBody .= "<h3 style='margin-top:24px;'>What to Bring</h3>";
+    		    $confirmBody .= "<ul style='line-height:1.6;'><li>Pens (highlighters optional)</li><li>Water bottle (optional)</li></ul>";
+    		    $confirmBody .= "<h3 style='margin-top:24px;'>Need Help?</h3>";
+    		    $confirmBody .= "<p>If you have any questions or need to make changes to your booking:</p>";
+    		    $confirmBody .= "<ul style='line-height:1.6;'><li><strong>Email:</strong> <a href='mailto:info@interactsafety.com.au'>info@interactsafety.com.au</a></li></ul>";
+    		    $confirmBody .= "<h3 style='margin-top:24px;'>Final Note</h3>";
+    		    $confirmBody .= "<p>We look forward to working with you and supporting you in your role as a Health and Safety Representative.</p>";
+    		    $confirmBody .= "<p style='margin-top:24px;'>Regards,<br>Interact Safety Training Team</p>";
     		    $mail = new PHPMailer(true);
                 try {
                     $mail->isSMTP();
@@ -110,9 +159,27 @@
                     $mail->addAddress($email, $userdataname);
                     $mail->setFrom($impactem, $impacttitle);
                     $mail->addReplyTo($impactem, $impacttitle);
-                    $mail->Subject = "Seat confirmed - ".$course_details['title'];
-                    $mail->Body    = $txt1;
+                    $mail->Subject = "Payment Receipt - ".$course_details['title'];
+                    $mail->Body    = $receiptBody;
                     $mail->Send();
+
+                    $mail2 = new PHPMailer(true);
+                    $mail2->isSMTP();
+                    $mail2->SMTPDebug  = 0;
+                    $mail2->Host       = $emailaccount['host'];
+                    $mail2->Port       = $emailaccount['port'];
+                    $mail2->SMTPSecure = 'tls';
+                    $mail2->SMTPAuth   = true;
+                    $mail2->IsHTML(true);
+                    $mail2->CharSet    = 'UTF-8';
+                    $mail2->Username   = $emailaccount['email'];
+                    $mail2->Password   = $emailaccount['password'];
+                    $mail2->addAddress($email, $userdataname);
+                    $mail2->setFrom($impactem, $impacttitle);
+                    $mail2->addReplyTo($impactem, $impacttitle);
+                    $mail2->Subject = "Your enrolment is confirmed - ".$course_details['title'];
+                    $mail2->Body    = $confirmBody;
+                    $mail2->Send();
                 } catch (Exception $e) {
                     $err = $e->getMessage();
                 }

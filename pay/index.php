@@ -43,6 +43,32 @@ $documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_R
 $baseUrl = $protocol . '://' . $host;
 $payBaseUrl = rtrim($baseUrl, '/') . '/pay'; // used for Stripe JS (avoid double slash after head_script overwrites $baseUrl)
 $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid;
+
+function paymentDisplayValue($value)
+{
+    $value = is_string($value) ? trim($value) : $value;
+    if ($value === null || $value === '') {
+        return '-';
+    }
+    return (string)$value;
+}
+
+function paymentRoleLabel($value)
+{
+    $roles = [
+        '1' => 'HSR',
+        '2' => 'Deputy HSR',
+        '3' => 'Supervisor',
+        '5' => 'Other'
+    ];
+    $key = (string)$value;
+    return $roles[$key] ?? '-';
+}
+
+function paymentHasValue($value)
+{
+    return trim((string)$value) !== '';
+}
 ?>
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
@@ -169,6 +195,16 @@ $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $sloti
         #stripe-payment-form .form-group:last-child {
             margin-bottom: 0;
         }
+        .details-row {
+            margin-bottom: 12px;
+        }
+        .details-label {
+            font-weight: 600;
+            color: #444;
+        }
+        .details-value {
+            color: #222;
+        }
     </style>
 </head>
 
@@ -211,15 +247,15 @@ $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $sloti
                                     <div class="panel-body">
                                         <div class="form-group">
                                             <label class="control-label col-sm-2">First Name:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['fname']); ?></label>
+                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars(paymentDisplayValue($register_details['fname'])); ?></label>
                                             <label class="control-label col-sm-2">Last Name:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['lname']); ?></label>
+                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars(paymentDisplayValue($register_details['lname'])); ?></label>
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label col-sm-2">Email:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['email']); ?></label>
+                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars(paymentDisplayValue($register_details['email'])); ?></label>
                                             <label class="control-label col-sm-2">Industry Type:</label>
-                                            <label class="control-label col-sm-4"><?php echo $industry_type ? htmlspecialchars($industry_type['title']) : '-'; ?></label>
+                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($industry_type ? paymentDisplayValue($industry_type['title']) : '-'); ?></label>
                                         </div>
                                     </div>
                                 </div>
@@ -227,65 +263,61 @@ $backUrl = $baseUrl . '/registration/' . $courseid . '/' . $locid . '/' . $sloti
                                 <div class="panel panel-default">
                                     <div class="panel-heading">HSR WORKPLACE DETAILS</div>
                                     <div class="panel-body">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-2">Position:</label>
-                                            <label class="col-sm-4"><?php echo htmlspecialchars($register_details['position']); ?></label>
-                                            <label class="control-label col-sm-2">Company:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['company']); ?></label>
+                                        <div class="form-group details-row">
+                                            <label class="control-label col-sm-2 details-label">Role:</label>
+                                            <label class="control-label col-sm-4 details-value"><?php echo htmlspecialchars(paymentRoleLabel($register_details['hsr_or_not'])); ?></label>
+                                            <label class="control-label col-sm-2 details-label">Company:</label>
+                                            <label class="control-label col-sm-4 details-value"><?php echo htmlspecialchars(paymentDisplayValue($register_details['company'])); ?></label>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-2">Postal Address:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['postal_address']); ?></label>
+                                        <?php
+                                        $hasWorkplaceContact = paymentHasValue($register_details['workplace_contact']);
+                                        $hasWorkplaceEmail = paymentHasValue($register_details['workplace_email']);
+                                        $hasWorkplacePhone = paymentHasValue($register_details['workplace_phone']);
+                                        $hasSupportRequirements = paymentHasValue($register_details['special_requirements']);
+                                        $hasFoodRequirements = paymentHasValue($register_details['food_requirements']);
+                                        ?>
+                                        <?php if ($hasWorkplaceContact || $hasWorkplaceEmail || $hasWorkplacePhone || $hasSupportRequirements || $hasFoodRequirements) { ?>
+                                            <hr>
+                                        <?php } ?>
+                                        <?php if ($hasWorkplaceContact) { ?>
+                                        <div class="form-group details-row">
+                                            <label class="control-label col-sm-2 details-label">Workplace Contact:</label>
+                                            <label class="control-label col-sm-4 details-value"><?php echo htmlspecialchars(paymentDisplayValue($register_details['workplace_contact'])); ?></label>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-12">Part A: If you are an HSR or Deputy HSR</label>
-                                            <div class="col-sm-12">
-                                                <div class="panel-heading">
-                                                    <input disabled type="radio" <?php if ($register_details['hsr_or_not'] == '1') echo 'checked'; ?> value="1"> You are an elected HSR <br>
-                                                    <input disabled type="radio" <?php if ($register_details['hsr_or_not'] == '2') echo 'checked'; ?> value="2"> You are an elected Deputy HSR
-                                                </div>
-                                            </div>
+                                        <?php } ?>
+                                        <?php if ($hasWorkplaceEmail || $hasWorkplacePhone) { ?>
+                                        <div class="form-group details-row">
+                                            <?php if ($hasWorkplaceEmail) { ?>
+                                            <label class="control-label col-sm-2 details-label">Workplace Email:</label>
+                                            <label class="control-label col-sm-4 details-value"><?php echo htmlspecialchars(paymentDisplayValue($register_details['workplace_email'])); ?></label>
+                                            <?php } else { ?>
+                                            <label class="control-label col-sm-2 details-label"></label>
+                                            <label class="control-label col-sm-4 details-value"></label>
+                                            <?php } ?>
+                                            <?php if ($hasWorkplacePhone) { ?>
+                                            <label class="control-label col-sm-2 details-label">Workplace Phone:</label>
+                                            <label class="control-label col-sm-4 details-value"><?php echo htmlspecialchars(paymentDisplayValue($register_details['workplace_phone'])); ?></label>
+                                            <?php } ?>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-12">Part B: If you are not an HSR or Deputy HSR</label>
-                                            <div class="col-sm-12">
-                                                <div class="panel-heading">
-                                                    <input disabled type="radio" <?php if ($register_details['hsr_or_not'] == '3') echo 'checked'; ?> value="3"> Manager/Supervisor <br>
-                                                    <input disabled type="radio" <?php if ($register_details['hsr_or_not'] == '4') echo 'checked'; ?> value="4"> Member of your HSC <br>
-                                                    <input disabled type="radio" <?php if ($register_details['hsr_or_not'] == '5') echo 'checked'; ?> value="5"> Other (e.g. unemployed, professional development)
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <?php } ?>
+                                        <?php if (($hasSupportRequirements || $hasFoodRequirements) && ($hasWorkplaceContact || $hasWorkplaceEmail || $hasWorkplacePhone)) { ?>
                                         <hr>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-2">Workplace Contact:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['workplace_contact']); ?></label>
+                                        <?php } ?>
+                                        <?php if ($hasSupportRequirements || $hasFoodRequirements) { ?>
+                                        <div class="form-group details-row">
+                                            <?php if ($hasSupportRequirements) { ?>
+                                            <label class="control-label col-sm-2 details-label">Support Requirements:</label>
+                                            <label class="control-label col-sm-4 details-value"><?php echo htmlspecialchars(paymentDisplayValue($register_details['special_requirements'])); ?></label>
+                                            <?php } else { ?>
+                                            <label class="control-label col-sm-2 details-label"></label>
+                                            <label class="control-label col-sm-4 details-value"></label>
+                                            <?php } ?>
+                                            <?php if ($hasFoodRequirements) { ?>
+                                            <label class="control-label col-sm-2 details-label">Food Allergies:</label>
+                                            <label class="control-label col-sm-4 details-value"><?php echo htmlspecialchars(paymentDisplayValue($register_details['food_requirements'])); ?></label>
+                                            <?php } ?>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-2">Workplace Email:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['workplace_email']); ?></label>
-                                            <label class="control-label col-sm-2">Workplace Phone:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['workplace_phone']); ?></label>
-                                        </div>
-                                        <hr>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-2">Emergency Contact:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['emergency_contact']); ?></label>
-                                            <label class="control-label col-sm-2">Emergency Phone:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['emergency_phone']); ?></label>
-                                        </div>
-                                        <hr>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-2">Additional Learning Requirements:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['special_requirements']); ?></label>
-                                            <label class="control-label col-sm-2">Food Allergies:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['food_requirements']); ?></label>
-                                        </div>
-                                        <hr>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-2">Instruction:</label>
-                                            <label class="control-label col-sm-4"><?php echo htmlspecialchars($register_details['instruction']); ?></label>
-                                        </div>
+                                        <?php } ?>
                                     </div>
                                 </div>
 

@@ -4,6 +4,33 @@ $courseId = isset($_GET['courseid']) ? (int)$_GET['courseid'] : 0;
 $slotId = isset($_GET['slotid']) ? (int)$_GET['slotid'] : 0;
 $adminBasePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 
+$err = $msg = '';
+
+// Remove a student from a specific scheduled course (unenrol = remove sale row for this slot/course/user)
+if (isset($_POST['remove_student']) && $courseId > 0 && $slotId > 0) {
+    $saleId = isset($_POST['sale_id']) ? (int)$_POST['sale_id'] : 0;
+    if ($saleId <= 0) {
+        $err = 'Invalid request.';
+    } else {
+        $saleRow = $conn->query("SELECT id, user, courseid, slotid FROM sale WHERE id='" . $saleId . "' LIMIT 1")->fetch_assoc();
+        if (!$saleRow || (int)$saleRow['courseid'] !== $courseId || (int)$saleRow['slotid'] !== $slotId) {
+            $err = 'Student enrolment not found for this scheduled course.';
+        } else {
+            $studentId = (int)$saleRow['user'];
+
+            // Clean up attendance for this scheduled course (if any)
+            $conn->query("DELETE FROM tbl_attendance WHERE tbl_student_id='" . $studentId . "' AND courseid='" . $courseId . "' AND slotid='" . $slotId . "'");
+
+            // Remove enrolment from the enrolled list
+            if ($conn->query("DELETE FROM sale WHERE id='" . $saleId . "' LIMIT 1")) {
+                $msg = 'Student removed from this scheduled course successfully.';
+            } else {
+                $err = $conn->error;
+            }
+        }
+    }
+}
+
 $course = $conn->query("SELECT * FROM courses WHERE id='" . $courseId . "'")->fetch_assoc();
 $scheduledCourse = false;
 if ($courseId > 0 && $slotId > 0) {
@@ -137,6 +164,20 @@ if ($course && $scheduledCourse) {
                                 <h5>Enrolled Students</h5>
                             </div>
                             <div class="ibox-content">
+                                <?php
+                                if (!empty($err)) {
+                                    echo "<div class='alert alert-danger alert-dismissible'>
+                                        <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
+                                        <strong>Error:</strong> " . $err . "
+                                    </div>";
+                                }
+                                if (!empty($msg)) {
+                                    echo "<div class='alert alert-success alert-dismissible'>
+                                        <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
+                                        " . $msg . "
+                                    </div>";
+                                }
+                                ?>
                                 <?php if (!$course || !$scheduledCourse) { ?>
                                     <div class="alert alert-danger">Scheduled course not found.</div>
                                 <?php } else { ?>
@@ -189,6 +230,12 @@ if ($course && $scheduledCourse) {
                                                         <td><?php echo $student['generateCertificate'] == '1' ? 'Yes' : 'No'; ?></td>
                                                         <td>
                                                             <a href="user-details.php?id=<?php echo (int)$student['user']; ?>" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> View Details</a>
+                                                            <form method="post" style="display:inline-block; margin-left: 6px;" onsubmit="return confirm('Remove this student from this scheduled course? This will remove them from the enrolled list.');">
+                                                                <input type="hidden" name="sale_id" value="<?php echo (int)$student['id']; ?>">
+                                                                <button type="submit" name="remove_student" value="1" class="btn btn-danger btn-sm">
+                                                                    <i class="fa fa-trash"></i> Remove
+                                                                </button>
+                                                            </form>
                                                         </td>
                                                     </tr>
                                                 <?php } ?>

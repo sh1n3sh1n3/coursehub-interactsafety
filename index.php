@@ -29,6 +29,10 @@
     #home .event-list .thumb { flex: 0 0 200px; height: 200px; overflow: hidden; display: block; }
     #home .event-list .thumb img { object-fit: cover; width: 100%; height: 100%; display: block; transform: scale(1.3); transition: transform 0.4s ease; }
     #home .event-list:hover .thumb img { transform: scale(1.5); }
+    #about .about-copy p { margin: 0 0 12px; }
+    #about .about-copy ul,
+    #about .about-copy ol { margin: 0; padding-left: 22px; }
+    #about .about-copy li { margin: 0 0 10px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -47,15 +51,33 @@
                                 <?php $aboutus = $conn->query("SELECT * FROM aboutus WHERE id='1'")->fetch_assoc(); ?>
                                 <h2 class="text-uppercase text-theme-colored mt-0 mt-sm-30">The Interact Safety Approach.</h2>
                                 <div class="double-line-bottom-theme-colored-2"></div>
-                                <?php $string = $aboutus['description'];
-                                    if (strlen($string) > 2500) {
-                                        $stringCut = substr($string, 0, 2500);
-                                        $endPoint = strrpos($stringCut, ' ');
-                                        $string = $endPoint ? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
-                                        $string .= '... <br><a href="about.php" class="btn btn-colored btn-theme-colored2 text-white btn-lg pl-40 pr-40 mt-15">Read More</a>';
+                                <?php
+                                $aboutDescription = (string)($aboutus['description'] ?? '');
+                                // Normalize pasted rich text (e.g., Google Docs HTML) to clean semantic markup.
+                                $aboutDescription = str_replace(["\r\n", "\r"], "\n", $aboutDescription);
+                                $aboutDescription = preg_replace('/<span\b[^>]*>/i', '', $aboutDescription);
+                                $aboutDescription = str_replace('</span>', '', $aboutDescription);
+                                $aboutDescription = preg_replace('/<div\b[^>]*>/i', '<p>', $aboutDescription);
+                                $aboutDescription = str_replace('</div>', '</p>', $aboutDescription);
+                                $aboutDescription = strip_tags($aboutDescription, '<p><ul><ol><li><a><strong><em><b><i><h2><h3><h4><br>');
+                                $aboutDescription = preg_replace('/<(p|ul|ol|li|h2|h3|h4|strong|em|b|i|br)\b[^>]*>/i', '<$1>', $aboutDescription);
+                                $aboutDescription = preg_replace_callback('/<a\b[^>]*>/i', function($m) {
+                                    if (preg_match('/href\s*=\s*([\'"])(.*?)\1/i', $m[0], $hrefMatch)) {
+                                        $href = htmlspecialchars($hrefMatch[2], ENT_QUOTES, 'UTF-8');
+                                        return '<a href="' . $href . '">';
                                     }
-                                    echo $string;
+                                    return '<a>';
+                                }, $aboutDescription);
+                                $aboutDescription = preg_replace('/<a>(.*?)<\/a>/is', '$1', $aboutDescription);
+                                $aboutDescription = preg_replace('/<(p|li)>\s*(?:&nbsp;|&#160;|<br>|\\s)*<\/\\1>/i', '', $aboutDescription);
+                                // Remove empty list items that render as stray bullets.
+                                $aboutDescription = preg_replace('/<li\b[^>]*>\s*(?:&nbsp;|&#160;|<br\s*\/?>|\s)*<\/li>/i', '', $aboutDescription);
+                                // Some editor content stores <li> without a surrounding <ul>/<ol>.
+                                if (preg_match('/<li\b/i', $aboutDescription) && !preg_match('/<(ul|ol)\b/i', $aboutDescription)) {
+                                    $aboutDescription = '<ul class="about-list">' . $aboutDescription . '</ul>';
+                                }
                                 ?>
+                                <div class="about-copy"><?php echo $aboutDescription; ?></div>
                             </div>
                             <div class="col-md-5">
                                 <img class="img-fullwidth maxwidth500" src="assets/images/about/<?php echo $aboutus['image']; ?>" alt="About the business">

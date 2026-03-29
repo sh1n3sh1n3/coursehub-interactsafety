@@ -10,16 +10,29 @@ function getUserHsrLabel($value)
     if ($value == '1') {
         return 'HSR';
     } elseif ($value == '2') {
-        return 'DHSR';
+        return 'Deputy HSR';
     } elseif ($value == '3') {
-        return 'Man or Sup';
-    } elseif ($value == '4') {
-        return 'Comm member';
+        return 'Supervisor';
     } elseif ($value == '5') {
         return 'Other';
     }
 
     return '-';
+}
+
+function displayValue($value)
+{
+    $value = is_string($value) ? trim($value) : $value;
+    if ($value === null || $value === '') {
+        return '-';
+    }
+
+    return (string)$value;
+}
+
+function hasValue($value)
+{
+    return trim((string)$value) !== '';
 }
 
 $user = false;
@@ -67,6 +80,18 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
 <head>
     <title><?php echo htmlspecialchars($userName); ?></title>
     <?php include('includes/head.php'); ?>
+    <style>
+        .details-table th {
+            width: 38%;
+            white-space: nowrap;
+            background: #f8f8f8;
+        }
+        .details-table th,
+        .details-table td {
+            vertical-align: middle !important;
+            padding: 10px 12px !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -109,15 +134,15 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
-                                            <table class="table table-bordered">
+                                            <table class="table table-bordered details-table">
                                                 <tbody>
                                                     <tr>
                                                         <th>Student ID</th>
-                                                        <td><?php echo htmlspecialchars(strtoupper($user['generated_code'])); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue(strtoupper((string)$user['generated_code']))); ?></td>
                                                     </tr>
                                                     <tr>
                                                         <th>Full Name</th>
-                                                        <td><?php echo htmlspecialchars(trim($user['title'] . ' ' . $user['fname'] . ' ' . $user['lname'])); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue(trim($user['title'] . ' ' . $user['fname'] . ' ' . $user['lname']))); ?></td>
                                                     </tr>
                                                     <tr>
                                                         <th>Status</th>
@@ -125,73 +150,59 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
                                                     </tr>
                                                     <tr>
                                                         <th>Email</th>
-                                                        <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($user['email'])); ?></td>
                                                     </tr>
                                                     <tr>
-                                                        <th>Position</th>
-                                                        <td><?php echo htmlspecialchars($user['position']); ?></td>
+                                                        <th>Role</th>
+                                                        <td><?php echo htmlspecialchars(getUserHsrLabel($user['hsr_or_not'])); ?></td>
                                                     </tr>
                                                     <tr>
                                                         <th>Company</th>
-                                                        <td><?php echo htmlspecialchars($user['company']); ?></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Postal Address</th>
-                                                        <td><?php echo htmlspecialchars($user['postal_address']); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($user['company'])); ?></td>
                                                     </tr>
                                                     <tr>
                                                         <th>Industry</th>
-                                                        <td><?php echo htmlspecialchars($industryTitle); ?></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>HSR / DHSR</th>
-                                                        <td><?php echo htmlspecialchars(getUserHsrLabel($user['hsr_or_not'])); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($industryTitle)); ?></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                         <div class="col-lg-6">
-                                            <table class="table table-bordered">
+                                            <table class="table table-bordered details-table">
                                                 <tbody>
                                                     <tr>
                                                         <th>Workplace Contact</th>
-                                                        <td><?php echo htmlspecialchars($user['workplace_contact']); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($user['workplace_contact'])); ?></td>
                                                     </tr>
                                                     <tr>
                                                         <th>Workplace Email</th>
-                                                        <td><?php echo htmlspecialchars($user['workplace_email']); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($user['workplace_email'])); ?></td>
                                                     </tr>
+                                                    <?php if (hasValue($user['workplace_phone'])) { ?>
                                                     <tr>
                                                         <th>Workplace Phone</th>
-                                                        <td><?php echo htmlspecialchars($user['workplace_phone']); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($user['workplace_phone'])); ?></td>
                                                     </tr>
-                                                    <tr>
-                                                        <th>Emergency Contact</th>
-                                                        <td><?php echo htmlspecialchars($user['emergency_contact']); ?></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Emergency Phone</th>
-                                                        <td><?php echo htmlspecialchars($user['emergency_phone']); ?></td>
-                                                    </tr>
+                                                    <?php } ?>
+                                                    <?php if (hasValue($user['food_requirements'])) { ?>
                                                     <tr>
                                                         <th>Food Requirements</th>
-                                                        <td><?php echo htmlspecialchars($user['food_requirements']); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($user['food_requirements'])); ?></td>
                                                     </tr>
+                                                    <?php } ?>
+                                                    <?php if (hasValue($user['special_requirements'])) { ?>
                                                     <tr>
                                                         <th>Special Requirements</th>
-                                                        <td><?php echo htmlspecialchars($user['special_requirements']); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($user['special_requirements'])); ?></td>
                                                     </tr>
-                                                    <tr>
-                                                        <th>Instruction</th>
-                                                        <td><?php echo htmlspecialchars($user['instruction']); ?></td>
-                                                    </tr>
+                                                    <?php } ?>
                                                     <tr>
                                                         <th>First Registered Date</th>
-                                                        <td><?php echo htmlspecialchars($firstOrderDate); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($firstOrderDate)); ?></td>
                                                     </tr>
                                                     <tr>
                                                         <th>Latest Course Enrolled</th>
-                                                        <td><?php echo htmlspecialchars($latestCourseTitle); ?></td>
+                                                        <td><?php echo htmlspecialchars(displayValue($latestCourseTitle)); ?></td>
                                                     </tr>
                                                     <tr>
                                                         <th>Total Orders</th>
