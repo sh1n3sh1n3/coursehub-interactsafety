@@ -45,8 +45,8 @@ if (!function_exists('testimonial_embed_src')) {
     #home .event-list-details { flex: 0 0 auto; min-height: 80px; height: 80px; display: flex; align-items: center; justify-content: center; padding: 15px; }
     #home .event-list-details h5 { margin: 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     #home .event-list .thumb { flex: 0 0 200px; height: 200px; overflow: hidden; display: block; }
-    #home .event-list .thumb img { object-fit: cover; width: 100%; height: 100%; display: block; transform: scale(1.3); transition: transform 0.4s ease; }
-    #home .event-list:hover .thumb img { transform: scale(1.5); }
+    #home .event-list .thumb img { object-fit: contain; height: 100%; display: block;  transition: transform 0.4s ease; }
+    #home .event-list:hover .thumb img { transform: scale(1.2); }
     #about .about-copy p { margin: 0 0 12px; }
     #about .about-copy ul,
     #about .about-copy ol { margin: 0; padding-left: 22px; }
