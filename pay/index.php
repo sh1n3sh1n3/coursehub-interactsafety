@@ -32,6 +32,17 @@ $_SESSION['orderprice'] = $price;
 $_SESSION['ordertitle'] = $title;
 $_SESSION['registerid'] = $registerid;
 $_SESSION['courseid'] = $courseid;
+$_SESSION['pay_slotid'] = $slotid;
+
+$paymentBlockedNoSeats = false;
+$paymentBlockedMessage = '';
+if (($course_slots['type'] ?? '') === 'public') {
+    $publicSeatsCheck = get_public_seats_remaining($conn, (int) $courseid, (int) $slotid);
+    if ($publicSeatsCheck !== null && $publicSeatsCheck < 1) {
+        $paymentBlockedNoSeats = true;
+        $paymentBlockedMessage = format_course_capacity_block_message($publicSeatsCheck);
+    }
+}
 
 require_once 'config.php';
 
@@ -233,6 +244,13 @@ function paymentHasValue($value)
                         <div class="col-md-12">
                             <h4 class="mt-0 mb-30 line-bottom-theme-colored-2"><?php echo htmlspecialchars($course_details['title']); ?></h4>
 
+                            <?php if (!empty($paymentBlockedNoSeats) && !empty($paymentBlockedMessage)) { ?>
+                                <div class="alert alert-warning" role="alert">
+                                    <strong>Booking cannot be completed.</strong> <?php echo htmlspecialchars($paymentBlockedMessage); ?>
+                                    Please choose another session or join the waitlist from the course page.
+                                </div>
+                            <?php } ?>
+
                             <?php if ($course_slots['type'] !== 'public') {
                                 if (isset($_POST['submit'])) {
                                     header('Location: ' . $baseUrl . '/payment-success/' . $courseid . '/' . $locid . '/' . $slotid . '/' . $cityid . '/' . $registerid);
@@ -321,7 +339,7 @@ function paymentHasValue($value)
                                     </div>
                                 </div>
 
-                                <?php if ($course_slots['type'] == 'public') { ?>
+                                <?php if ($course_slots['type'] == 'public' && empty($paymentBlockedNoSeats)) { ?>
                                     <div class="panel panel-default">
                                         <div class="panel-body">
                                             <div class="col-md-12">
@@ -357,7 +375,7 @@ function paymentHasValue($value)
                                     </div>
                                 <?php } ?>
 
-                                <?php if ($course_slots['type'] == 'public') { ?>
+                                <?php if ($course_slots['type'] == 'public' && empty($paymentBlockedNoSeats)) { ?>
                                     <div class="panel panel-default" id="panel-payment-details">
                                         <div class="panel-heading">Payment Details</div>
                                         <div class="panel-body" id="payment-details-body">
@@ -401,6 +419,12 @@ function paymentHasValue($value)
                                     </div>
                                 <?php } ?>
 
+                                <?php if ($course_slots['type'] === 'public' && !empty($paymentBlockedNoSeats)) { ?>
+                                    <div class="mt-20 mb-20">
+                                        <a href="<?php echo htmlspecialchars($backUrl); ?>" class="btn btn-default btn-sm">Back</a>
+                                    </div>
+                                <?php } ?>
+
                                 <?php if ($course_slots['type'] !== 'public') { ?>
                                     <a href="<?php echo htmlspecialchars($backUrl); ?>" class="btn btn-default btn-sm">Back</a>
                                     <button type="submit" name="submit" class="btn btn-primary btn-sm">Continue</button>
@@ -413,7 +437,7 @@ function paymentHasValue($value)
         </div>
     </div>
     <?php include('../include/footer_script.php'); ?>
-    <?php if ($course_slots['type'] == 'public') { ?>
+    <?php if ($course_slots['type'] == 'public' && empty($paymentBlockedNoSeats)) { ?>
         <script src="https://js.stripe.com/v3/"></script>
         <script>
             var PAY_BASE = '<?php echo htmlspecialchars($payBaseUrl); ?>';

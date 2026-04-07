@@ -81,7 +81,7 @@
     		    $course_link = $urlcourse."courses-detail/".$fetchcourses['id']."/".$fetchcourses['slug'];
     		    $start_date = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])).' at '.date('g:i A', strtotime($fetchdates['starttime'])) : '-';
     		    $end_date = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '-';
-    		    $location_text = ($course_city ? $course_city['name'].' - ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
+    		    $location_text = format_booking_location_label($course_city ? ($course_city['name'] ?? '') : '', $course_locations['location'] ?? '', $course_locations['title'] ?? '');
     		    $map_link = !empty($course_locations['maplink']) ? $course_locations['maplink'] : '';
     		    $course_dates_list = '';
     		    $day_index = 0;
@@ -212,7 +212,7 @@
 <?php
     $conf_start = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])).' at '.date('g:i A', strtotime($fetchdates['starttime'])) : '-';
     $conf_end = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])).' at '.date('g:i A', strtotime($fetchdateslast['starttime'])) : '-';
-    $conf_location = ($course_city ? $course_city['name'].' - ' : '').$course_locations['location'].($course_locations['title'] ? ' ('.$course_locations['title'].')' : '');
+    $conf_location = format_booking_location_label($course_city ? ($course_city['name'] ?? '') : '', $course_locations['location'] ?? '', $course_locations['title'] ?? '');
     $student_email = $register_details['email'];
 ?>
 <!DOCTYPE html>

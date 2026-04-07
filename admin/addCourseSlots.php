@@ -131,7 +131,7 @@ $urlcourse = $base_url;
                                             $txt1 .= "Course Code: " . $course_code . "<br>";
                                             $txt1 .= "Course Link: <a target='_blank' href='" . $urlcourse . "courses-detail/" . $fetchcourses['id'] . "/" . $fetchcourses['slug'] . "'>Click Here</a><br>";
                                             $txt1 .= "Date & Time: " . $dates . "<br>";
-                                            $txt1 .= "Location: " . $course_city['name'] . ' - ' . $course_locations['location'] . ' (' . $course_locations['title'] . ')' . "<br>";
+                                            $txt1 .= "Location: " . htmlspecialchars(format_booking_location_label($course_city['name'] ?? '', $course_locations['location'] ?? '', $course_locations['title'] ?? '')) . "<br>";
                                             $txt1 .= "Location Map: <a target='_blank' href='" . $course_locations['maplink'] . "'>Click Here</a><br>";
                                             $txt1 .= "Venue Notes: " . $course_slots['remarks'] . "<br>";
                                             $txt1 .= "<br>Regards<br>Company";

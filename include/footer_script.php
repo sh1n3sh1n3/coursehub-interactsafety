@@ -19,7 +19,8 @@
 <script src="js/custom.js"></script>
 <script>
     $(document).ready(function () {
-        $('select').select2();
+        $('select').not('.js-uniform-select').not('.reg-native-select').not('[data-reg-native="1"]').select2();
+        if ($('#datatable').length) {
         $('#datatable').DataTable({
             bFilter: false,
             "sDom": 'Rfrtlip',
@@ -32,6 +33,7 @@
                     }
             },
         });
+        }
     });
     $(document).ready(function (e) {
     $("#account_form_popup").on('submit',(function(e) {
@@ -284,10 +286,19 @@
 </script>
 <script>
 (function () {
-    // Hard unblock mouse / wheel scroll
+    function allowSelect2Wheel(e) {
+        var t = e.target;
+        if (t && t.closest && (t.closest('.select2-dropdown') || t.closest('.select2-container'))) {
+            return true;
+        }
+        return false;
+    }
     window.addEventListener(
         'wheel',
         function (e) {
+            if (allowSelect2Wheel(e)) {
+                return;
+            }
             e.stopImmediatePropagation();
         },
         { passive: true }
@@ -296,6 +307,9 @@
     document.addEventListener(
         'wheel',
         function (e) {
+            if (allowSelect2Wheel(e)) {
+                return;
+            }
             e.stopImmediatePropagation();
         },
         { passive: true }

@@ -225,10 +225,23 @@ if (!empty($_GET['tid'])) {
     $orderno = 'ORD' . $minyear . '-' . $maxyear . $vrno;
     $seeltdata = $conn->query("SELECT * FROM sale WHERE courseid=" . $courseid . " AND slotid=" . $slotid . " AND user=" . $register_details['id'] . "");
     $insert = false;
+    $pay_booking_blocked = false;
+    $pay_booking_blocked_rem = 0;
     $email_failed = ($email_status === 'failed');
     if ($seeltdata->num_rows ==  0) {
         $sql = "INSERT INTO sale (date, invoiceno, vrno, orderno, courseid, slotid, user, fname, lname, email, address1,assign_to,assigned,industry_type,paymenttag,paymentmethod,paymentid,amount,netamount,hsrornot,position,company,postal_address,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, instruction) SELECT now(), '" . $invoiceno . "','" . $vrno . "','" . $orderno . "','" . $courseid . "','" . $slotid . "',id, fname,lname,email,postal_address,'" . $course_slots['teacherid'] . "',1,'" . $register_details['industry_type'] . "',1,'Online','" . $transaction_id . "','" . $course_details['price'] . "','" . $course_details['price'] . "','" . $register_details['hsr_or_not'] . "', '" . $register_details['position'] . "','" . $register_details['company'] . "','" . $register_details['postal_address'] . "','" . $register_details['workplace_contact'] . "','" . $register_details['workplace_email'] . "','" . $register_details['workplace_phone'] . "','" . $register_details['emergency_contact'] . "','" . $register_details['emergency_phone'] . "','" . $register_details['special_requirements'] . "','" . $register_details['food_requirements'] . "','" . $register_details['instruction'] . "' from registration where id='" . $registerid . "'";
-        $insert = $conn->query($sql);
+        $isPublicSlot = (($course_slots['type'] ?? '') === 'public');
+        if ($isPublicSlot) {
+            $seatsRemAtPay = get_public_seats_remaining($conn, (int) $courseid, (int) $slotid);
+            if ($seatsRemAtPay !== null && $seatsRemAtPay < 1) {
+                $pay_booking_blocked = true;
+                $pay_booking_blocked_rem = max(0, (int) $seatsRemAtPay);
+            } else {
+                $insert = $conn->query($sql);
+            }
+        } else {
+            $insert = $conn->query($sql);
+        }
     }
     $saleCreatedNow = !empty($insert);
     if ($seeltdata->num_rows > 0 || $saleCreatedNow) {
@@ -265,7 +278,7 @@ if (!empty($_GET['tid'])) {
             $course_link = $baseUrl . "/courses-detail/" . $fetchcourses['id'] . "/" . $fetchcourses['slug'];
             $start_date = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])) . ' at ' . date('g:i A', strtotime($fetchdates['starttime'])) : '-';
             $end_date = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])) . ' at ' . date('g:i A', strtotime($fetchdateslast['starttime'])) : '-';
-            $location_text = ($course_city ? $course_city['name'] . ' - ' : '') . $course_locations['location'] . ($course_locations['title'] ? ' (' . $course_locations['title'] . ')' : '');
+            $location_text = format_booking_location_label($course_city ? ($course_city['name'] ?? '') : '', $course_locations['location'] ?? '', $course_locations['title'] ?? '');
             $map_link = !empty($course_locations['maplink']) ? $course_locations['maplink'] : '';
             $course_dates_list = '';
             $day_index = 0;
@@ -387,7 +400,7 @@ if (!empty($_GET['tid'])) {
             $_SESSION['ordertitle'] = '';
             $conf_start = $fetchdates ? date('l, j F Y', strtotime($fetchdates['date'])) . ' at ' . date('g:i A', strtotime($fetchdates['starttime'])) : '-';
             $conf_end = $fetchdateslast ? date('l, j F Y', strtotime($fetchdateslast['date'])) . ' at ' . date('g:i A', strtotime($fetchdateslast['starttime'])) : '-';
-            $conf_location = ($course_city ? $course_city['name'] . ' - ' : '') . $course_locations['location'] . ($course_locations['title'] ? ' (' . $course_locations['title'] . ')' : '');
+            $conf_location = format_booking_location_label($course_city ? ($course_city['name'] ?? '') : '', $course_locations['location'] ?? '', $course_locations['title'] ?? '');
 ?>
             <!DOCTYPE html>
             <html dir="ltr" lang="en">
@@ -550,9 +563,121 @@ if (!empty($_GET['tid'])) {
 
             </html>
     <?php }
-    } else {
-        // 		$err = $conn->error;
-    }
+    } elseif (!empty($pay_booking_blocked)) {
+        $capacity_notice = format_course_capacity_block_message($pay_booking_blocked_rem);
+    ?>
+            <!DOCTYPE html>
+            <html dir="ltr" lang="en">
+
+            <head>
+                <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+                <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+                <title>Session full – Interact Safety</title>
+                <?php include('../include/head_script.php'); ?>
+                <style>
+                    .capacity-hero {
+                        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+                        color: #fff;
+                        padding: 28px 24px;
+                        border-radius: 8px;
+                        text-align: center;
+                        margin-bottom: 24px;
+                    }
+
+                    .capacity-hero h1 {
+                        margin: 0 0 8px 0;
+                        font-size: 24px;
+                        font-weight: 700;
+                        color: #fff !important;
+                    }
+
+                    .btn-continue {
+                        display: inline-block;
+                        height: 32px;
+                        line-height: 32px;
+                        padding: 0 16px;
+                        background: #D8701A;
+                        color: #fff !important;
+                        text-decoration: none;
+                        border-radius: 6px;
+                        font-weight: 600;
+                    }
+                </style>
+            </head>
+
+            <body class>
+                <div id="wrapper" class="clearfix">
+                    <?php include('../include/head.php'); ?>
+                    <div class="main-content">
+                        <section class="divider">
+                            <div class="container pt-50 pb-70">
+                                <div class="row">
+                                    <div class="col-md-8 col-md-offset-2">
+                                        <div class="capacity-hero">
+                                            <h1>Payment received</h1>
+                                            <p style="margin:0;opacity:0.95;">This session had no available seats, so your enrolment could not be completed.</p>
+                                        </div>
+                                        <div class="alert alert-warning">
+                                            <strong><?php echo htmlspecialchars($capacity_notice); ?></strong>
+                                            <p class="mb-0" style="margin-top:10px;">Your card was charged <strong><?php echo htmlspecialchars($display_amount); ?></strong>. Please contact us with your Transaction ID below so we can arrange a refund or transfer to another session.</p>
+                                        </div>
+                                        <div class="panel panel-default">
+                                            <div class="panel-body">
+                                                <p><strong>Course:</strong> <?php echo htmlspecialchars($course_details['title'] ?? ''); ?></p>
+                                                <p><strong>Transaction ID:</strong> <code><?php echo htmlspecialchars($transaction_id); ?></code></p>
+                                                <p class="mb-0"><strong>Email:</strong> <a href="mailto:<?php echo htmlspecialchars($impactem); ?>"><?php echo htmlspecialchars($impactem); ?></a><?php if (!empty($impactph)) { ?> &nbsp;|&nbsp; <strong>Phone:</strong> <?php echo htmlspecialchars($impactph); ?><?php } ?></p>
+                                            </div>
+                                        </div>
+                                        <p class="text-center" style="margin-top: 24px;">
+                                            <a href="<?php echo htmlspecialchars(rtrim($baseUrl, '/') . '/'); ?>" class="btn-continue">Back to website</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <?php include('../include/footer.php'); ?>
+                </div>
+                <?php include('../include/footer_script.php'); ?>
+            </body>
+
+            </html>
+    <?php } else { ?>
+            <!DOCTYPE html>
+            <html dir="ltr" lang="en">
+
+            <head>
+                <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+                <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+                <title>Booking issue – Interact Safety</title>
+                <?php include('../include/head_script.php'); ?>
+            </head>
+
+            <body class>
+                <div id="wrapper" class="clearfix">
+                    <?php include('../include/head.php'); ?>
+                    <div class="main-content">
+                        <section class="divider">
+                            <div class="container pt-50 pb-70">
+                                <div class="row">
+                                    <div class="col-md-8 col-md-offset-2">
+                                        <div class="alert alert-danger">
+                                            <h2 class="mt-0">We could not complete your booking</h2>
+                                            <p>Your payment may have been received. Please contact us with Transaction ID <code><?php echo htmlspecialchars($transaction_id); ?></code> and we will help you.</p>
+                                            <p><a href="<?php echo htmlspecialchars($baseUrl); ?>/">Return to home</a></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <?php include('../include/footer.php'); ?>
+                </div>
+                <?php include('../include/footer_script.php'); ?>
+            </body>
+
+            </html>
+    <?php }
 } else { ?>
     <!DOCTYPE html>
     <html dir="ltr" lang="en">

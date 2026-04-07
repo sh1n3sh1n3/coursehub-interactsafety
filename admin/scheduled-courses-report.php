@@ -267,7 +267,7 @@ if ($course) {
                                                             <?php } ?>
                                                         </td>
                                                         <td><?php echo htmlspecialchars(ucfirst($scheduledCourse['type'])) . $courseCode; ?></td>
-                                                        <td><?php echo htmlspecialchars($scheduledCourse['city_name'] . ' - ' . $scheduledCourse['location'] . ' (' . $scheduledCourse['location_title'] . ')'); ?></td>
+                                                        <td><?php echo htmlspecialchars(format_booking_location_label($scheduledCourse['city_name'] ?? '', $scheduledCourse['location'] ?? '', $scheduledCourse['location_title'] ?? '')); ?></td>
                                                         <td><?php echo (int)$scheduledCourse['mincapacity']; ?></td>
                                                         <td><?php echo (int)$scheduledCourse['maxcapacity']; ?></td>
                                                         <td><?php echo (int)$scheduledCourse['makecapacity']; ?></td>
