@@ -126,8 +126,8 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                     					if ($leftplace > 0) {
                                     					    $buttonttl = '<a href="registration/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-primary btn-sm" role="button">Book Now</a>';
                                     					} else {
-                                    					    $lefttext = 'No seats available';
-                                    					    $buttonttl = '<a href="waiting/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-warning btn-sm" role="button">Add Me To Waitlist</a>';
+                                    					    $lefttext = 'FULL';
+                                    					    $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
                                     					}
                                 					}
                                 					if($coursedate >= $curdate) {

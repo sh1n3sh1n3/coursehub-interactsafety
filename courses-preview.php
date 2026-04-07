@@ -97,7 +97,7 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
                                                 $locs = $conn->query("SELECT * FROM locations WHERE id=".$fetchcourses['locid'])->fetch_assoc();
                                                 $fetchdates = $conn->query("SELECT * FROM course_dates WHERE slot_id='".$id."' ORDER BY date ASC LIMIT 1")->fetch_assoc();
                                 					$coursedate = date('Y-m-d', strtotime($fetchdates['date']));
-                                					$coursedatetime = date('Y-m-d H:i:s', strtotime($fetchdates['date']).' '.strtotime($fetchdates['starttime']));
+                                					$coursedatetime = date('Y-m-d H:i:s', strtotime($fetchdates['date'].' '.$fetchdates['starttime']));
                                 					$maxcapacity = $fetchcourses['maxcapacity'];
                                 					$curdatetime = date('Y-m-d H:i:s');
                                 					$curdate = date('Y-m-d');
@@ -112,8 +112,8 @@ $cate = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM category WHERE
                                     					if ($leftplace > 0) {
                                     					    $buttonttl = '<a href="javascript:" class="btn btn-primary btn-sm" role="button">Book Now</a>';
                                     					} else {
-                                    					    $lefttext = 'No seats available';
-                                    					    $buttonttl = '<a href="javascript:" class="btn btn-warning btn-sm" role="button">Add Me To Waitlist</a>';
+                                    					    $lefttext = 'FULL';
+                                    					    $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
                                     					}
                                 					}
                                 					if($coursedate >= $curdate) {
