@@ -120,7 +120,7 @@ $userdataname = $userdata['title'].' '.$userdata['fname'].' '.$userdata['lname']
 								<td><?php echo $sqlcourseslot['type'].'<br>'.$coursecode; ?></td>
                                 <td><?php echo $sqlcourses['title']; ?></td>
                                 <td><?php echo $dates; ?></td>
-                                <td> <?php echo $cities['name'].' - '.$sqllocation['location'].' ('.$sqllocation['title'].')'; ?></td>
+                                <td> <?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $sqllocation['location'] ?? '', $sqllocation['title'] ?? '')); ?></td>
 								<!--<td><?php echo $fetch['discountdescription']; ?></td>-->
 								<td><?php echo $invitees; ?></td>
 								<td><a class="btn btn-info" href="javascript:" onclick="getattandace(<?php echo $fetch['user']; ?>, <?php echo $fetch['courseid']; ?>, <?php echo $fetch['slotid']; ?>)">View</a></td>

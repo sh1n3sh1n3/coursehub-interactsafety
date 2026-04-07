@@ -51,6 +51,22 @@ try {
         sendJson(['error' => 'Invalid amount. Please return to the course page and try again.']);
     }
 
+    $courseid_sess = isset($_SESSION['courseid']) ? (int) $_SESSION['courseid'] : 0;
+    $slotid_sess = isset($_SESSION['pay_slotid']) ? (int) $_SESSION['pay_slotid'] : 0;
+    if ($courseid_sess > 0 && $slotid_sess > 0 && isset($conn) && $conn instanceof mysqli) {
+        $slotTypeRes = $conn->query('SELECT type FROM course_slots WHERE id=' . $slotid_sess . ' AND courseid=' . $courseid_sess);
+        if ($slotTypeRes && $slotTypeRes->num_rows > 0) {
+            $slotRow = $slotTypeRes->fetch_assoc();
+            if (($slotRow['type'] ?? '') === 'public') {
+                $rem = get_public_seats_remaining($conn, $courseid_sess, $slotid_sess);
+                if ($rem !== null && $rem < 1) {
+                    http_response_code(409);
+                    sendJson(['error' => format_course_capacity_block_message($rem)]);
+                }
+            }
+        }
+    }
+
     $currency = defined('CURRENCY') ? CURRENCY : 'AUD';
     $description = defined('DESCRIPTION') ? DESCRIPTION : 'Course payment';
 

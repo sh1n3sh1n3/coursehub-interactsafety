@@ -91,7 +91,7 @@ while($fetchdates = $cpurse_dates->fetch_assoc()) {
 								<td><?php echo $fetch['email']; ?></td>
                                 <td><?php echo $sqlcourses['title']; ?></td>
                                 <td><?php echo $dates; ?></td>
-                                <td> <?php echo $cities['name'].' - '.$sqllocation['location'].' ('.$sqllocation['title'].')'; ?></td>
+                                <td> <?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $sqllocation['location'] ?? '', $sqllocation['title'] ?? '')); ?></td>
 								<td><a class="btn btn-info btn-xs" href="javascript:" onclick="getattandace(<?php echo $fetch['id']; ?>, <?php echo $data['courseid']; ?>, <?php echo $data['slotid']; ?>, <?php echo $_SESSION['teacher']; ?>)">View</a></td>
 								<td><a class="btn btn-dark btn-xs" target="_blank" href="certificate.php?id=<?php echo $data['id']; ?>">View</a><br>
 								<?php if($data['generateCertificate'] == '1') { ?>
@@ -126,7 +126,7 @@ while($fetchdates = $cpurse_dates->fetch_assoc()) {
 								<td><?php echo $fetch['email']; ?></td> 
                                 <td><?php echo $sqlcourses['title']; ?></td>
                                 <td><?php echo $dates; ?></td>
-                                <td> <?php echo $cities['name'].' - '.$sqllocation['location'].' ('.$sqllocation['title'].')'; ?></td>
+                                <td> <?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $sqllocation['location'] ?? '', $sqllocation['title'] ?? '')); ?></td>
 								<td><a class="btn btn-info btn-xs" href="javascript:" onclick="getattandace(<?php echo $fetch['id']; ?>, <?php echo $data['courseid']; ?>, <?php echo $data['slotid']; ?>, <?php echo $_SESSION['teacher']; ?>)">View</a></td>
 								<td><a class="btn btn-dark btn-xs" target="_blank" href="certificate.php?id=<?php echo $data['id']; ?>">View</a><br>
 								<?php if($data['generateCertificate'] == '1') { ?>

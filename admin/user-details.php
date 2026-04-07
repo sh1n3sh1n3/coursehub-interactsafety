@@ -290,7 +290,7 @@ if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
                                                         <td><?php echo htmlspecialchars(ucfirst($sqlcourseslot['type'])) . '<br>' . htmlspecialchars($coursecode); ?></td>
                                                         <td><a href="<?php echo (int) $fetch['courseid']; ?>/scheduled-courses-report.php"><?php echo htmlspecialchars($sqlcourses['title']); ?></a></td>
                                                         <td><a href="<?php echo (int) $fetch['courseid']; ?>/<?php echo (int) $fetch['slotid']; ?>/students-report.php"><?php echo $dates; ?></a></td>
-                                                        <td><?php echo htmlspecialchars($cities['name'] . ' - ' . $sqllocation['location'] . ' (' . $sqllocation['title'] . ')'); ?></td>
+                                                        <td><?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $sqllocation['location'] ?? '', $sqllocation['title'] ?? '')); ?></td>
                                                         <td><?php echo $invitees; ?></td>
                                                         <td><a class="btn btn-info" href="javascript:" onclick="getattandace(<?php echo $fetch['user']; ?>, <?php echo $fetch['courseid']; ?>, <?php echo $fetch['slotid']; ?>)">View</a></td>
                                                         <td>

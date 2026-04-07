@@ -21,7 +21,7 @@ if ($result = $conn->query($sql)) {
 		$cities = $conn->query("SELECT * FROM cities WHERE id=".$fetchcourses['cityid'])->fetch_assoc();
         $locs = $conn->query("SELECT * FROM locations WHERE id=".$fetchcourses['locid'])->fetch_assoc();
         $courses = $conn->query("SELECT * FROM courses WHERE id=".$fetchcourses['courseid'])->fetch_assoc();
-        $coursetitl = $cities['name'].' - '.$locs['location'].' ('.$locs['title'].')';
+        $coursetitl = format_booking_location_label($cities['name'] ?? '', $locs['location'] ?? '', $locs['title'] ?? '');
         $description = "<b>Course</b> : ".$courses['title']." <br> ";
         $description .= "<b>Location</b> : ".$coursetitl." <br> ";
         $description .= "Start Date : ".$startdate1." ".$starttimeh1." <br> ";

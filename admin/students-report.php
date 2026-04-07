@@ -189,7 +189,7 @@ if ($course && $scheduledCourse) {
                                     <div class="row" style="margin-bottom: 15px;">
                                         <div class="col-lg-3"><strong>Course:</strong><br><?php echo htmlspecialchars($course['title']); ?></div>
                                         <div class="col-lg-2"><strong>Course Type:</strong><br><?php echo htmlspecialchars($scheduledCourse['type']); ?></div>
-                                        <div class="col-lg-3"><strong>Location:</strong><br><?php echo htmlspecialchars($scheduledCourse['city_name'] . ' - ' . $scheduledCourse['location'] . ' (' . $scheduledCourse['location_title'] . ')'); ?></div>
+                                        <div class="col-lg-3"><strong>Location:</strong><br><?php echo htmlspecialchars(format_booking_location_label($scheduledCourse['city_name'] ?? '', $scheduledCourse['location'] ?? '', $scheduledCourse['location_title'] ?? '')); ?></div>
                                         <div class="col-lg-2"><strong>Dates:</strong><br><?php echo getStudentReportDates($conn, $slotId); ?></div>
                                         <div class="col-lg-2"><strong>Teacher:</strong><br><?php echo getStudentReportTeachers($conn, $slotId); ?></div>
                                     </div>

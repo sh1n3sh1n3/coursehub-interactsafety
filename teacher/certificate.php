@@ -18,7 +18,7 @@ while($fetchattendancedata = $tbl_attendancedata->fetch_assoc()) {
 }
 $dates = rtrim($dates,", ");
 $dt = date('d-M-Y',strtotime("+$days day", strtotime($coursedatetime)));
-$loc = $cities['name'].' - '.$sqllocation['location'].' ('.$sqllocation['title'].')';
+$loc = format_booking_location_label($cities['name'] ?? '', $sqllocation['location'] ?? '', $sqllocation['title'] ?? '');
 $html = '
 <div style="width:100%; height:675px; padding:10px;font-family: Arial, Helvetica, sans-serif; ">
 <div style="width:100%; height:475px; text-align:center;">

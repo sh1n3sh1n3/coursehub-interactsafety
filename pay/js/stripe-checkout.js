@@ -53,12 +53,32 @@ paymentForm.addEventListener("submit", handlePaymentSubmit);
 // Fetch a payment intent and capture the client secret
 let payment_intent_id;
 async function initialize() {
-    const { paymentIntentId, clientSecret } = await fetch((payBase ? payBase + '/' : '') + "create_payment_intent.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ request_type:'create_payment_intent' }),
-    }).then((r) => r.json());
-    
+    let data;
+    try {
+        const res = await fetch((payBase ? payBase + '/' : '') + "create_payment_intent.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ request_type:'create_payment_intent' }),
+        });
+        data = await res.json();
+    } catch (e) {
+        showMessage("Unable to start payment. Please refresh the page or try again.");
+        stripeProcessing(false);
+        return;
+    }
+    if (data.error) {
+        showMessage(data.error);
+        stripeProcessing(false);
+        return;
+    }
+    const paymentIntentId = data.paymentIntentId;
+    const clientSecret = data.clientSecret;
+    if (!clientSecret || !paymentIntentId) {
+        showMessage("Unable to start payment. Please refresh the page or try again.");
+        stripeProcessing(false);
+        return;
+    }
+
     const appearance = {
         theme: 'stripe',
         rules: {

@@ -18,4 +18,8 @@ date_default_timezone_set('Asia/Kolkata');
 	// 	if ($con->connect_error) {
 	// 	    die("Connection failed: " . $con->connect_error);
 	// 	}
+
+require_once dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'include' . DIRECTORY_SEPARATOR . 'location_display.php';
+require_once dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'include' . DIRECTORY_SEPARATOR . 'course_dates_display.php';
+require_once dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'include' . DIRECTORY_SEPARATOR . 'seat_availability.php';
 ?>

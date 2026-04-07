@@ -115,13 +115,13 @@
                                 <div class="form-group row">
                                     <label class="control-label col-sm-3" for="name"><span class="mandatory">*</span>Location:</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" readonly value="<?php echo $citiesdata['name'].' - '.$locationsdata['location'].' ('.$locationsdata['title'].')'; ?>" style="border: none;background: transparent;">
+                                        <input type="text" class="form-control" readonly value="<?php echo htmlspecialchars(format_booking_location_label($citiesdata['name'] ?? '', $locationsdata['location'] ?? '', $locationsdata['title'] ?? '')); ?>" style="border: none;background: transparent;">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label class="control-label col-sm-3" for="name"><span class="mandatory">*</span>Start DateTime:</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" readonly value="<?php echo date('M d, Y', strtotime($fetchdates['date'])); ?> (<?php echo date('H:i:s', strtotime($fetchdates['starttime'])); ?>)" style="border: none;background: transparent;">
+                                        <div class="form-control" style="border: none;background: transparent; height: auto; min-height: 34px; box-shadow: none;"><?php echo format_course_dates_table_cell_html($fetchdates['date'], $fetchdates['starttime'], $fetchdates['endtime']); ?></div>
                                     </div>
                                 </div>
                                 <div class="form-group row">

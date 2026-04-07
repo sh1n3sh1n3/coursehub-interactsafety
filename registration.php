@@ -248,9 +248,9 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     $workplace_contact = trim((string) ($_POST['workplace_contact'] ?? ''));
     $workplace_email_raw = trim((string) ($_POST['workplace_email'] ?? ''));
     $workplace_phone = trim((string) ($_POST['workplace_phone'] ?? ''));
-    $special_opts = isset($_POST['special_requirements']) && is_array($_POST['special_requirements']) ? $_POST['special_requirements'] : [];
+    $special_val = isset($_POST['special_requirements']) ? trim((string) $_POST['special_requirements']) : 'not_required';
     $special_other = trim((string) ($_POST['special_requirements_other'] ?? ''));
-    $food_opts = isset($_POST['food_requirements']) && is_array($_POST['food_requirements']) ? $_POST['food_requirements'] : [];
+    $food_val = isset($_POST['food_requirements']) ? trim((string) $_POST['food_requirements']) : 'none';
     $food_other = trim((string) ($_POST['food_requirements_other'] ?? ''));
     $instruction = '';
     $emergency_contact = '';
@@ -291,12 +291,17 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     if ($company === '' || !in_array($hsr_or_not, $allowedRoles, true) || $workplace_contact === '' || $workplace_email_raw === '' || !filter_var($workplace_email_raw, FILTER_VALIDATE_EMAIL) || $industry_type <= 0) {
         $err = 'Please complete all required fields in Student Information and Workplace Contact sections.';
     } else {
-        $special_opts = array_values(array_unique(array_values(array_filter(array_map('trim', $special_opts), function($v) use ($allowedSupport) {
-            return in_array($v, $allowedSupport, true);
-        }))));
-        $food_opts = array_values(array_unique(array_values(array_filter(array_map('trim', $food_opts), function($v) use ($allowedFood) {
-            return in_array($v, $allowedFood, true);
-        }))));
+        if ($special_val === 'not_required' || $special_val === '') {
+            $special_opts = [];
+        } elseif (in_array($special_val, $allowedSupport, true)) {
+            $special_opts = [$special_val];
+        } else {
+            $special_opts = [];
+        }
+        if (!in_array($food_val, $allowedFood, true)) {
+            $food_val = 'none';
+        }
+        $food_opts = [$food_val];
 
         $special_store_parts = [];
         foreach ($special_opts as $opt) {
@@ -365,7 +370,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         html { scroll-behavior: smooth; }
         .form-control,
         input.form-control,
-        select.form-control {
+        select.form-control:not([multiple]) {
             height: 34px !important;
         }
         textarea.form-control {
@@ -382,18 +387,26 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 34px !important;
         }
-        .select2-container--default .select2-selection--multiple {
-            min-height: 34px !important;
-            border: 1px solid #ccc !important;
-            border-radius: 0 !important;
-            overflow-y: auto;
+        .select2-dropdown {
+            z-index: 9999;
         }
         .select2-container {width:100% !important;}
+        #reg-enrolment-form .reg-other-text-wrap[hidden] { display: none !important; }
+        #reg-enrolment-form .reg-other-text-wrap:not([hidden]) { display: block !important; margin-top: 10px; }
         /* Enrollment process buttons: orange, 32px height */
         .main-content .btn-primary.btn-sm,
         .main-content .btn-primary:not(.btn-sm) { height: 32px; line-height: 32px; padding: 0 16px; border-radius: 6px; border: none; box-sizing: border-box; background: #D8701A !important; color: #fff !important; }
         .main-content .btn-primary.btn-sm:hover,
         .main-content .btn-primary:not(.btn-sm):hover { background: #c46214 !important; color: #fff !important; }
+        .reg-email-hint {
+            margin-top: 6px;
+            margin-bottom: 0;
+            font-size: 12px;
+            line-height: 1.4;
+            font-style: italic;
+            font-weight: normal;
+            color: #555;
+        }
     </style>
 </head>
 <body class>
@@ -456,45 +469,53 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						    $industry_types = $conn->query("SELECT * FROM industry_type WHERE status='1' ORDER BY title ASC");
     						    $savedSupportRaw = array_values(array_filter(array_map('trim', explode(',', (string) $fetchRegis['special_requirements']))));
     						    $savedFoodRaw = array_values(array_filter(array_map('trim', explode(',', (string) $fetchRegis['food_requirements']))));
-    						    $selectedSupport = [];
-    						    $selectedFood = [];
     						    $supportOtherText = '';
     						    $foodOtherText = '';
+    						    $supportSelectValue = 'not_required';
+    						    $supportLabelToValue = [
+    						        'Language support' => 'language_support',
+    						        'Literacy support' => 'literacy_support',
+    						        'Learning difficulty' => 'learning_difficulty',
+    						        'Hearing impairment' => 'hearing_impairment',
+    						        'Vision impairment' => 'vision_impairment',
+    						        'Other' => 'other',
+    						    ];
     						    foreach ($savedSupportRaw as $sr) {
     						        if (stripos($sr, 'Other:') === 0) {
-    						            $selectedSupport[] = 'other';
+    						            $supportSelectValue = 'other';
     						            $supportOtherText = trim(substr($sr, 6));
-    						            continue;
-    						        }
-    						        $map = [
-    						            'Language support' => 'language_support',
-    						            'Literacy support' => 'literacy_support',
-    						            'Learning difficulty' => 'learning_difficulty',
-    						            'Hearing impairment' => 'hearing_impairment',
-    						            'Vision impairment' => 'vision_impairment',
-    						            'Other' => 'other'
-    						        ];
-    						        if (isset($map[$sr])) {
-    						            $selectedSupport[] = $map[$sr];
     						        }
     						    }
+    						    if ($supportSelectValue !== 'other') {
+    						        foreach ($savedSupportRaw as $sr) {
+    						            if (isset($supportLabelToValue[$sr])) {
+    						                $supportSelectValue = $supportLabelToValue[$sr];
+    						                break;
+    						            }
+    						        }
+    						    }
+    						    $foodSelectValue = 'none';
+    						    $foodLabelToValue = [
+    						        'None' => 'none',
+    						        'Nuts' => 'nuts',
+    						        'Dairy' => 'dairy',
+    						        'Gluten' => 'gluten',
+    						        'Seafood / shellfish' => 'seafood_shellfish',
+    						        'Eggs' => 'eggs',
+    						        'Other' => 'other',
+    						    ];
     						    foreach ($savedFoodRaw as $fr) {
     						        if (stripos($fr, 'Other:') === 0) {
-    						            $selectedFood[] = 'other';
+    						            $foodSelectValue = 'other';
     						            $foodOtherText = trim(substr($fr, 6));
-    						            continue;
     						        }
-    						        $map = [
-    						            'None' => 'none',
-    						            'Nuts' => 'nuts',
-    						            'Dairy' => 'dairy',
-    						            'Gluten' => 'gluten',
-    						            'Seafood / shellfish' => 'seafood_shellfish',
-    						            'Eggs' => 'eggs',
-    						            'Other' => 'other'
-    						        ];
-    						        if (isset($map[$fr])) {
-    						            $selectedFood[] = $map[$fr];
+    						    }
+    						    if ($foodSelectValue !== 'other') {
+    						        foreach ($savedFoodRaw as $fr) {
+    						            if (isset($foodLabelToValue[$fr])) {
+    						                $foodSelectValue = $foodLabelToValue[$fr];
+    						                break;
+    						            }
     						        }
     						    }
     						    if (!empty($_SESSION['registration_welcome_complete'])) {
@@ -508,7 +529,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						        <p><strong>Name:</strong> <?php echo htmlspecialchars(trim($fetchRegis['fname'].' '.$fetchRegis['lname'])); ?> &nbsp;|&nbsp; <strong>Email:</strong> <?php echo htmlspecialchars($fetchRegis['email']); ?> &nbsp;|&nbsp; <strong>Course:</strong> <?php echo $course_details ? htmlspecialchars($course_details['title']) : '—'; ?></p>
     						    </div>
     						</div>
-    						<form method="post" enctype="multipart/form-data" autocomplete="off">
+    						<form id="reg-enrolment-form" method="post" enctype="multipart/form-data" autocomplete="off">
     						    <div class="panel panel-default">
     						        <div class="panel-heading">Complete Your Enrollment</div>
     						        <div class="panel-body">
@@ -558,30 +579,35 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						            <div class="form-group row">
     						                <label class="control-label col-sm-3">Support Requirements (optional):</label>
     						                <div class="col-sm-9">
-    						                    <select class="form-control js-uniform-select" name="special_requirements[]" multiple>
-    						                        <option value="language_support" <?php if (in_array('language_support', $selectedSupport, true)) echo 'selected'; ?>>Language support (English not first language)</option>
-    						                        <option value="literacy_support" <?php if (in_array('literacy_support', $selectedSupport, true)) echo 'selected'; ?>>Literacy support</option>
-    						                        <option value="learning_difficulty" <?php if (in_array('learning_difficulty', $selectedSupport, true)) echo 'selected'; ?>>Learning difficulty</option>
-    						                        <option value="hearing_impairment" <?php if (in_array('hearing_impairment', $selectedSupport, true)) echo 'selected'; ?>>Hearing impairment</option>
-    						                        <option value="vision_impairment" <?php if (in_array('vision_impairment', $selectedSupport, true)) echo 'selected'; ?>>Vision impairment</option>
-    						                        <option value="other" <?php if (in_array('other', $selectedSupport, true)) echo 'selected'; ?>>Other</option>
+    						                    <select class="form-control reg-native-select" name="special_requirements" id="special_requirements" data-reg-native="1">
+    						                        <option value="not_required" <?php if ($supportSelectValue === 'not_required') echo 'selected'; ?>>Not required</option>
+    						                        <option value="language_support" <?php if ($supportSelectValue === 'language_support') echo 'selected'; ?>>Language support (English not first language)</option>
+    						                        <option value="literacy_support" <?php if ($supportSelectValue === 'literacy_support') echo 'selected'; ?>>Literacy support</option>
+    						                        <option value="learning_difficulty" <?php if ($supportSelectValue === 'learning_difficulty') echo 'selected'; ?>>Learning difficulty</option>
+    						                        <option value="hearing_impairment" <?php if ($supportSelectValue === 'hearing_impairment') echo 'selected'; ?>>Hearing impairment</option>
+    						                        <option value="vision_impairment" <?php if ($supportSelectValue === 'vision_impairment') echo 'selected'; ?>>Vision impairment</option>
+    						                        <option value="other" <?php if ($supportSelectValue === 'other') echo 'selected'; ?>>Other</option>
     						                    </select>
-    						                    <input type="text" class="form-control mt-10" name="special_requirements_other" placeholder="Other support requirement (optional)" value="<?php echo htmlspecialchars($supportOtherText); ?>">
+    						                    <div id="special_requirements_other_wrap" class="reg-other-text-wrap mt-10"<?php echo $supportSelectValue !== 'other' ? ' hidden' : ''; ?>>
+    						                        <input type="text" class="form-control" name="special_requirements_other" id="special_requirements_other" placeholder="If Other, describe here (optional)" value="<?php echo htmlspecialchars($supportSelectValue === 'other' ? $supportOtherText : ''); ?>">
+    						                    </div>
     						                </div>
     						            </div>
     						            <div class="form-group row">
     						                <label class="control-label col-sm-3">Food Allergies (optional):</label>
     						                <div class="col-sm-9">
-    						                    <select class="form-control js-uniform-select" name="food_requirements[]" multiple>
-    						                        <option value="none" <?php if (in_array('none', $selectedFood, true)) echo 'selected'; ?>>None</option>
-    						                        <option value="nuts" <?php if (in_array('nuts', $selectedFood, true)) echo 'selected'; ?>>Nuts</option>
-    						                        <option value="dairy" <?php if (in_array('dairy', $selectedFood, true)) echo 'selected'; ?>>Dairy</option>
-    						                        <option value="gluten" <?php if (in_array('gluten', $selectedFood, true)) echo 'selected'; ?>>Gluten</option>
-    						                        <option value="seafood_shellfish" <?php if (in_array('seafood_shellfish', $selectedFood, true)) echo 'selected'; ?>>Seafood / shellfish</option>
-    						                        <option value="eggs" <?php if (in_array('eggs', $selectedFood, true)) echo 'selected'; ?>>Eggs</option>
-    						                        <option value="other" <?php if (in_array('other', $selectedFood, true)) echo 'selected'; ?>>Other</option>
+    						                    <select class="form-control reg-native-select" name="food_requirements" id="food_requirements" data-reg-native="1">
+    						                        <option value="none" <?php if ($foodSelectValue === 'none') echo 'selected'; ?>>None</option>
+    						                        <option value="nuts" <?php if ($foodSelectValue === 'nuts') echo 'selected'; ?>>Nuts</option>
+    						                        <option value="dairy" <?php if ($foodSelectValue === 'dairy') echo 'selected'; ?>>Dairy</option>
+    						                        <option value="gluten" <?php if ($foodSelectValue === 'gluten') echo 'selected'; ?>>Gluten</option>
+    						                        <option value="seafood_shellfish" <?php if ($foodSelectValue === 'seafood_shellfish') echo 'selected'; ?>>Seafood / shellfish</option>
+    						                        <option value="eggs" <?php if ($foodSelectValue === 'eggs') echo 'selected'; ?>>Eggs</option>
+    						                        <option value="other" <?php if ($foodSelectValue === 'other') echo 'selected'; ?>>Other</option>
     						                    </select>
-    						                    <input type="text" class="form-control mt-10" name="food_requirements_other" placeholder="Other food allergy (optional)" value="<?php echo htmlspecialchars($foodOtherText); ?>">
+    						                    <div id="food_requirements_other_wrap" class="reg-other-text-wrap mt-10"<?php echo $foodSelectValue !== 'other' ? ' hidden' : ''; ?>>
+    						                        <input type="text" class="form-control" name="food_requirements_other" id="food_requirements_other" placeholder="If Other, describe here (optional)" value="<?php echo htmlspecialchars($foodSelectValue === 'other' ? $foodOtherText : ''); ?>">
+    						                    </div>
     						                </div>
     						            </div>
     						            <div class="form-group row">
@@ -616,7 +642,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Booking / Confirmation Email:</label>
     						                <div class="col-sm-9">
     						                    <input type="email" class="form-control" name="email" required value="<?php echo htmlspecialchars($fetchRegis['email']); ?>">
-    						                    <p class="help-block" style="margin-bottom:0;">Course confirmation and enrolment details will be sent to this email address.</p>
+    						                    <p class="reg-email-hint">Course confirmation and enrolment details will be sent to this email address.</p>
     						                </div>
     						            </div>
     						            <div class="form-group row">
@@ -649,7 +675,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						                <label class="control-label col-sm-3"><span class="mandatory">*</span>Booking / Confirmation Email:</label>
     						                <div class="col-sm-9">
     						                    <input type="email" class="form-control" name="email" required value="<?php echo htmlspecialchars($fetchRegis['email']); ?>">
-    						                    <p class="help-block" style="margin-bottom:0;">Course confirmation and enrolment details will be sent to this email address.</p>
+    						                    <p class="reg-email-hint">Course confirmation and enrolment details will be sent to this email address.</p>
     						                </div>
     						            </div>
     						            <div class="form-group row">
@@ -682,7 +708,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
                                         <label class="control-label col-sm-3" for="email"><span class="mandatory">*</span>Booking / Confirmation Email:</label>
                                         <div class="col-sm-9">
                                             <input type="email" class="form-control" name="email" id="email" required placeholder="Enter booking or confirmation email" oninput="checkuniq(this.value,'email')" value="<?php echo htmlspecialchars($prefillEmail); ?>">
-                                            <p class="help-block" style="margin-bottom:0;">Course confirmation and enrolment details will be sent to this email address.</p>
+                                            <p class="reg-email-hint">Course confirmation and enrolment details will be sent to this email address.</p>
                                             <p id="emailerr" style="display:none; color:#e83e8c"></p>
                                         </div>
                                     </div>
@@ -859,9 +885,7 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         $(document).ready(function (e) {
             $('input').attr('autocomplete','off');
             if ($.fn.select2) {
-                $('.js-uniform-select').select2({
-                    width: '100%'
-                });
+                $('.js-uniform-select[name="industry_type"]').select2({ width: '100%' });
             }
          $("#reservation_form_popup_login").on('submit',(function(e) {
           e.preventDefault();
@@ -931,6 +955,56 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
         //         $("#email").prop('readonly', true);
         //     }
         // });
+    </script>
+    <script>
+    (function () {
+        function destroySelect2IfAny(el) {
+            if (typeof window.jQuery === 'undefined' || !window.jQuery.fn.select2) return;
+            var $el = window.jQuery(el);
+            if ($el.data('select2')) {
+                try { $el.select2('destroy'); } catch (e) {}
+            }
+        }
+        function syncRegEnrolmentOtherFields() {
+            var sup = document.getElementById('special_requirements');
+            var food = document.getElementById('food_requirements');
+            var sw = document.getElementById('special_requirements_other_wrap');
+            var fw = document.getElementById('food_requirements_other_wrap');
+            var so = document.getElementById('special_requirements_other');
+            var fo = document.getElementById('food_requirements_other');
+            if (!sup || !food || !sw || !fw || !so || !fo) return;
+            destroySelect2IfAny(sup);
+            destroySelect2IfAny(food);
+            var supOther = sup.value === 'other';
+            var foodOther = food.value === 'other';
+            sw.hidden = !supOther;
+            fw.hidden = !foodOther;
+            if (!supOther) so.value = '';
+            if (!foodOther) fo.value = '';
+        }
+        function bindRegEnrolmentOtherFields() {
+            var sup = document.getElementById('special_requirements');
+            var food = document.getElementById('food_requirements');
+            if (!sup || !food) return;
+            sup.addEventListener('change', syncRegEnrolmentOtherFields);
+            food.addEventListener('change', syncRegEnrolmentOtherFields);
+        }
+        function initRegEnrolmentOtherFields() {
+            bindRegEnrolmentOtherFields();
+            syncRegEnrolmentOtherFields();
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initRegEnrolmentOtherFields);
+        } else {
+            initRegEnrolmentOtherFields();
+        }
+        window.addEventListener('load', function () {
+            syncRegEnrolmentOtherFields();
+            [0, 50, 150, 400].forEach(function (ms) {
+                setTimeout(syncRegEnrolmentOtherFields, ms);
+            });
+        });
+    })();
     </script>
 </body>
 </html>

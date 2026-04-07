@@ -96,7 +96,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                             <tr>
                                                 <th>Location</th>
                                                 <th>Start Date</th>
-                                                <th>Places Left</th>
+                                                <th>Seats</th>
                                                 <th>&nbsp;</th>
                                             </tr>
                                         </thead>
@@ -120,23 +120,21 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                 					    $buttonttl = '';
                                 					} else {
                                     					$remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid='".$courseid."' AND slotid='".$fetchcourses['id']."'")->fetch_assoc();
-                                    					$leftplace = $maxcapacity - $remain_places['count'];
-                                    					if($leftplace >= 10) {
-                                    					    $lefttext = 'Places Available (1-10)';
-                                    					    $buttonttl = '<a href="registration/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-primary btn-sm" role="button">Book Now</a>';
-                                    					} else if($leftplace > 0 && $leftplace <= 10) {
-                                    					    $lefttext = 'Limited Places (11- '.$maxcapacity.')';
+                                    					$used = $remain_places ? (int) $remain_places['count'] : 0;
+                                    					$leftplace = $maxcapacity - $used;
+                                    					$lefttext = format_public_seat_availability_label($leftplace);
+                                    					if ($leftplace > 0) {
                                     					    $buttonttl = '<a href="registration/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-primary btn-sm" role="button">Book Now</a>';
                                     					} else {
-                                    					    $lefttext = 'Sold Out';
+                                    					    $lefttext = 'No seats available';
                                     					    $buttonttl = '<a href="waiting/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-warning btn-sm" role="button">Add Me To Waitlist</a>';
                                     					}
                                 					}
                                 					if($coursedate >= $curdate) {
                         					?>
                                             <tr>
-                                                <td> <?php echo $cities['name'].' - '.$locs['location'].' ('.$locs['title'].')'; ?></td>
-                                                <td><?php echo date('M d, Y', strtotime($fetchdates['date'])); ?> (<?php echo date('H:i:s', strtotime($fetchdates['starttime'])); ?> - <?php echo date('H:i:s', strtotime($fetchdates['endtime'])); ?>)</td>
+                                                <td> <?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $locs['location'] ?? '', $locs['title'] ?? '')); ?></td>
+                                                <td class="course-dates-cell"><?php echo format_course_dates_table_cell_html($fetchdates['date'], $fetchdates['starttime'], $fetchdates['endtime']); ?></td>
                                                 <td><?php echo $lefttext; ?></td>
                                                 <td><?php echo $buttonttl; ?></td>
                                             </tr>
