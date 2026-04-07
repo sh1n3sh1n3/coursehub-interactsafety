@@ -26,5 +26,5 @@ function format_booking_location_label($cityName, $locationField, $title)
         return $city . $titleSuffix;
     }
 
-    return $city . ' - ' . $locDistinct . $titleSuffix;
+    return $city $titleSuffix;
 }
