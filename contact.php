@@ -86,22 +86,6 @@
                             </form>
                         </div>
                     </div>
-                    <div class="row mt-60">
-                        <div class="col-sm-12 col-md-6">
-                            <div class="contact-info text-center bg-silver-light border-1px pt-60 pb-60">
-                                <i class="fa fa-phone font-36 mb-10 text-theme-colored2"></i>
-                                <h4>Call Us</h4>
-                                <h6 class="text-gray">Phone: +0000 000 0000</h6>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-6">
-                            <div class="contact-info text-center bg-silver-light border-1px pt-60 pb-60">
-                                <i class="fa fa-envelope font-36 mb-10 text-theme-colored2"></i>
-                                <h4>Email</h4>
-                                <h6 class="text-gray"><a href="#" class="__cf_email__" data-cfemail="ccb5a3b98cb5a3b9bea8a3a1ada5a2e2afa3a1">[email&#160;protected]</a></h6>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
         </div>
