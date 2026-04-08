@@ -141,7 +141,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                                 <td><?php echo $lefttext; ?></td>
                                                 <td><?php echo $buttonttl; ?></td>
                                             </tr>
-                                            <?php }}} else {
+                                            <?php }} else {
                                             echo '<tr><td>No record found!!</td><td></td><td></td><td></td></tr>';
                                             } ?>
                                          
