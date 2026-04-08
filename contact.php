@@ -47,12 +47,7 @@
            <section class="divider">
                 <div class="container pt-50 pb-70">
                     <div class="row pt-10">
-                        <div class="col-md-5">
-                            <h4 class="mt-0 mb-30 line-bottom-theme-colored-2">Find Our Location</h4>
-
-                            <iframe class="w-100" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29993.713570913787!2d144.9679653259878!3d-37.797051606704585!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d4c2b349649%3A0xb6899234e561db11!2sEnvato!5e0!3m2!1sen!2sbd!4v1697103076200!5m2!1sen!2sbd" height="400" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                        </div>
-                        <div class="col-md-7">
+                        <div class="col-md-12">
                             <h4 class="mt-0 mb-30 line-bottom-theme-colored-2">Interested in discussing?</h4>
 
                             <form id="contact_form" name="contact_form" class method="post">
@@ -92,32 +87,18 @@
                         </div>
                     </div>
                     <div class="row mt-60">
-                        <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-12 col-md-6">
                             <div class="contact-info text-center bg-silver-light border-1px pt-60 pb-60">
                                 <i class="fa fa-phone font-36 mb-10 text-theme-colored2"></i>
                                 <h4>Call Us</h4>
                                 <h6 class="text-gray">Phone: +0000 000 0000</h6>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="contact-info text-center bg-silver-light border-1px pt-60 pb-60">
-                                <i class="fa fa-map-marker font-36 mb-10 text-theme-colored2"></i>
-                                <h4>Address</h4>
-                                <h6 class="text-gray">121 King Street, Australia</h6>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-12 col-md-6">
                             <div class="contact-info text-center bg-silver-light border-1px pt-60 pb-60">
                                 <i class="fa fa-envelope font-36 mb-10 text-theme-colored2"></i>
                                 <h4>Email</h4>
                                 <h6 class="text-gray"><a href="#" class="__cf_email__" data-cfemail="ccb5a3b98cb5a3b9bea8a3a1ada5a2e2afa3a1">[email&#160;protected]</a></h6>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 col-md-3">
-                            <div class="contact-info text-center bg-silver-light border-1px pt-60 pb-60">
-                                <i class="fa fa-fax font-36 mb-10 text-theme-colored2"></i>
-                                <h4>Fax</h4>
-                                <h6 class="text-gray">0000 000 0000</h6>
                             </div>
                         </div>
                     </div>
