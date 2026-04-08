@@ -58,6 +58,10 @@ try {
         if ($slotTypeRes && $slotTypeRes->num_rows > 0) {
             $slotRow = $slotTypeRes->fetch_assoc();
             if (($slotRow['type'] ?? '') === 'public') {
+                if (public_booking_is_closed_for_slot($conn, $slotid_sess)) {
+                    http_response_code(409);
+                    sendJson(['error' => public_booking_closed_user_message()]);
+                }
                 $rem = get_public_seats_remaining($conn, $courseid_sess, $slotid_sess);
                 if ($rem !== null && $rem < 1) {
                     http_response_code(409);

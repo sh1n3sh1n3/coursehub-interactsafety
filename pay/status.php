@@ -227,17 +227,24 @@ if (!empty($_GET['tid'])) {
     $insert = false;
     $pay_booking_blocked = false;
     $pay_booking_blocked_rem = 0;
+    $pay_booking_blocked_cutoff = false;
     $email_failed = ($email_status === 'failed');
     if ($seeltdata->num_rows ==  0) {
         $sql = "INSERT INTO sale (date, invoiceno, vrno, orderno, courseid, slotid, user, fname, lname, email, address1,assign_to,assigned,industry_type,paymenttag,paymentmethod,paymentid,amount,netamount,hsrornot,position,company,postal_address,workplace_contact,workplace_email,workplace_phone,emergency_contact,emergency_phone,special_requirements,food_requirements, instruction) SELECT now(), '" . $invoiceno . "','" . $vrno . "','" . $orderno . "','" . $courseid . "','" . $slotid . "',id, fname,lname,email,postal_address,'" . $course_slots['teacherid'] . "',1,'" . $register_details['industry_type'] . "',1,'Online','" . $transaction_id . "','" . $course_details['price'] . "','" . $course_details['price'] . "','" . $register_details['hsr_or_not'] . "', '" . $register_details['position'] . "','" . $register_details['company'] . "','" . $register_details['postal_address'] . "','" . $register_details['workplace_contact'] . "','" . $register_details['workplace_email'] . "','" . $register_details['workplace_phone'] . "','" . $register_details['emergency_contact'] . "','" . $register_details['emergency_phone'] . "','" . $register_details['special_requirements'] . "','" . $register_details['food_requirements'] . "','" . $register_details['instruction'] . "' from registration where id='" . $registerid . "'";
         $isPublicSlot = (($course_slots['type'] ?? '') === 'public');
         if ($isPublicSlot) {
-            $seatsRemAtPay = get_public_seats_remaining($conn, (int) $courseid, (int) $slotid);
-            if ($seatsRemAtPay !== null && $seatsRemAtPay < 1) {
+            if (public_booking_is_closed_for_slot($conn, (int) $slotid)) {
                 $pay_booking_blocked = true;
-                $pay_booking_blocked_rem = max(0, (int) $seatsRemAtPay);
+                $pay_booking_blocked_cutoff = true;
+                $pay_booking_blocked_rem = 0;
             } else {
-                $insert = $conn->query($sql);
+                $seatsRemAtPay = get_public_seats_remaining($conn, (int) $courseid, (int) $slotid);
+                if ($seatsRemAtPay !== null && $seatsRemAtPay < 1) {
+                    $pay_booking_blocked = true;
+                    $pay_booking_blocked_rem = max(0, (int) $seatsRemAtPay);
+                } else {
+                    $insert = $conn->query($sql);
+                }
             }
         } else {
             $insert = $conn->query($sql);
@@ -564,7 +571,12 @@ if (!empty($_GET['tid'])) {
             </html>
     <?php }
     } elseif (!empty($pay_booking_blocked)) {
-        $capacity_notice = format_course_capacity_block_message($pay_booking_blocked_rem);
+        $pay_booking_hero_line = !empty($pay_booking_blocked_cutoff)
+            ? 'Bookings had already closed for this session, so your enrolment could not be completed.'
+            : 'This session had no available seats, so your enrolment could not be completed.';
+        $capacity_notice = !empty($pay_booking_blocked_cutoff)
+            ? public_booking_closed_user_message()
+            : format_course_capacity_block_message($pay_booking_blocked_rem);
     ?>
             <!DOCTYPE html>
             <html dir="ltr" lang="en">
@@ -572,7 +584,7 @@ if (!empty($_GET['tid'])) {
             <head>
                 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
                 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-                <title>Session full – Interact Safety</title>
+                <title>Booking could not be completed – Interact Safety</title>
                 <?php include('../include/head_script.php'); ?>
                 <style>
                     .capacity-hero {
@@ -615,7 +627,7 @@ if (!empty($_GET['tid'])) {
                                     <div class="col-md-8 col-md-offset-2">
                                         <div class="capacity-hero">
                                             <h1>Payment received</h1>
-                                            <p style="margin:0;opacity:0.95;">This session had no available seats, so your enrolment could not be completed.</p>
+                                            <p style="margin:0;opacity:0.95;"><?php echo htmlspecialchars($pay_booking_hero_line); ?></p>
                                         </div>
                                         <div class="alert alert-warning">
                                             <strong><?php echo htmlspecialchars($capacity_notice); ?></strong>

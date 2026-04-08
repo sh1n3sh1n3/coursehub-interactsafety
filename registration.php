@@ -32,6 +32,11 @@ if(isset($_SESSION['client_emaill']) && $course_slots && $course_slots['type'] =
     $backbutn = '1';
 }
 
+$publicBookingClosed = $registrationLinkIsValid
+    && $course_slots
+    && (($course_slots['type'] ?? '') === 'public')
+    && public_booking_is_closed_for_slot($conn, $slotid_get);
+
 // Session enrolment must match this URL (prevents wrong-course session reuse)
 if ($registrationLinkIsValid && !empty($_SESSION['pin_user'])) {
     $pu = (int) $_SESSION['pin_user'];
@@ -110,6 +115,8 @@ if (isset($_POST['submit'])) {
     $cityid = $cityid_get;
     if (!$registrationLinkIsValid) {
         $err = 'Invalid registration link. Missing course/slot parameters. Please use the link from the course page.';
+    } elseif ($publicBookingClosed) {
+        $err = public_booking_closed_user_message();
     } else {
     $fullname = trim(mysqli_real_escape_string($conn, $_POST['fullname']));
     $parts = explode(' ', $fullname, 2);
@@ -157,6 +164,8 @@ if (isset($_POST['submit'])) {
 if (isset($_POST['update'])) {
     if (!$registrationLinkIsValid) {
         $errup = 'Invalid registration link. Please use the link from the course page.';
+    } elseif ($publicBookingClosed) {
+        $errup = public_booking_closed_user_message();
     } else {
     $fullname = trim(mysqli_real_escape_string($conn, $_POST['fullname']));
     $parts = explode(' ', $fullname, 2);
@@ -238,6 +247,8 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     $slotChk = $conn->query("SELECT id FROM registration WHERE id=" . $rid . " AND slotid=" . (int)$slotid_get)->fetch_assoc();
     if (!$slotChk) {
         $err = 'Your enrolment does not match this course. Please start again from the course page.';
+    } elseif ($publicBookingClosed) {
+        $err = public_booking_closed_user_message();
     } else {
     $title = '';
     $position = trim((string) ($_POST['position'] ?? ''));
@@ -464,7 +475,17 @@ if (isset($_POST['submit_full_btn']) && isset($_SESSION['pin_user'])) {
     						}
     						$showOtpStep = isset($_SESSION['pin_user']) && $_SESSION['pin_user'] && !$isLocalhost && empty($_SESSION['registration_otp_verified']);
     						$showFullForm = isset($_SESSION['pin_user']) && $_SESSION['pin_user'] && ($isLocalhost || !empty($_SESSION['registration_otp_verified']));
-    						if ($showFullForm) {
+    						$courseSlugForBack = ($course_details && !empty($course_details['slug'])) ? str_replace(' ', '-', $course_details['slug']) : '';
+    						$courseDatesBackUrl = $redirectBaseUrl . '/courses-detail/' . (int) $courseid_get . '/' . $courseSlugForBack;
+    						if ($registrationLinkIsValid && $publicBookingClosed) {
+    						?>
+    						<div class="alert alert-warning" role="alert">
+    						    <strong>Bookings closed</strong><br>
+    						    <?php echo htmlspecialchars(public_booking_closed_user_message()); ?>
+    						</div>
+    						<p><a class="btn btn-default btn-sm" href="<?php echo htmlspecialchars($courseDatesBackUrl); ?>">Back to course dates</a></p>
+    						<?php
+    						} elseif ($showFullForm) {
     						    $fetchRegis = $conn->query("SELECT * FROM registration WHERE id='".$_SESSION['pin_user']."'")->fetch_assoc();
     						    $industry_types = $conn->query("SELECT * FROM industry_type WHERE status='1' ORDER BY title ASC");
     						    $savedSupportRaw = array_values(array_filter(array_map('trim', explode(',', (string) $fetchRegis['special_requirements']))));

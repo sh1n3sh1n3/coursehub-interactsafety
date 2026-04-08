@@ -37,10 +37,15 @@ $_SESSION['pay_slotid'] = $slotid;
 $paymentBlockedNoSeats = false;
 $paymentBlockedMessage = '';
 if (($course_slots['type'] ?? '') === 'public') {
-    $publicSeatsCheck = get_public_seats_remaining($conn, (int) $courseid, (int) $slotid);
-    if ($publicSeatsCheck !== null && $publicSeatsCheck < 1) {
+    if (public_booking_is_closed_for_slot($conn, (int) $slotid)) {
         $paymentBlockedNoSeats = true;
-        $paymentBlockedMessage = format_course_capacity_block_message($publicSeatsCheck);
+        $paymentBlockedMessage = public_booking_closed_user_message();
+    } else {
+        $publicSeatsCheck = get_public_seats_remaining($conn, (int) $courseid, (int) $slotid);
+        if ($publicSeatsCheck !== null && $publicSeatsCheck < 1) {
+            $paymentBlockedNoSeats = true;
+            $paymentBlockedMessage = format_course_capacity_block_message($publicSeatsCheck);
+        }
     }
 }
 
