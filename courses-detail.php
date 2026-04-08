@@ -113,27 +113,18 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                                 if (!$fetchdates) {
                                                     continue;
                                                 }
-                                                $fetchdatesLast = $conn->query("SELECT * FROM course_dates WHERE slot_id='".$id."' ORDER BY date DESC, endtime DESC LIMIT 1")->fetch_assoc();
-                                                if (!$fetchdatesLast) {
-                                                    $fetchdatesLast = $fetchdates;
-                                                }
                                 					$firstStartTs = strtotime($fetchdates['date'] . ' ' . $fetchdates['starttime']);
-                                					$courseEndTs = strtotime($fetchdatesLast['date'] . ' ' . $fetchdatesLast['endtime']);
-                                					$lastDateYmd = date('Y-m-d', strtotime($fetchdatesLast['date']));
                                 					$now = time();
                                 					$maxcapacity = $fetchcourses['maxcapacity'];
-                                					$curdate = date('Y-m-d');
                                 					$remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid='".$courseid."' AND slotid='".$fetchcourses['id']."'")->fetch_assoc();
                                 					$used = $remain_places ? (int) $remain_places['count'] : 0;
                                 					$leftplace = $maxcapacity - $used;
                                 					$bookingClosedEarly = public_booking_is_closed_for_slot($conn, $id);
-                                					if ($now > $courseEndTs) {
-                                					    $lefttext = 'Finished';
-                                					    $buttonttl = '';
-                                					} elseif ($now >= $firstStartTs) {
-                                					    $lefttext = 'In session';
-                                					    $buttonttl = '';
-                                					} elseif ($bookingClosedEarly) {
+                                					if ($now >= $firstStartTs) {
+                                					    // Keep public list focused on pre-start sessions only.
+                                					    continue;
+                                					}
+                                					if ($bookingClosedEarly) {
                                 					    $lefttext = 'Bookings closed';
                                 					    $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
                                 					} elseif ($leftplace <= 0) {
@@ -143,9 +134,6 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                 					    $lefttext = format_public_seat_availability_label($leftplace);
                                 					    $buttonttl = '<a href="registration/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-primary btn-sm" role="button">Book Now</a>';
                                 					}
-                                					$finishedGraceDays = 30;
-                                					$showFinishedRow = ($now > $courseEndTs && $now <= $courseEndTs + ($finishedGraceDays * 86400));
-                                					if ($lastDateYmd >= $curdate || $showFinishedRow) {
                         					?>
                                             <tr>
                                                 <td> <?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $locs['location'] ?? '', $locs['title'] ?? '')); ?></td>
