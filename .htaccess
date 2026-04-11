@@ -4,10 +4,9 @@
 RewriteEngine On
 
 ############################################
-# Force HTTPS (SAFE for POST / CKEditor)
+# Set Env
 ############################################
-RewriteCond %{HTTPS} !=on
-RewriteRule ^ https://coursehub.interactsafety.com.au%{REQUEST_URI} [R=301,L]
+SetEnv APP_ENV local
 
 ############################################
 # Home
