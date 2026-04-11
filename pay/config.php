@@ -10,8 +10,8 @@ if (session_status() === PHP_SESSION_NONE) {
 include(__DIR__ . '/../include/conn.php');
 $priceval = !empty($_SESSION['orderprice']) ? $_SESSION['orderprice'] : 0;
 $ordertitle = !empty($_SESSION['ordertitle']) ? $_SESSION['ordertitle'] : '';
-define("STRIPE_SECRET_API_KEY", "sk_test_51RRmNFFpmzbyKL2OdtPBpEk11D3MnfqyIU17ZYzaPJB1ew6t1Q7zbkKdEbZM4BtJRVeDveQy7mR4ZUOrQQ0ddmMq00Vx7m666M");
-define("STRIPE_PUBLISHABLE_KEY", "pk_test_51RRmNFFpmzbyKL2Ot3r9TiZ78lSbxbm61lUg9cBo2PhCNILv8LMQLwkha6gmAhWAZ0ENGKxHMFhGFx2ZP2NRHHzB00KKp6bmsH");
+define("STRIPE_SECRET_API_KEY", "");
+define("STRIPE_PUBLISHABLE_KEY", "");
 
 //Sample Product Details
 define('CURRENCY', 'AUD');
