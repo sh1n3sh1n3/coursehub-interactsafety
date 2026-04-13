@@ -49,14 +49,16 @@
 								}
 							}
 							$err = $msg = '';
+							$categoryResult = $conn->query("SELECT id, title FROM category WHERE status='1' ORDER BY id ASC");
+							$categories = $categoryResult->fetch_all(MYSQLI_ASSOC);
 							if (isset($_POST['submit'])) {
-								$categoryResult = $conn->query("SELECT id FROM category WHERE status='1' ORDER BY id ASC LIMIT 1");
-								if ($categoryResult && $categoryResult->num_rows > 0) {
-									$categoryData = $categoryResult->fetch_assoc();
-									$category = mysqli_real_escape_string($conn, $categoryData['id']);
-								} else {
-									$err = 'No active category available for this course.';
-								}
+								// $categoryResult = $conn->query("SELECT id FROM category WHERE status='1' ORDER BY id ASC LIMIT 1");
+								// if ($categoryResult && $categoryResult->num_rows > 0) {
+								// 	$categoryData = $categoryResult->fetch_assoc();
+								// 	$category = mysqli_real_escape_string($conn, $categoryData['id']);
+								// } else {
+								// 	$err = 'No active category available for this course.';
+								// }
 								$course_type = mysqli_real_escape_string($conn, $_POST['course_type']);
 								if (empty($err)) {
 									$title = mysqli_real_escape_string($conn, $_POST['title']);
@@ -111,7 +113,7 @@
 											}
 										}
 									}
-									$insert = $conn->query("INSERT INTO courses (catid,title,slug,description,image,status,addedby,price, shippingCharge, tax, mrp,shortdescription,short,aliascoursename,orderby,duration,course_type,duration_type,delivery_types) VALUES('" . $category . "','" . $title . "','" . $slug . "','" . $description . "','" . $image . "','1','" . $_SESSION['admin'] . "','" . $price . "', '" . $shippingCharge . "', '" . $tax . "', '" . $mrp . "', '" . $shortdescription . "', '" . $short . "','" . $aliascoursename . "','" . $orderby . "', '" . $duration . "', '" . $course_type . "','" . $duration_type . "','" . $delivery_types . "')");
+									$insert = $conn->query("INSERT INTO courses (catid,title,slug,description,image,status,addedby,price, shippingCharge, tax, mrp,shortdescription,short,aliascoursename,orderby,duration,course_type,duration_type,delivery_types) VALUES('" . $_POST['catid'] . "','" . $title . "','" . $slug . "','" . $description . "','" . $image . "','1','" . $_SESSION['admin'] . "','" . $price . "', '" . $shippingCharge . "', '" . $tax . "', '" . $mrp . "', '" . $shortdescription . "', '" . $short . "','" . $aliascoursename . "','" . $orderby . "', '" . $duration . "', '" . $course_type . "','" . $duration_type . "','" . $delivery_types . "')");
 									if ($insert) {
 										$lastid = $conn->insert_id;
 										$msg = 'Data Added Successfully.';
@@ -149,6 +151,17 @@
 												<option value="">Select</option>
 												<option value="Public">Public</option>
 												<option value="Private">Private</option>
+											</select>
+										</div>
+										<label class="col-sm-2 col-form-label">Course Category</label>
+										<div class="col-sm-4">
+											<select class="form-control" required name="catid">
+												<option value="">Select</option>
+												<?php foreach ($categories as $category):?>
+													<option value="<?php echo htmlspecialchars($category["id"], ENT_QUOTES, 'UTF-8'); ?>">
+														<?php echo htmlspecialchars($category["title"], ENT_QUOTES, 'UTF-8'); ?>
+													</option>
+												<?php endforeach; ?>
 											</select>
 										</div>
 									</div>

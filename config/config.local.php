@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'base_url' => 'http://localhost:5000',
+    'base_url' => 'http://localhost:5000/',
     'database' => [
         'host' => 'localhost',
         'port' => 3306,

@@ -68,13 +68,13 @@
 					<li  class="<?= (($activePage == 'makeupClass') || ($activePage == 'editmakeupClass')) ? 'active' : ''; ?>"><a href="makeupClass.php">Makeup Classes</a></li>
 				</ul>
 			</li> -->
-			<!-- <li class="<?= (($activePage == 'addCategory') || ($activePage == 'category') || ($activePage == 'editCategory')) ? 'active' : ''; ?>">
+			<li class="<?= (($activePage == 'addCategory') || ($activePage == 'category') || ($activePage == 'editCategory')) ? 'active' : ''; ?>">
 				<a href="#"><i class="fa fa-graduation-cap"></i> <span class="nav-label">Course Category</span><span class="fa arrow"></span></a>
 				<ul class="nav nav-second-level collapse">
 					<li class="<?= (($activePage == 'addCategory')) ? 'active' : ''; ?>"><a href="addCategory.php">Add Category</a></li>
 					<li class="<?= (($activePage == 'category') || ($activePage == 'editCategory')) ? 'active' : ''; ?>"><a href="category.php">Registered Category</a></li>
 				</ul>
-			</li> -->
+			</li>
 			<li class="<?= (($activePage == 'course_detail') || ($activePage == 'addCourse') || ($activePage == 'courses') || ($activePage == 'editCourse')) ? 'active' : ''; ?>">
 				<a href="#"><i class="fa fa-graduation-cap"></i> <span class="nav-label">Courses</span><span class="fa arrow"></span></a>
 				<ul class="nav nav-second-level collapse">

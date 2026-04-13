@@ -1,8 +1,7 @@
-<?php
-$config = require __DIR__ . '/../config/config.php';
-?>
+<?php $config = require __DIR__ . '/../config/config.php';?>
 
-<base href="<?php $config['base_url'] ?>">
+<meta name="robots" content="noindex, nofollow">
+<base href="<?php echo $config['base_url']; ?>">
 <link href="images/logo/favicon.ico" rel="shortcut icon" type="image/x-icon">
 <link href="images/logo/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
 <link href="images/logo/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
