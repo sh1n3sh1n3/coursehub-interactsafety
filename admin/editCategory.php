@@ -49,7 +49,7 @@
 							$err = $msg = '';
 							if(isset($_POST['submit'])) {
 								$title = mysqli_real_escape_string($conn, $_POST['title']);
-							$phrase  = mysqli_real_escape_string($conn, $_POST['title']);
+								$phrase  = mysqli_real_escape_string($conn, $_POST['title']);
 								$healthy = [")", "(", "''''"," "];
                                 $yummy   = ["", "", "","-"];
 
@@ -94,7 +94,7 @@
                     			}else{
                     				$image = mysqli_real_escape_string($conn, $_POST['oldimg']);
                     			}
-							$insert = $conn->query("UPDATE category SET title= '".$title."', showHome= '".$showHome."', slug= '".$slug."', image= '".$image."' WHERE id=".$id);
+							$insert = $conn->query("UPDATE category SET title= '".$title."', showHome= '".$showHome."', slug= '".$slug."', image= '".$image."', `description`= '".$_POST['description']."' WHERE id=".$id);
 							if($insert){
 								$msg = 'Data Updated Successfully.';
 							} else {
@@ -128,7 +128,6 @@
 								<div class="form-group  row"><label class="col-sm-2 col-form-label">Title</label>
                                     <div class="col-sm-10"><input type="text" class="form-control" required name="title" value="<?php echo $testimonial['title']; ?>"></div>
                                 </div>
-                                <div class="hr-line-dashed"></div>                       
                                 <div class="form-group  row"><label class="col-sm-2 col-form-label">Image</label>
                                     <div class="col-sm-1"><img src="../assets/images/category/<?php echo $testimonial['image']; ?>" style="width:75px;height:75px;"/></div>
 									<input type="hidden" name="oldimg" value="<?php echo $testimonial['image']; ?>"/>
@@ -139,7 +138,9 @@
 										</div>
 									</div>
                                 </div>
-                                <div class="hr-line-dashed"></div>     
+								<div class="form-group  row"><label class="col-sm-2 col-form-label">Short Description</label>
+									<div class="col-sm-10"><textarea class="form-control ckeditor" name="description"><?php echo $testimonial['description']; ?></textarea></div>
+								</div>
                                 <div class="form-group  row"><label class="col-sm-2 col-form-label">Show on Homepage</label>
                                     <div class="col-sm-10 pt-2"><input type="checkbox" id="showHome" class="form-check" name="showHome" <?php if($testimonial['showHome'] == '1') {echo 'checked';} ?> value="1"></div>
                                 </div> 

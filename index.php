@@ -117,11 +117,11 @@ if (!function_exists('testimonial_embed_src')) {
                         </div>
                         <div class="row multi-row-clearfix">
                             	<?php $count=0;
-					$courses = $conn->query("SELECT *, replace(slug,' ','-') as slug FROM courses WHERE status='1' AND isPublished='1' ORDER BY title ASC");
-					while($fetchcourses = $courses->fetch_assoc()) {
-						$count++;
-						$cardHref = 'courses-detail/'.$fetchcourses['id'].'/'.$fetchcourses['slug'];
-					?>
+                                $categories = $conn->query("SELECT *, replace(slug,' ','-') as slug FROM category WHERE status='1' ORDER BY title ASC");
+                                while($fetchcourses = $categories->fetch_assoc()) {
+                                    $count++;
+                                    $cardHref = 'courses-detail/'.$fetchcourses['id'].'/'.$fetchcourses['slug'];
+                                ?>
                             <div class="col-sm-6 col-md-4">
                                 <div class="event-list bg-silver-light maxwidth500">
                                     <a href="<?php echo $cardHref; ?>">
@@ -134,7 +134,6 @@ if (!function_exists('testimonial_embed_src')) {
                                 </div>
                             </div>
                          	<?php } ?>
-                         
                         </div>
                     </div>
                 </div>
