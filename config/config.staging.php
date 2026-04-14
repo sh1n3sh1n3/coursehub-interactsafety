@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'base_url' => 'https://interactsafety.com.au/',
+    'base_url' => 'https://coursehub.interactsafety.com.au/',
     'database' => [
         'host' => 'localhost',
         'port' => 3306,
