@@ -129,7 +129,7 @@ if (!function_exists('testimonial_embed_src')) {
                                         <h5 class="text-uppercase font-weight-600 font-16"><?php echo $fetchcourses['title']; ?></h5>
                                     </div>
                                     <div class="thumb">
-                                        <img src="assets/images/course/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
+                                        <img src="assets/images/category/<?php echo $fetchcourses['image']; ?>" alt class="img-fullwidth">
                                     </div></a>
                                 </div>
                             </div>

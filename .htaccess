@@ -4,9 +4,9 @@
 RewriteEngine On
 
 ############################################
-# Force HTTPS (SAFE for POST / CKEditor)
+# Set Env
 ############################################
-SetEnv APP_ENV staging
+SetEnv APP_ENV local
 
 ############################################
 # Home
