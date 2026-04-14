@@ -39,3 +39,4 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/interac8/coursehub.interactsafety.com.au/admin/deleteClient.php on line 8
+[07-Apr-2026 14:09:46 Asia/Kolkata] PHP Parse error:  syntax error, unexpected variable "$titleSuffix", expecting ";" in /home1/interac8/coursehub.interactsafety.com.au/include/location_display.php on line 29
