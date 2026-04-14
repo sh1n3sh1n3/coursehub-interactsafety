@@ -1,11 +1,9 @@
 <?php session_start(); include('include/conn.php'); 
-$courseid=$_GET['id'];
+// $courseid=$_GET['id'];
 
-$courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'")->fetch_assoc();
-//require_once('phpmailer/class.phpmailer.php');
-  //  $emailaccount = $conn->query("SELECT * FROM emails WHERE type='support'")->fetch_assoc();
-    //$refitcertifiedph = $emailaccount['phone'];
-    //$refitcertifiedem = $emailaccount['email1'];
+// $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'")->fetch_assoc();
+$categoryId=$_GET['id'];
+$category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "' LIMIT 1")->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -15,12 +13,12 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
 
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <meta name="description" content="<?php echo $courses_details['title']; ?>" />
-    <meta name="keywords" content="<?php echo $courses_details['title']; ?>" />
-    <meta name="author" content="<?php echo $courses_details['title']; ?>" />
+    <meta name="description" content="<?php echo $category['title']; ?>" />
+    <meta name="keywords" content="<?php echo $category['title']; ?>" />
+    <meta name="author" content="<?php echo $category['title']; ?>" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
-    <title><?php echo $courses_details['title']; ?> | Interact Safety</title>
+    <title><?php echo $category['title']; ?> | Interact Safety</title>
     <?php
     include("include/head_script.php");
     ?>
@@ -49,7 +47,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
         <?php
         include("include/head.php");
         ?>
-     <div class="main-content">
+     <div id="main-content" class="main-content">
 
             <section class="inner-header divider layer-overlay overlay-theme-colored-7" data-bg-img="images/bg/bg1.jpg">
                 <div class="container pt-20 pb-20" >
@@ -57,10 +55,10 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                     <div class="section-content">
                         <div class="row">
                             <div class="col-md-12">
-                                <h2 class="text-theme-colored2 font-36"><?php echo htmlspecialchars($courses_details['title']); ?></h2>
+                                <h2 class="text-theme-colored2 font-36"><?php echo htmlspecialchars($category['title']); ?></h2>
                                 <ol class="breadcrumb text-left mt-10 white">
                                     <li><a href="index.php">Home</a></li>
-                                    <li class="active"><?php echo htmlspecialchars($courses_details['title']); ?></li>
+                                    <li class="active"><?php echo htmlspecialchars($category['title']); ?></li>
                                 </ol>
                             </div>
                         </div>
@@ -71,27 +69,15 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
             <section>
                 <div class="container mt-30 mb-30 pt-30 pb-30">
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-9">
                             <div class="single-service">
-                              
-                              
-                                <h3 class="text-uppercase mt-30 mb-10"><?php echo htmlspecialchars($courses_details['title']); ?></h3>
+                                <h3 class="text-uppercase mt-30 mb-10"><?php echo htmlspecialchars($category['title']); ?></h3>
                                 <div class="double-line-bottom-theme-colored-2 mt-10"></div>
-                                <?php if ($courseid == '1') { ?>
-                                <p class="mb-0">Interact Safety is approved by WorkSafe Victoria to deliver the HSR Initial OHS Training Course.</p>
-                                <?php } else {
-                                    if (!empty($courses_details['shortdescription'])) { echo '<div class="mb-0">'.$courses_details['shortdescription'].'</div>'; }
-                                    elseif (!empty($courses_details['aliascoursename'])) { echo '<p class="mb-0">'.htmlspecialchars($courses_details['aliascoursename']).'</p>'; }
-                                } ?>
-                                <div id="book">&nbsp;</div>
-                                <br>
                                 <div  class="tab-content">
                                     <div class="tab-pane fade in active" id="tab1">
                                     <div id="course-dates"></div>
                                         <h2 class="line-bottom-theme-colored-2 mb-15"><strong>Course Dates</strong></h2>
-                                        
-
-                                <table id="datatable" class="table" style="width:100%">
+                                        <table id="datatable" class="table" style="width:100%">
                                         <thead>
                                             <tr>
                                                 <th>Location</th>
@@ -102,53 +88,71 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                         </thead>
                                         <tbody>
                                     	<?php $count=0;
-                                	        $courseid=$_GET['id'];
-                        					$courses = $conn->query("SELECT * FROM course_slots WHERE type='public' AND isPublished='1' AND courseid='".$courseid."'");
+                                            $courses = $conn->query("
+                                                SELECT course_slots.*, category.title AS category_title, category.slug AS category_slug, courses.title AS course_title
+                                                FROM course_slots
+                                                INNER JOIN courses ON courses.id = course_slots.courseid
+                                                INNER JOIN category ON category.id = courses.catid
+                                                WHERE course_slots.type='public'
+                                                    AND course_slots.isPublished='1'
+                                                    AND category.id='" . $categoryId . "' ORDER BY courses.title ASC
+                                            ");
                         				    if($courses->num_rows > 0) {
-                        				    while($fetchcourses = $courses->fetch_assoc()) {
-                        				        $count++; $id = $fetchcourses['id'];
-                            					$cities = $conn->query("SELECT * FROM cities WHERE id=".$fetchcourses['cityid'])->fetch_assoc();
-                                                $locs = $conn->query("SELECT * FROM locations WHERE id=".$fetchcourses['locid'])->fetch_assoc();
-                                                $fetchdates = $conn->query("SELECT * FROM course_dates WHERE slot_id='".$id."' ORDER BY date ASC, starttime ASC LIMIT 1")->fetch_assoc();
-                                                if (!$fetchdates) {
-                                                    continue;
-                                                }
-                                					$firstStartTs = strtotime($fetchdates['date'] . ' ' . $fetchdates['starttime']);
-                                					$now = time();
-                                					$maxcapacity = $fetchcourses['maxcapacity'];
-                                					$remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid='".$courseid."' AND slotid='".$fetchcourses['id']."'")->fetch_assoc();
-                                					$used = $remain_places ? (int) $remain_places['count'] : 0;
-                                					$leftplace = $maxcapacity - $used;
-                                					$bookingClosedEarly = public_booking_is_closed_for_slot($conn, $id);
-                                					if ($now >= $firstStartTs) {
-                                					    // Keep public list focused on pre-start sessions only.
-                                					    continue;
-                                					}
-                                					if ($bookingClosedEarly) {
-                                					    $lefttext = 'Bookings closed';
-                                					    $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
-                                					} elseif ($leftplace <= 0) {
-                                					    $lefttext = 'FULL';
-                                					    $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
-                                					} else {
-                                					    $lefttext = format_public_seat_availability_label($leftplace);
-                                					    $buttonttl = '<a href="registration/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-primary btn-sm" role="button">Book Now</a>';
-                                					}
-                        					?>
-                                            <tr>
-                                                <td> <?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $locs['location'] ?? '', $locs['title'] ?? '')); ?></td>
-                                                <td class="course-dates-cell"><?php echo format_course_dates_table_cell_html($fetchdates['date'], $fetchdates['starttime'], $fetchdates['endtime']); ?></td>
-                                                <td><?php echo $lefttext; ?></td>
-                                                <td><?php echo $buttonttl; ?></td>
-                                            </tr>
-                                            <?php }} else {
-                                            echo '<tr><td>No record found!!</td><td></td><td></td><td></td></tr>';
+                                                $course_name = '';
+                                                while($fetchcourses = $courses->fetch_assoc()) {
+                                                    $count++; 
+                                                    $id = $fetchcourses['id'];
+                                                    $cities = $conn->query("SELECT * FROM cities WHERE id=".$fetchcourses['cityid'])->fetch_assoc();
+                                                    $locs = $conn->query("SELECT * FROM locations WHERE id=".$fetchcourses['locid'])->fetch_assoc();
+                                                    $fetchdates = $conn->query("SELECT * FROM course_dates WHERE slot_id='".$id."' ORDER BY date ASC, starttime ASC LIMIT 1")->fetch_assoc();
+                                                    if (!$fetchdates) {
+                                                        continue;
+                                                    }
+                                                    $firstStartTs = strtotime($fetchdates['date'] . ' ' . $fetchdates['starttime']);
+                                                    $now = time();
+                                                    $maxcapacity = $fetchcourses['maxcapacity'];
+                                                    $remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid='".$fetchcourses['id']."' AND slotid='".$fetchcourses['id']."'")->fetch_assoc();
+                                                    $used = $remain_places ? (int) $remain_places['count'] : 0;
+                                                    $leftplace = $maxcapacity - $used;
+                                                    $bookingClosedEarly = public_booking_is_closed_for_slot($conn, $id);
+                                                    if ($now >= $firstStartTs) {
+                                                        // Keep public list focused on pre-start sessions only.
+                                                        continue;
+                                                    }
+                                                    if ($bookingClosedEarly) {
+                                                        $lefttext = 'Bookings closed';
+                                                        $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
+                                                    } elseif ($leftplace <= 0) {
+                                                        $lefttext = 'FULL';
+                                                        $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
+                                                    } else {
+                                                        $lefttext = format_public_seat_availability_label($leftplace);
+                                                        $buttonttl = '<a href="registration/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-primary btn-sm" role="button">Book Now</a>';
+                                                    }?>
+                                                    <?php if($course_name != $fetchcourses['course_title']) {
+                                                        $course_name = $fetchcourses['course_title']
+                                                    ?>
+                                                        <tr>
+                                                            <td colspan="4">
+                                                                <?php echo $course_name?>
+                                                            </td>
+                                                        </tr>
+                                                    <?php }?>
+                                                    <tr>
+                                                        <td style="padding-left: 50px;"><?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $locs['location'] ?? '', $locs['title'] ?? '')); ?></td>
+                                                        <td class="course-dates-cell"><?php echo format_course_dates_table_cell_html($fetchdates['date'], $fetchdates['starttime'], $fetchdates['endtime']); ?></td>
+                                                        <td><?php echo $lefttext; ?></td>
+                                                        <td><?php echo $buttonttl; ?></td>
+                                                    </tr>
+                                                <?php }
+                                            } else {
+                                                echo '<tr><td>No record found!!</td><td></td><td></td><td></td></tr>';
                                             } ?>
                                          
                                             </tbody>
                                             </table>
                                            <form id="importform" name="importform" class="rest-form mb-0 bg-silver-deep p-30" method="post" action="javascript:">
-                                                <input type="hidden" name="courseid" id="courseid" value="<?php echo $courseid; ?>"/>
+                                                <input type="hidden" name="categoryid" id="categoryid" value="<?php echo $categoryid; ?>"/>
                                                 <div class="form-group  row"><label class="col-sm-3 col-form-label">Private Course Code</label>
                                                     <div class="col-sm-6"><input type="text" required minlength="8" maxlength="8" class="form-control" name="course_code" id="course_code"></div>
                                                     <div class="col-sm-3"><button type="submit" id="submitbook" class="btn btn-colored btn-block btn-theme-colored2 text-white btn-lg btn-flat" data-loading-text="Please wait...">Book Now</button></div>
@@ -157,96 +161,28 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                             <p id="bookerr" style="display:none; color:red; font-weight:bold;"></p>
                                             <div id="myloaderabc"></div>
                                         <div id="course-details" class="fluid g-pt-30 g-pb-25">
-					                        <h2 class="line-bottom-theme-colored-2 mb-15" id="course-details"><strong>Course Details</strong></h2>
-                                        	<?php
-                                        	if ($courseid == '1') {
-                                        	    // HSR Initial OHS Training Course – full content
-                                        	    ?>
-                                        	    <h3 class="mt-20 mb-10">Course Overview</h3>
-                                        	    <p>The HSR Initial OHS Training Course is a WorkSafe-approved training course designed for elected Health and Safety Representatives (HSRs) and Deputy HSRs to develop the knowledge, practical skills, and confidence required to effectively carry out their role under the Occupational Health and Safety Act 2004.</p>
-                                        	    <p>Delivered face-to-face, this five-day course focuses on consultation, issue resolution, hazard identification, risk management, and the powers and functions of HSRs within their designated work group. The training is practical, discussion-based, and aligned with real workplace consultation processes rather than theoretical delivery.</p>
-                                        	    <p>Public courses are conducted at training venues across South East and Eastern Suburbs of Melbourne, with flexible on-site workplace group training available throughout Victoria.</p>
-                                        	    <p>This training is delivered with a strong focus on workplace consultation systems, ensuring HSRs and management clearly understand their roles, responsibilities, and how effective consultation strengthens workplace safety performance.</p>
-
-                                        	    <h3 class="mt-25 mb-10">Who Should Attend</h3>
-                                        	    <p>This course is primarily intended for:</p>
-                                        	    <ul class="list theme-colored">
-                                        	        <li>Elected Health and Safety Representatives (HSRs)</li>
-                                        	        <li>Deputy HSRs</li>
-                                        	        <li>Newly elected HSRs requiring initial training</li>
-                                        	    </ul>
-                                        	    <p>The course is also valuable for:</p>
-                                        	    <ul class="list theme-colored">
-                                        	        <li>Managers and supervisors working alongside HSRs</li>
-                                        	        <li>Health and Safety Committee members</li>
-                                        	        <li>Senior leaders responsible for consultation and safety governance</li>
-                                        	        <li>Employers seeking to strengthen consultation and HSR engagement within their organisation</li>
-                                        	    </ul>
-                                        	    <p><strong>Note:</strong> The primary audience remains elected HSRs in accordance with legislative requirements.</p>
-
-                                        	    <h3 class="mt-25 mb-10">Workplace Group Bookings &amp; Organisational Training</h3>
-                                        	    <p>Interact Safety offers flexible public enrolments and on-site workplace group training across Victoria, allowing organisations to train elected HSRs, Deputy HSRs, and relevant management representatives together where appropriate.</p>
-                                        	    <p>Group bookings support a stronger understanding of the HSR role, consultation obligations, and workplace issue resolution processes under the Occupational Health and Safety Act 2004. This approach helps managers, supervisors, and senior leaders better understand how to effectively engage with HSRs and how the HSR role can be a practical asset to improving safety systems, consultation, and workplace communication.</p>
-                                        	    <p>On-site delivery also allows training to be contextualised to the organisation's workplace environment while remaining fully aligned with WorkSafe-approved course requirements.</p>
-
-                                        	    <h3 class="mt-25 mb-10">Learning Outcomes</h3>
-                                        	    <p>By the end of this course, participants will be able to:</p>
-                                        	    <ul class="list theme-colored">
-                                        	        <li>Understand the role, powers, and functions of an HSR</li>
-                                        	        <li>Interpret and apply the Occupational Health and Safety Act 2004 in the workplace</li>
-                                        	        <li>Identify hazards and participate in risk management processes</li>
-                                        	        <li>Participate effectively in consultation and issue resolution procedures</li>
-                                        	        <li>Represent their designated work group with confidence</li>
-                                        	        <li>Contribute to improved workplace safety systems and consultation practices</li>
-                                        	    </ul>
-
-                                        	    <h3 class="mt-25 mb-10">What to Expect During the Course</h3>
-                                        	    <p>This course is interactive, discussion-based, and focused on real workplace consultation rather than passive learning. Participants are encouraged to actively engage throughout the five days.</p>
-                                        	    <p>To get the most value from the training, participants should:</p>
-                                        	    <ul class="list theme-colored">
-                                        	        <li>Bring a positive and open mindset to learning</li>
-                                        	        <li>Be prepared to ask questions and participate in discussions</li>
-                                        	        <li>Be willing to work collaboratively in group activities</li>
-                                        	        <li>Share workplace experiences where appropriate to support practical learning</li>
-                                        	    </ul>
-                                        	    <p>The course involves group discussions, scenario-based activities, and consultation exercises that reflect real workplace situations and the practical role of a Health and Safety Representative.</p>
-
-                                        	    <h3 class="mt-25 mb-10">For Employers &amp; Organisations</h3>
-                                        	    <p>This WorkSafe-approved course supports employers in meeting their legal obligations to provide training to elected HSRs while strengthening workplace consultation, cooperation, and overall safety performance.</p>
-                                        	    <p>Delivered by an experienced safety consultancy, the training goes beyond basic theory and focuses on practical workplace application, helping organisations build functional safety systems where HSRs, management, and workers can effectively consult and resolve safety issues in accordance with legislative requirements.</p>
-
-                                        	    <h3 class="mt-25 mb-10">Course Delivery Information</h3>
-                                        	    <table class="table table-bordered">
-                                        	        <tr><th style="width:40%">Duration</th><td>5 Days (Face-to-Face)</td></tr>
-                                        	        <tr><th>Course Type</th><td>WorkSafe-Approved HSR Initial OHS Training Course</td></tr>
-                                        	        <tr><th>Delivery Format</th><td>Classroom-based public courses and on-site workplace group training</td></tr>
-                                        	        <tr><th>Locations</th><td>South East Melbourne training venues &amp; on-site delivery across Victoria</td></tr>
-                                        	        <tr><th>Materials</th><td>Printed WorkSafe materials and a copy of the Act is provided to students in accordance with WorkSafe course delivery requirements. Morning tea, lunch and light refreshments are provided.</td></tr>
-                                        	    </table>
-
-                                        	    <h3 class="mt-25 mb-10">Booking &amp; Enrolment</h3>
-                                        	    <p>Upcoming public course dates are released regularly.</p>
-                                        	    <p>Organisations may also enquire about private on-site group bookings across Victoria.</p>
-                                        	    <p>For bookings, group training enquiries, or availability, please <a href="contact.php" class="text-theme-colored2">contact Interact Safety</a> or proceed with the enrolment process below.</p>
-                                        	    <?php
-                                        	} else {
-                                        	    echo $courses_details['description'];
-                                        	}
-                                        	?>
+					                        <h2 class="line-bottom-theme-colored-2 mb-15" id="course-details"><strong>Category Details</strong></h2>
+                                        	<?php if ($categoryid == '1') { ?>
+                                            <p class="mb-0">Interact Safety is approved by WorkSafe Victoria to deliver the HSR Initial OHS Training Course.</p>
+                                            <?php } else {
+                                                if (!empty($category['description'])) { echo '<div class="mb-0">'.$category['description'].'</div>'; }
+                                                elseif (!empty($category['title'])) { echo '<p class="mb-0">'.htmlspecialchars($category['title']).'</p>'; }
+                                            } ?>
+                                            <div id="book">&nbsp;</div>
 				                        </div>
                                     </div>
                                 </div>
-                                <div><a class="btn btn-xl btn-theme-colored2 mt-30 pr-40 pl-40" href="courses-detail/<?php echo $courses_details['id']; ?>/<?php echo $_GET['title']; ?>#book">Scroll Up To Book</a></div>
+                                <div><a class="btn btn-xl btn-theme-colored2 mt-30 pr-40 pl-40" href="courses-detail/<?php echo $category['id']; ?>/<?php echo $_GET['title']; ?>#main-content">Scroll Up To Book</a></div>
                             </div>
                         </div>
-                        <div class="col-sm-12 col-md-4">
+                        <div class="col-sm-12 col-md-3">
                             <div class="sidebar sidebar-left mt-sm-30 ml-30 ml-sm-0">
                                 <?php
-                                $d = $courses_details;
-                                $course_cover = ($courseid == '1') ? 'HSR-Initial-Course.png' : $d['image'];
+                                $d = $category;
+                                $course_cover = ($categoryid == '1') ? 'HSR-Initial-Course.png' : $d['image'];
                                 $dur = !empty($d['duration']) ? $d['duration'] . ' ' . (!empty($d['duration_type']) ? $d['duration_type'] : 'Days') : '';
                                 $delivery = !empty($d['delivery_types']) ? htmlspecialchars($d['delivery_types']) : 'Face-to-face and on-site options available';
-                                if ($courseid == '1') {
+                                if ($categoryid == '1') {
                                     $wsafe = 'Interact Safety is approved by WorkSafe Victoria to deliver the HSR Initial OHS Training Course.';
                                     $dur = $dur ?: '5 Days';
                                     $legis = 'Under the OHS Act 2004, elected HSRs are entitled to attend an approved HSR initial training course.';
@@ -263,7 +199,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                 ?>
                                 <div class="widget mb-20">
                                     <div class="course-sidebar-info">
-                                        <div style="display:inline-block; width: calc(100% - 40px);">
+                                        <div style="display:inline-block; width: calc(100% - 20px);">
                                             <div style="display: flex; align-items: center;">
                                                 <i class="fa fa-check-circle info-icon"></i>
                                                 <p class="info-title mb-0">WorkSafe Approval</p>
@@ -276,7 +212,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                             <i class="fa fa-clock-o info-icon"></i>
                                             <p class="info-title mb-0">Duration</p>
                                         </div>
-                                        <div style="display:inline-block; width: calc(100% - 40px);">
+                                        <div style="display:inline-block; width: calc(100% - 20px);">
                                             <p class="info-desc"><?php echo $dur; ?></p>
                                         </div>
                                     </div>
@@ -285,7 +221,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                             <i class="fa fa-balance-scale info-icon mb-10"></i>
                                             <p class="info-title mb-0">Legislative Entitlement</p>
                                         </div>
-                                        <div style="display:inline-block; width: calc(100% - 40px);">
+                                        <div style="display:inline-block; width: calc(100% - 20px);">
                                             <p class="info-desc"><?php echo $legis; ?></p>
                                         </div>
                                     </div>
@@ -294,7 +230,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                             <i class="fa fa-graduation-cap info-icon"></i>
                                             <p class="info-title mb-0">Delivery Format</p>
                                         </div>
-                                        <div style="display:inline-block; width: calc(100% - 40px);">
+                                        <div style="display:inline-block; width: calc(100% - 20px);">
                                             <p class="info-desc"><?php echo $delivery; ?></p>
                                         </div>
                                     </div>
@@ -303,7 +239,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                             <i class="fa fa-map-marker info-icon"></i>
                                             <p class="info-title mb-0">Training Locations</p>
                                         </div>
-                                        <div style="display:inline-block; width: calc(100% - 40px);">
+                                        <div style="display:inline-block; width: calc(100% - 20px);">
                                             <p class="info-desc"><?php echo $loc; ?></p>
                                         </div>
                                     </div>
@@ -312,7 +248,7 @@ $courses_details = $conn->query("SELECT * FROM courses WHERE id='".$courseid."'"
                                             <i class="fa fa-book info-icon"></i>
                                             <p class="info-title mb-0">What's Included</p>
                                         </div>
-                                        <div style="display:inline-block; width: calc(100% - 40px);">
+                                        <div style="display:inline-block; width: calc(100% - 20px);">
                                             <p class="info-desc"><?php echo $included; ?></p>
                                         </div>
                                     </div>
