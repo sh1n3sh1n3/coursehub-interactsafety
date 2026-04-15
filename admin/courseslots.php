@@ -98,6 +98,7 @@
                                                 <th>Status</th>
                                                 <th>Course</th>
                                                 <th>Course Type</th>
+                                                <th>Duration</th>
                                                 <th>Location</th>
                                                 <th>Min Capacity</th>
                                                 <th>Max Capacity</th>
@@ -110,7 +111,7 @@
                                         <tbody>
                                             <?php $count = 0;
                                             $dates = '';
-                                            $queryassoc = $conn->query("SELECT course_slots.id as id,courses.status,courseid,locid,cityid,course_slots.isPublished as published,course_slots.type as course_slots_type,course_slots.teacherid as teacherid,mincapacity,maxcapacity,makecapacity,remarks,createdate,courses.title as coursetitle,location FROM course_slots inner join courses on courseid=courses.id INNER join locations on locid=locations.id order by id DESC, courseid, locid,cityid");
+                                            $queryassoc = $conn->query("SELECT course_slots.id as id,courses.status,courseid,locid,cityid,course_slots.isPublished as published,course_slots.type as course_slots_type,course_slots.teacherid as teacherid,mincapacity,maxcapacity,makecapacity,remarks,createdate,courses.title as coursetitle, courses.duration as courseDuration,location FROM course_slots inner join courses on courseid=courses.id INNER join locations on locid=locations.id order by id DESC, courseid, locid,cityid");
                                             while ($fetch = $queryassoc->fetch_assoc()) {
                                                 $dates = $invitees = '';
                                                 $count++;
@@ -150,6 +151,7 @@
                                                         } ?></td>
                                                     <td><?php echo $fetch['coursetitle'] . $coursecode; ?></td>
                                                     <td><?php echo $fetch['course_slots_type']; ?></td>
+                                                    <td><?php echo $fetch['courseDuration']; ?></td>
                                                     <td><?php echo $fetch['location']; ?></td>
                                                     <td><?php echo $fetch['mincapacity']; ?></td>
                                                     <td><?php echo $fetch['maxcapacity']; ?></td>
