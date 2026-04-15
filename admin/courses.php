@@ -88,7 +88,7 @@
                                         </thead>
                                         <tbody>
                                             <?php $count = 0;
-                                            $contact = $conn->query("SELECT * FROM courses order by orderby ASC");
+                                            $contact = $conn->query("SELECT * FROM courses order by created DESC");
                                             while ($fetch = $contact->fetch_assoc()) {
                                                 $count++;
                                                 $fetchcourses = $conn->query("SELECT *,replace(slug,' ','-') as slug FROM courses WHERE id='" . $fetch['id'] . "'")->fetch_assoc();

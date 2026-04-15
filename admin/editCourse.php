@@ -102,7 +102,7 @@
                     			}else{
                     				$image = mysqli_real_escape_string($conn, $_POST['oldimg']);
                     			}
-							$insert = $conn->query("UPDATE courses SET duration_type='".$duration_type."',delivery_types='".$delivery_types."',course_type='".$course_type."',duration='".$duration."', catid= '".$category."', shortdescription= '".$shortdescription."',title= '".$title."',aliascoursename= '".$aliascoursename."',short= '".$short."',slug= '".$slug."',mrp= '".$mrp."',shippingCharge= '".$shippingCharge."',price= '".$price."',description= '".$description."', image= '".$image."' , updated='".date('Y-m-d')."' WHERE id=".$id);
+							$insert = $conn->query("UPDATE courses SET duration_type='".$duration_type."', delivery_types='".$delivery_types."', course_type='".$course_type."',duration='".$duration."', catid= '".$category."', shortdescription= '".$shortdescription."',title= '".$title."',aliascoursename= '".$aliascoursename."',short= '".$short."',slug= '".$slug."',mrp= '".$mrp."',shippingCharge= '".$shippingCharge."',price= '".$price."',description= '".$description."', image= '".$image."' , updated='".date('Y-m-d')."' WHERE id=".$id);
 							if($insert){
 								$msg = 'Data Updated Successfully.';
 							} else {
@@ -134,9 +134,9 @@
                             <form method="post" enctype="multipart/form-data">
 							<input type="hidden" name="id" value="<?php echo $testimonial['id']; ?>"/>
 								<div class="form-group  row">
-								    	<label class="col-sm-2 col-form-label">Select Category</label>
+									<label class="col-sm-2 col-form-label">Select Category</label>
 									<div class="col-sm-4">
-										<select class="form-control" required name="category">
+										<select id="select_category" class="form-control" required name="category">
 											<option value="">Select</option>
 											<?php $count=0;
 											$contact = $conn->query("SELECT * FROM category WHERE status='1' order by id ASC");
@@ -156,26 +156,25 @@
                                 </div>
                                 <div class="hr-line-dashed"></div>             
 								<div class="form-group  row">
-                               
-                               
 								    <label class="col-sm-2 col-form-label">Course Name</label>
                                     <div class="col-sm-4"><input type="text" class="form-control" required name="title" value="<?php echo $testimonial['title']; ?>"></div>
-                               
 								    <label class="col-sm-2 col-form-label">Course Code</label>
                                     <div class="col-sm-4"><input type="text" class="form-control" required name="short" oninput="this.value = this.value.toUpperCase()"  value="<?php echo $testimonial['short']; ?>"></div>
                                 </div>   
                                 <div class="hr-line-dashed"></div>   
                                 <div class="form-group  row">
 								    <label class="col-sm-2 col-form-label">Price</label>
-                                    <div class="col-sm-4"><input type="number" step="0.01" class="form-control" required name="price" value="<?php echo $testimonial['price']; ?>"></div> 
+                                    <div class="col-sm-4"><input id="txt_price" type="number" step="0.01" class="form-control" required name="price" value="<?php echo $testimonial['price']; ?>"></div> 
                                 <label class="col-sm-2 col-form-label">Different types of delivery </label>
-                                    <div class="col-sm-4"><select class="form-control" required name="delivery_types">
-                                        <option value="">Select</option>
-                                        <option value="Face to Face" <?php if($testimonial['delivery_types'] == 'Face to Face') {echo 'selected';} ?>>Face to Face</option>
-                                        <option value="eLearning" <?php if($testimonial['delivery_types'] == 'eLearning') {echo 'selected';} ?>>eLearning</option>
-                                        <option value="Connected Real Time Delivery" <?php if($testimonial['delivery_types'] == 'Connected Real Time Delivery') {echo 'selected';} ?>>Connected Real Time Delivery</option>
-                                    </select></div>
-                               
+                                    <div class="col-sm-4">
+										<input type="hidden" name="delivery_types" id="hidden_delivery_types" value="<?php echo $testimonial['delivery_types'];?>">
+										<select class="form-control" required id="select_delivery_types">
+											<option value="">Select</option>
+											<option value="Face to Face" <?php if($testimonial['delivery_types'] == 'Face to Face') {echo 'selected';} ?>>Face to Face</option>
+											<option value="eLearning" <?php if($testimonial['delivery_types'] == 'eLearning') {echo 'selected';} ?>>eLearning</option>
+											<option value="Connected Real Time Delivery" <?php if($testimonial['delivery_types'] == 'Connected Real Time Delivery') {echo 'selected';} ?>>Connected Real Time Delivery</option>
+										</select>
+									</div>
                                 </div>
                                 
                                 <div class="hr-line-dashed"></div>  
@@ -227,4 +226,29 @@
         </div>
 <?php include('includes/foot.php'); ?>
 </body>
+<script>
+	$('form').on('submit', function () {
+		$('#hidden_delivery_types').val($('#select_delivery_types').val());
+	});
+	$('#select_category').change(function () {
+		getCategoryPriceAndDelTypes($(this).val());
+	});
+	function getCategoryPriceAndDelTypes(categoryId) {
+		$.ajax({
+			url: "getCategory.php?categoryid="+categoryId,
+			type: "GET",
+			contentType: 'application/json',
+			success: function(data) { 
+				var flag = false;
+				if(data) {
+					$('#select_delivery_types').val(data.delivery_types);
+					$('#txt_price').val(data.price);
+					flag = true;
+				}
+				$('#select_delivery_types').prop('disabled', flag);
+				$('#txt_price').prop('readonly', flag);
+			},       
+		});
+	}
+</script>
 </html>

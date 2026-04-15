@@ -155,7 +155,7 @@
 										</div>
 										<label class="col-sm-2 col-form-label">Course Category</label>
 										<div class="col-sm-4">
-											<select class="form-control" required name="catid">
+											<select class="form-control" required name="catid" id="select_category">
 												<option value="">Select</option>
 												<?php foreach ($categories as $category):?>
 													<option value="<?php echo htmlspecialchars($category["id"], ENT_QUOTES, 'UTF-8'); ?>">
@@ -165,24 +165,25 @@
 											</select>
 										</div>
 									</div>
-									<div class="form-group  row"><label class="col-sm-2 col-form-label">Course Name</label>
-										<div class="col-sm-4"><input type="text" class="form-control" required name="title" value=""></div>
-										<label class="col-sm-2 col-form-label">Course Code</label>
-										<div class="col-sm-4"><input type="text" class="form-control" required name="short" oninput="this.value = this.value.toUpperCase()" value=""></div>
-									</div>
 									<div class="hr-line-dashed"></div>
-
 									<div class="form-group  row">
 										<label class="col-sm-2 col-form-label">Price</label>
-										<div class="col-sm-4"><input type="number" step="0.01" class="form-control" required name="price" value=""></div>
+										<div class="col-sm-4"><input type="number" step="0.01" class="form-control" required name="price" value="" id="txt_price"></div>
 										<label class="col-sm-2 col-form-label">Different types of delivery </label>
-										<div class="col-sm-4"><select class="form-control" required name="delivery_types">
+										<div class="col-sm-4">
+											<input type="hidden" name="delivery_types" id="hidden_delivery_types" value="<?php echo $testimonial['delivery_types'];?>">
+											<select class="form-control" required id="select_delivery_types">
 												<option value="">Select</option>
 												<option value="Face to Face">Face to Face</option>
 												<option value="eLearning">eLearning</option>
 												<option value="Connected Real Time Delivery">Connected Real Time Delivery</option>
-											</select></div>
-
+											</select>
+										</div>
+									</div>
+									<div class="form-group  row"><label class="col-sm-2 col-form-label">Course Name</label>
+										<div class="col-sm-4"><input type="text" class="form-control" required name="title" value=""></div>
+										<label class="col-sm-2 col-form-label">Course Code</label>
+										<div class="col-sm-4"><input type="text" class="form-control" required name="short" oninput="this.value = this.value.toUpperCase()" value=""></div>
 									</div>
 									<div class="hr-line-dashed"></div>
 									<div class="form-group  row"><label class="col-sm-2 col-form-label">Course Duration </label>
@@ -231,4 +232,29 @@
 	<?php include('includes/foot.php'); ?>
 </body>
 
+<script>
+	$('form').on('submit', function () {
+		$('#hidden_delivery_types').val($('#select_delivery_types').val());
+	});
+	$('#select_category').change(function () {
+		getCategoryPriceAndDelTypes($(this).val());
+	});
+	function getCategoryPriceAndDelTypes(categoryId) {
+		$.ajax({
+			url: "getCategory.php?categoryid="+categoryId,
+			type: "GET",
+			contentType: 'application/json',
+			success: function(data) { 
+				var flag = false;
+				if(data) {
+					$('#select_delivery_types').val(data.delivery_types);
+					$('#txt_price').val(data.price);
+					flag = true;
+				}
+				$('#select_delivery_types').prop('disabled', flag);
+				$('#txt_price').prop('readonly', flag);
+			},       
+		});
+	}
+</script>
 </html>

@@ -43,10 +43,6 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
     </style>
 </head>
 <body class>
-
-<script>
-    var courses = [];
-</script>
 <div id="wrapper" class="clearfix">
         <?php
         include("include/head.php");
@@ -92,80 +88,107 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                         </thead>
                                         <tbody>
                                     	<?php $count=0;
-                                            $courses = $conn->query("
+                                            $today = date("Y-m-d");
+                                            $query = "
                                                 SELECT 
-                                                    category.title AS category_title,
-                                                    category.slug AS category_slug,
-                                                    courses.id AS course_id,
-                                                    courses.title AS course_title,
-                                                    courses.image,
-                                                    courses.delivery_types,
-                                                    courses.duration,
-                                                    courses.price,
-                                                    course_slots.*
-                                                FROM course_slots
-                                                INNER JOIN courses ON courses.id = course_slots.courseid
-                                                INNER JOIN category ON category.id = courses.catid
-                                                WHERE course_slots.type='public'
-                                                    AND course_slots.isPublished='1'
-                                                    AND category.id='" . $categoryId . "' ORDER BY courses.title ASC
-                                            ");
-                        				    if($courses->num_rows > 0) {
-                                                $course_name = '';
-                                                while($fetchcourses = $courses->fetch_assoc()) {
-                                                    $count++; 
-                                                    $id = $fetchcourses['id'];
-                                                    $cities = $conn->query("SELECT * FROM cities WHERE id=".$fetchcourses['cityid'])->fetch_assoc();
-                                                    $locs = $conn->query("SELECT * FROM locations WHERE id=".$fetchcourses['locid'])->fetch_assoc();
-
-                                                    $maxcapacity = $fetchcourses['maxcapacity'];
-                                                    $remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid='".$fetchcourses['course_id']."' AND slotid='".$fetchcourses['id']."'")->fetch_assoc();
-                                                    $used = $remain_places ? (int) $remain_places['count'] : 0;
-                                                    $leftplace = $maxcapacity - $used;
-                                                    $bookingClosedEarly = public_booking_is_closed_for_slot($conn, $id);
-                                                    if ($bookingClosedEarly) {
-                                                        $lefttext = 'Bookings closed';
-                                                        $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
-                                                    } elseif ($leftplace <= 0) {
-                                                        $lefttext = 'FULL';
-                                                        $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
-                                                    } else {
-                                                        $lefttext = format_public_seat_availability_label($leftplace);
-                                                        $buttonttl = '<a href="registration/'.$fetchcourses["courseid"].'/'.$fetchcourses["locid"].'/'.$fetchcourses["id"].'/'.$fetchcourses["cityid"].'" target="_blank" class="btn btn-primary btn-sm" role="button">Book Now</a>';
-                                                    }
-
-                                                    $fetchdates = $conn->query("SELECT * FROM course_dates WHERE slot_id='".$id."' ORDER BY date ASC, starttime ASC");
-                                                    if($course_name != $fetchcourses['course_title']) {
-                                                        $course_name = $fetchcourses['course_title']
+                                                    CD.date,
+                                                    CD.starttime,
+                                                    CD.endtime,
+                                                    CS.*,
+                                                    C.title AS course_title,
+                                                    C.duration,
+                                                    C.shippingCharge,
+                                                    C.tax,
+                                                    C.slug AS course_slug,
+                                                    CA.title AS category_title, 
+                                                    CA.description AS category_description,
+                                                    CA.slug AS category_slug,
+                                                    L.*
+                                                FROM course_dates AS CD
+                                                LEFT JOIN course_slots AS CS ON CD.slot_id = CS.id
+                                                LEFT JOIN courses AS C ON CS.courseid = C.id
+                                                LEFT JOIN category AS CA ON C.catid = CA.id
+                                                LEFT JOIN (
+                                                    SELECT 
+                                                        LO.id AS locationid, 
+                                                        LO.location, 
+                                                        LO.title AS location_title, 
+                                                        LO.type,
+                                                        Lo.city,
+                                                        CT.name AS city_name,
+                                                        LO.state,
+                                                        ST.name AS state_name,
+                                                        ST.code AS state_code,
+                                                        LO.country,
+                                                        CO.name AS country_name, 
+                                                        CO.code AS country_code,
+                                                        LO.postcode,
+                                                        LO.phone,
+                                                        LO.email,
+                                                        LO.address,
+                                                        LO.image,
+                                                        LO.description,
+                                                        LO.status,
+                                                        LO.slug
+                                                    FROM locations AS LO
+                                                    INNER JOIN cities AS CT ON LO.city = CT.id
+                                                    INNER JOIN countries AS CO ON LO.country = CO.id
+                                                    INNER JOIN states AS ST ON LO.state = ST.id
+                                                ) AS L ON CS.locid = L.locationid
+                                                WHERE CS.type='public' AND CS.isPublished='1' AND CA.id='". $categoryId ."' AND CD.date >='". $today ."'
+                                                ORDER BY C.title ASC
+                                            ";
+                                            $courses = $conn->query($query);
+                                            if($courses->num_rows > 0) {
+                                                $slotId = 0;
+                                                $courseId = 0;
+                                                while($row = $courses->fetch_assoc()) {
+                                                    if($courseId != $row['courseid']) {
+                                                        $courseId = $row['courseid']
                                                     ?>
-                                                        <tr id="<?php echo $id;?>" class="course-header" style="cursor: pointer; background: #e2e2e2;">
+                                                        <tr class="course-header" style="background: #e2e2e2;">
                                                             <td colspan="4">
-                                                                <?php echo $course_name?>
+                                                                <?php echo $row['course_title']?>
                                                             </td>
                                                         </tr>
                                                     <?php }
-                                                    while($dates = $fetchdates->fetch_assoc()) {
-                                                        $firstStartTs = strtotime($dates['date'] . ' ' . $dates['starttime']);
-                                                        $now = time();
-                                                        if ($now >= $firstStartTs) {
-                                                            continue;
+                                                    if($slotId != $row['id']) { 
+                                                        $maxcapacity = $row['maxcapacity'];
+                                                        $remain_places = $conn->query("SELECT * FROM remain_places WHERE courseid='".$row['courseid']."' AND slotid='".$row['id']."'")->fetch_assoc();
+                                                        $used = $remain_places ? (int) $remain_places['count'] : 0;
+                                                        $leftplace = $maxcapacity - $used;
+
+                                                        $bookingClosedEarly = public_booking_is_closed_for_slot($conn, $row['id']);
+                                                        if ($bookingClosedEarly) {
+                                                            $lefttext = 'Bookings closed';
+                                                            $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
+                                                        } elseif ($leftplace <= 0) {
+                                                            $lefttext = 'FULL';
+                                                            $buttonttl = '<span class="btn btn-default btn-sm disabled" role="button" aria-disabled="true">SOLD OUT</span>';
+                                                        } else {
+                                                            $lefttext = format_public_seat_availability_label($leftplace);
+                                                            $buttonttl = '<a href="registration/'.$row["courseid"].'/'.$row["locid"].'/'.$row["id"].'/'.$row["cityid"].'" target="_blank" class="btn btn-primary btn-sm" role="button">Book Now</a>';
                                                         }
-                                                    ?>
+                                                        ?>
                                                         <tr>
-                                                            <td style="padding-left: 50px;"><?php echo htmlspecialchars(format_booking_location_label($cities['name'] ?? '', $locs['location'] ?? '', $locs['title'] ?? '')); ?></td>
-                                                            <td class="course-dates-cell"><?php echo format_course_dates_table_cell_html($dates['date'], $dates['starttime'], $dates['endtime']); ?></td>
+                                                            <td><?php echo htmlspecialchars(format_booking_location_label($row['city_name'] ?? '', $row['location'] ?? '', $row['location_title'] ?? '')); ?></td>
+                                                            <td class="course-dates-cell"><?php echo format_course_dates_table_cell_html($row['date'], $row['starttime'], $row['endtime']); ?></td>
                                                             <td><?php echo $lefttext; ?></td>
                                                             <td><?php echo $buttonttl; ?></td>
                                                         </tr>
-                                                    <?php
-                                                    }
-                                                    ?>
-                                                    <script>
-                                                        courses.push(<?php echo json_encode($fetchcourses); ?>);
-                                                    </script>
-                                                    <?php
-                                                    }
-                                            } else {
+                                                    <?php } 
+                                                    else { ?>
+                                                        <tr>
+                                                            <td style="padding-left: 50px;">&nbsp;</td>
+                                                            <td class="course-dates-cell"><?php echo format_course_dates_table_cell_html($row['date'], $row['starttime'], $row['endtime']); ?></td>
+                                                            <td>&nbsp;</td>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                    <?php }
+                                                    $slotId = $row['id'];
+                                                }
+                                            }
+                                            else {
                                                 echo '<tr><td>No record found!!</td><td></td><td></td><td></td></tr>';
                                             } ?>
                                          
@@ -216,11 +239,12 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                             <i class="fa fa-balance-scale info-icon mb-10"></i>
                                             <p class="info-title mb-0">Legislative Entitlement</p>
                                         </div>
-                                        <div style="display:inline-block; width: calc(100% - 20px);">
+                                        <div style="display:inline-block; width: 100%;">
+                                            <p class="info-desc" style="margin-bottom: .8rem">
+                                                Under Section 67 of the Occupational Health and Safety Act 2004 (Vic), elected Health and Safety Representatives (HSRs) have the right to attend an approved training course. 
+                                            </p>
                                             <p class="info-desc">
-                                                <?php 
-                                                    echo $categoryid == '1' ? 'Under the OHS Act 2004, elected HSRs are entitled to attend an approved HSR initial training course.' : 'Under the OHS Act 2004, elected HSRs may be entitled to attend approved training. Contact us for eligibility.'; 
-                                                ?>
+                                                HSRs are also entitled to attend annual refresher training under the same provisions.
                                             </p>
                                         </div>
                                     </div>
@@ -230,7 +254,7 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                             <i class="fa fa-map-marker info-icon"></i>
                                             <p class="info-title mb-0">Training Locations</p>
                                         </div>
-                                        <div style="display:inline-block; width: calc(100% - 20px);">
+                                        <div style="display:inline-block; width: 100%;">
                                             <p class="info-desc">
                                                 <?php 
                                                     echo $categoryid == '1' ? 'South East Melbourne venues &amp; flexible on-site delivery across Victoria.' : 'South East Melbourne &amp; flexible on-site delivery across Victoria.'; 
@@ -243,7 +267,7 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                             <i class="fa fa-book info-icon"></i>
                                             <p class="info-title mb-0">What's Included</p>
                                         </div>
-                                        <div style="display:inline-block; width: calc(100% - 20px);">
+                                        <div style="display:inline-block; width: 100%;">
                                             <p class="info-desc">
                                                 <?php 
                                                     echo $categoryid == '1' ? 'Printed WorkSafe materials and a copy of the Act; morning tea, lunch and light refreshments provided.' : 'Course materials and refreshments as per course. Contact us for details.'; 
@@ -252,17 +276,26 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                         </div>
                                     </div>
                                 </div>
+                                <div class="course-sidebar-info">
+                                    <div style="display: flex; align-items: center;">
+                                        <i class="fa fa-clock-o info-icon"></i>
+                                        <p class="info-title mb-0">Duration</p>
+                                    </div>
+                                    <div style="display:inline-block; width: 100%;">
+                                        <p class="info-desc">5 days x 8hrs per day</p>
+                                    </div>
+                                </div>
                                 <div class="widget course-sidebar-info p-15">
                                     <ul class="list-inline">
                                         <li><i class="fa fa-dollar info-icon font-48"></i>
                                             <div class="pull-right ml-5">
                                                 <span class="info-title">Course Price</span>
-                                                <h4 class="mt-0" id="h4_price"></h4>
+                                                <h4 class="mt-0"><?php echo $category['price']; ?></h4>
                                             </div>
                                         </li>
                                     </ul>
                                     <div class="mt-15">
-                                        <img id="img_corse_image" src="" alt="" class="img-fullwidth">
+                                        <img src="" alt="" class="img-fullwidth">
                                     </div>
                                 </div>
                                 <div class="course-sidebar-info">
@@ -270,19 +303,8 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                         <i class="fa fa-graduation-cap info-icon"></i>
                                         <p class="info-title mb-0">Delivery Format</p>
                                     </div>
-                                    <div style="display:inline-block; width: calc(100% - 20px);">
-                                        <p class="info-desc" id="p_delivery">
-
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="course-sidebar-info">
-                                    <div style="display: flex; align-items: center;">
-                                        <i class="fa fa-clock-o info-icon"></i>
-                                        <p class="info-title mb-0">Duration</p>
-                                    </div>
-                                    <div style="display:inline-block; width: calc(100% - 20px);">
-                                        <p class="info-desc" id="p_duration"></p>
+                                    <div style="display:inline-block; width: 100%;">
+                                        <p class="info-desc"><?php echo $category['delivery_types']; ?></p>
                                     </div>
                                 </div>
                                 <div class="widget course-sidebar-info p-15">
@@ -316,9 +338,6 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
     ?>
     <script>
         $( document ).ready(function(e) {
-            $('#courseTable .course-header').click(function () {
-                filloutSidePanel(courses.find(el => el.id == this.id));
-            });
             $("#importform").on('submit',(function(e) {
                 e.preventDefault();
                 $.ajax({
@@ -358,15 +377,6 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                 });
             }));
         });
-
-        function filloutSidePanel(course) {
-            if(!course) return;
-            $('#p_delivery').text(course.delivery_types);
-            $('#p_duration').text(course.duration);
-            $('#h4_price').text(course.price);
-            $('#img_corse_image').attr('alt', course.title);
-            $('#img_corse_image').attr('src', 'assets/images/course/' + course.image);
-        }
     </script>
 </body>
 </html>

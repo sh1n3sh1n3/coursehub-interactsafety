@@ -94,7 +94,7 @@
                     			}else{
                     				$image = mysqli_real_escape_string($conn, $_POST['oldimg']);
                     			}
-							$insert = $conn->query("UPDATE category SET title= '".$title."', showHome= '".$showHome."', slug= '".$slug."', image= '".$image."', `description`= '".$_POST['description']."' WHERE id=".$id);
+							$insert = $conn->query("UPDATE category SET title= '".$title."', showHome= '".$showHome."', slug= '".$slug."', image= '".$image."', `description`= '".$_POST['description']."', price='".$_POST['price']."', delivery_types='".$_POST['delivery_types']."' WHERE id=".$id);
 							if($insert){
 								$msg = 'Data Updated Successfully.';
 							} else {
@@ -138,6 +138,19 @@
 										</div>
 									</div>
                                 </div>
+								<div class="form-group  row">
+									<label class="col-sm-2 col-form-label">Price</label>
+									<div class="col-sm-4"><input type="number" step="0.01" class="form-control" required name="price" value="<?php echo $testimonial['price']; ?>"></div>
+									<label class="col-sm-2 col-form-label">Different types of delivery </label>
+									<div class="col-sm-4">
+										<select class="form-control" required name="delivery_types">
+											<option value="">Select</option>
+											<option value="Face to Face" <?php if($testimonial['delivery_types'] == 'Face to Face') {echo 'selected';} ?>>Face to Face</option>
+											<option value="eLearning" <?php if($testimonial['delivery_types'] == 'eLearning') {echo 'selected';} ?>>eLearning</option>
+											<option value="Connected Real Time Delivery" <?php if($testimonial['delivery_types'] == 'Connected Real Time Delivery') {echo 'selected';} ?>>Connected Real Time Delivery</option>
+										</select>
+									</div>
+								</div>
 								<div class="form-group  row"><label class="col-sm-2 col-form-label">Short Description</label>
 									<div class="col-sm-10"><textarea class="form-control ckeditor" name="description"><?php echo $testimonial['description']; ?></textarea></div>
 								</div>
