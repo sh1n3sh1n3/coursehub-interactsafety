@@ -114,7 +114,7 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                                         LO.location, 
                                                         LO.title AS location_title, 
                                                         LO.type,
-                                                        Lo.city,
+                                                        LO.city,
                                                         CT.name AS city_name,
                                                         LO.state,
                                                         ST.name AS state_name,
