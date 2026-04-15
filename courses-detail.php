@@ -135,6 +135,15 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                                     }
 
                                                     $fetchdates = $conn->query("SELECT * FROM course_dates WHERE slot_id='".$id."' ORDER BY date ASC, starttime ASC");
+                                                    if($course_name != $fetchcourses['course_title']) {
+                                                        $course_name = $fetchcourses['course_title']
+                                                    ?>
+                                                        <tr id="<?php echo $id;?>" class="course-header" style="cursor: pointer; background: #e2e2e2;">
+                                                            <td colspan="4">
+                                                                <?php echo $course_name?>
+                                                            </td>
+                                                        </tr>
+                                                    <?php }
                                                     while($dates = $fetchdates->fetch_assoc()) {
                                                         $firstStartTs = strtotime($dates['date'] . ' ' . $dates['starttime']);
                                                         $now = time();
@@ -154,15 +163,7 @@ $category = $conn->query("SELECT * FROM category WHERE id = '" . $categoryId . "
                                                     <script>
                                                         courses.push(<?php echo json_encode($fetchcourses); ?>);
                                                     </script>
-                                                    <?php if($course_name != $fetchcourses['course_title']) {
-                                                        $course_name = $fetchcourses['course_title']
-                                                    ?>
-                                                        <tr id="<?php echo $id;?>" class="course-header" style="cursor: pointer; background: #e2e2e2;">
-                                                            <td colspan="4">
-                                                                <?php echo $course_name?>
-                                                            </td>
-                                                        </tr>
-                                                    <?php }
+                                                    <?php
                                                     }
                                             } else {
                                                 echo '<tr><td>No record found!!</td><td></td><td></td><td></td></tr>';
