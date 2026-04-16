@@ -15,24 +15,24 @@
 <script type="text/javascript" src="js/revolution-slider/js/extensions/revolution.extension.video.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
-<script src="js/select2.full.min.js"></script>
+<!-- <script src="js/select2.full.min.js"></script> -->
 <script src="js/custom.js"></script>
 <script>
     $(document).ready(function () {
-        $('select').not('.js-uniform-select').not('.reg-native-select').not('[data-reg-native="1"]').select2();
+        // $('select').not('.js-uniform-select').not('.reg-native-select').not('[data-reg-native="1"]').select2();
         if ($('#datatable').length) {
-        $('#datatable').DataTable({
-            bFilter: false,
-            "sDom": 'Rfrtlip',
-            "language": {
-                  "info": "Showing _START_ to _END_ of _TOTAL_ rows",
-                  "lengthMenu":     " _MENU_ rows per page",
-                    paginate: {
-                      next: '&#129170;',
-                      previous: '&#129168;'
-                    }
-            },
-        });
+            $('#datatable').DataTable({
+                bFilter: false,
+                "sDom": 'Rfrtlip',
+                "language": {
+                        "info": "Showing _START_ to _END_ of _TOTAL_ rows",
+                        "lengthMenu":     " _MENU_ rows per page",
+                        paginate: {
+                            next: '&#129170;',
+                            previous: '&#129168;'
+                        }
+                },
+            });
         }
     });
     $(document).ready(function (e) {

@@ -91,7 +91,8 @@
                     					}
                     				}
                     			}
-							$insert = $conn->query("INSERT INTO category (title,slug,image, showHome) VALUES ('".$title."','".$slug."','".$image."', '".$showHome."')");
+							$insert = $conn->query("INSERT INTO category (title, slug, `image`, showHome, `description`, price, delivery_types)
+								VALUES ('".$title."','".$slug."','".$image."', '".$showHome."', '".$_POST['description']."', '".$_POST['price']."', '".$_POST['delivery_types']."')");
 							if($insert){
 								$msg = 'Data Added Successfully.';
 							} else {
@@ -123,7 +124,6 @@
                                 <div class="form-group  row"><label class="col-sm-2 col-form-label">Title</label>
                                     <div class="col-sm-10"><input type="text" id="title" class="form-control" required name="title" value=""></div>
                                 </div> 
-                                <div class="hr-line-dashed"></div>                       
                                 <div class="form-group  row"><label class="col-sm-2 col-form-label">Image</label>
 									<div class="col-sm-10">
 										<div class="custom-file">
@@ -132,7 +132,22 @@
 										</div>
 									</div>
                                 </div>
-                                <div class="hr-line-dashed"></div>     
+								<div class="form-group  row">
+									<label class="col-sm-2 col-form-label">Price</label>
+									<div class="col-sm-4"><input type="number" step="0.01" class="form-control" required name="price" value=""></div>
+									<label class="col-sm-2 col-form-label">Different types of delivery </label>
+									<div class="col-sm-4">
+										<select class="form-control" required name="delivery_types">
+											<option value="">Select</option>
+											<option value="Face to Face">Face to Face</option>
+											<option value="eLearning">eLearning</option>
+											<option value="Connected Real Time Delivery">Connected Real Time Delivery</option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group  row"><label class="col-sm-2 col-form-label">Short Description</label>
+									<div class="col-sm-10"><textarea class="form-control ckeditor" name="description"></textarea></div>
+								</div>
                                 <div class="form-group  row"><label class="col-sm-2 col-form-label">Show on Homepage</label>
                                     <div class="col-sm-10 pt-2"><input type="checkbox" id="showHome" class="form-check" name="showHome" value="1"></div>
                                 </div> 

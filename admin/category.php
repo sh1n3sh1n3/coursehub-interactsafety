@@ -54,7 +54,7 @@ if(isset($_GET['id'])) {
                     </tr>
                     </thead>
                     <?php $count=0;
-					$contact = $conn->query("SELECT * FROM category order by id ASC");
+					$contact = $conn->query("SELECT * FROM category order by date DESC");
 					while($fetch = $contact->fetch_assoc()) {$count++; ?>
                     <tr>
 						<td>

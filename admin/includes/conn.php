@@ -8,6 +8,7 @@ date_default_timezone_set('Australia/Melbourne');
 	if ($conn->connect_error) {
 	    die("Connection failed: " . $conn->connect_error);
 	}
+
 	$con = new mysqli($db['host'], $db['user'], $db['password'], $db['name']);
 	if ($con->connect_error) {
 	    die("Connection failed: " . $con->connect_error);
