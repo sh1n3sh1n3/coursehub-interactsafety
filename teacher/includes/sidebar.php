@@ -3,7 +3,7 @@
 		<ul class="nav metismenu" id="side-menu">
 			<li class="nav-header">
 				<div class="dropdown profile-element">
-					<img alt="Interact Safety" class="" src="../images/logo/logo.svg" style="width:180px;max-width:100%;height:auto;"/>
+					<img alt="Interact Safety" class="" src="../images/logo/text-logo.png" style="width:180px;max-width:100%;height:auto;"/>
 					<a data-toggle="dropdown" class="dropdown-toggle" href="#">
                         <span class="block m-t-xs font-bold"><?php echo $teacher['title']; ?></span>
                         <span class="text-muted text-xs block"><?php echo $teacher['email']; ?> <b class="caret"></b></span>
@@ -15,7 +15,7 @@
 					</ul>
 				</div>
 				<div class="logo-element">
-					<img alt="Interact Safety" class="" src="../images/logo/logo.svg" style="width:58px;height:auto;max-width:100%;"/>
+					<img alt="Interact Safety" class="" src="../images/logo/text-logo.png" style="width:58px;height:auto;max-width:100%;"/>
 				</div>
 			</li>
 			<?php $activePage = basename($_SERVER['PHP_SELF'], ".php"); ?>
