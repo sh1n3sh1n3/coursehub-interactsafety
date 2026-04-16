@@ -40,8 +40,8 @@
         <div class="container pt-5 pb-5">
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-3">
-                    <a class="menuzord-brand pull-left flip sm-pull-center mb-5" style="display: flex; align-items: center; justify-content: center;" href="index.php">
-                        <img src="images/logo/text-logo.png" alt="Interact Safety" style="width:320px;height:50px;max-width:100%;object-fit:contain;">
+                    <a class="menuzord-brand pull-left flip sm-pull-center mb-5" style="display: flex; align-items: center; justify-content: center; margin: 9px 30px;" href="index.php">
+                        <img src="images/logo/text-logo.png" alt="Interact Safety" style="width:320px;max-height:60px;max-width:100%;object-fit:contain;">
                     </a>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-9">
